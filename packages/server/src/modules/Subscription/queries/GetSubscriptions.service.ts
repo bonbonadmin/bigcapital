@@ -23,35 +23,55 @@ export class GetSubscriptionsService {
    * @param {number} tenantId
    */
   public async getSubscriptions() {
-    configureLemonSqueezy();
-
     const tenant = await this.tenancyContext.getTenant();
     const subscriptions = await this.planSubscriptionModel
       .query()
       .where('tenant_id', tenant.id)
       .withGraphFetched('plan');
 
-    const lemonSubscriptionsResult = await PromisePool.withConcurrency(1)
-      .for(subscriptions)
-      .process(async (subscription, index, pool) => {
-        if (subscription.lemonSubscriptionId) {
-          const res = await getSubscription(subscription.lemonSubscriptionId);
+    const lemonSubscriptions = await this.getLemonSubscriptions(subscriptions);
 
-          if (res.error) {
-            return;
-          }
-          return [subscription.lemonSubscriptionId, res.data];
-        }
-      });
-    const lemonSubscriptions = fromPairs(
-      lemonSubscriptionsResult?.results.filter((result) => !!result[1]),
-    );
     return this.transformer.transform(
       subscriptions,
       new GetSubscriptionsTransformer(),
       {
         lemonSubscriptions,
       },
+    );
+  }
+
+  /**
+   * Self-hosted installs can run without Lemon Squeezy configured.
+   */
+  private async getLemonSubscriptions(subscriptions: InstanceType<typeof PlanSubscription>[]) {
+    const hasLemonConfig =
+      !!process.env.LEMONSQUEEZY_API_KEY &&
+      !!process.env.LEMONSQUEEZY_STORE_ID &&
+      !!process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+
+    if (!hasLemonConfig) {
+      return {};
+    }
+
+    configureLemonSqueezy();
+
+    const lemonSubscriptionsResult = await PromisePool.withConcurrency(1)
+      .for(subscriptions)
+      .process(async (subscription) => {
+        if (!subscription.lemonSubscriptionId) {
+          return;
+        }
+
+        const res = await getSubscription(subscription.lemonSubscriptionId);
+
+        if (res.error) {
+          return;
+        }
+        return [subscription.lemonSubscriptionId, res.data];
+      });
+
+    return fromPairs(
+      lemonSubscriptionsResult?.results.filter((result) => !!result?.[1]) ?? [],
     );
   }
 }

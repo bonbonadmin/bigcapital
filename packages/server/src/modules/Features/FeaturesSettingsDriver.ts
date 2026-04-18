@@ -4,6 +4,7 @@ import { SETTINGS_PROVIDER } from '../Settings/Settings.types';
 import { SettingsStore } from '../Settings/SettingsStore';
 import { IFeatureAllItem } from '@/common/types/Features';
 import { FeaturesConfigure } from './FeaturesConfigure';
+import { Features } from '@/common/types/Features';
 
 @Injectable()
 export class FeaturesSettingsDriver {
@@ -43,6 +44,13 @@ export class FeaturesSettingsDriver {
    * @returns {Promise<boolean|null|undefined>}
    */
   async accessible(feature: string) {
+    if (
+      feature === Features.BRANCHES ||
+      feature === Features.WAREHOUSES
+    ) {
+      return true;
+    }
+
     const settingsStore = await this.settings();
 
     const defaultValue = this.configure.getFeatureConfigure(

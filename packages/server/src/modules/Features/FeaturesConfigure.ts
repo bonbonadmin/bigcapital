@@ -16,11 +16,11 @@ export class FeaturesConfigure {
     return [
       {
         name: Features.BRANCHES,
-        defaultValue: false,
+        defaultValue: true,
       },
       {
         name: Features.WAREHOUSES,
-        defaultValue: false,
+        defaultValue: true,
       },
       {
         name: Features.BankSyncing,
