@@ -87,7 +87,9 @@ class FsMigrations {
    * @returns {string}
    */
   public getMigrationName(migration: MigrateItem): string {
-    return migration.file;
+    // Keep migration history compatible between source `.ts` files used by
+    // ts-node and compiled `.js` files recorded in knex_migrations tables.
+    return migration.file.replace(/\.ts$/, '.js');
   }
 
   /**
