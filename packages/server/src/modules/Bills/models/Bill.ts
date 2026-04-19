@@ -239,7 +239,10 @@ export class Bill extends TenantBaseModel {
    * @return {number}
    */
   get balance(): number {
-    return this.paymentAmount + this.creditedAmount;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+    const creditedAmount = Number(this.creditedAmount) || 0;
+
+    return paymentAmount + creditedAmount;
   }
 
   /**
@@ -247,7 +250,9 @@ export class Bill extends TenantBaseModel {
    * @return {number}
    */
   get dueAmount(): number {
-    return Math.max(this.total - this.balance, 0);
+    const total = Number(this.total) || 0;
+
+    return Math.max(total - this.balance, 0);
   }
 
   /**
@@ -255,7 +260,9 @@ export class Bill extends TenantBaseModel {
    * @return {number}
    */
   get overPaymentAmount(): number {
-    return Math.max(this.balance - this.total, 0);
+    const total = Number(this.total) || 0;
+
+    return Math.max(this.balance - total, 0);
   }
 
   /**

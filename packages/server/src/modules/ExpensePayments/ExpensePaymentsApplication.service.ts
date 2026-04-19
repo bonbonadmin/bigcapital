@@ -4,6 +4,7 @@ import { EditExpensePaymentService } from './commands/EditExpensePayment.service
 import { DeleteExpensePaymentService } from './commands/DeleteExpensePayment.service';
 import { ExpensePaymentsPages } from './commands/ExpensePaymentsPages.service';
 import { GetExpensePaymentsService } from './queries/GetExpensePayments.service';
+import { GetExpensePaymentService } from './queries/GetExpensePayment.service';
 import {
   CreateExpensePaymentDto,
   EditExpensePaymentDto,
@@ -18,6 +19,7 @@ export class ExpensePaymentsApplication {
     private readonly deleteExpensePaymentService: DeleteExpensePaymentService,
     private readonly expensePaymentsPages: ExpensePaymentsPages,
     private readonly getExpensePaymentsService: GetExpensePaymentsService,
+    private readonly getExpensePaymentService: GetExpensePaymentService,
   ) {}
 
   public createExpensePayment(paymentDTO: CreateExpensePaymentDto) {
@@ -48,5 +50,9 @@ export class ExpensePaymentsApplication {
 
   public getExpensePayments(filterDTO: GetExpensePaymentsFilterDto) {
     return this.getExpensePaymentsService.getExpensePayments(filterDTO);
+  }
+
+  public getExpensePayment(expensePaymentId: number) {
+    return this.getExpensePaymentService.getExpensePayment(expensePaymentId);
   }
 }

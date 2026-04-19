@@ -11,16 +11,33 @@ import {
   DetailItem,
   DetailsMenu,
   ExchangeRateDetailItem,
+  Money,
   FormattedMessage as T,
 } from '@/components';
 import { useExpenseDrawerContext } from './ExpenseDrawerProvider';
 import { ExpenseDetailsStatus } from './components';
+
+const getExpenseDueAmount = (expense) => {
+  const totalAmount = Number(expense.total_amount) || 0;
+  const paymentAmount = Number(expense.payment_amount) || 0;
+
+  return Math.max(totalAmount - paymentAmount, 0);
+};
+
+const getExpenseOverPaymentAmount = (expense) => {
+  const totalAmount = Number(expense.total_amount) || 0;
+  const paymentAmount = Number(expense.payment_amount) || 0;
+
+  return Math.max(paymentAmount - totalAmount, 0);
+};
 
 /**
  * Expense drawer content.
  */
 export default function ExpenseDrawerHeader() {
   const { expense } = useExpenseDrawerContext();
+  const dueAmount = getExpenseDueAmount(expense);
+  const overPaymentAmount = getExpenseOverPaymentAmount(expense);
 
   return (
     <CommercialDocHeader>
@@ -75,9 +92,10 @@ export default function ExpenseDrawerHeader() {
               }
             >
               <strong>
-                {expense.is_over_paid
-                  ? expense.formatted_over_payment_amount
-                  : expense.formatted_due_amount}
+                <Money
+                  amount={expense.is_over_paid ? overPaymentAmount : dueAmount}
+                  currency={expense.currency_code}
+                />
               </strong>
             </DetailItem>
 

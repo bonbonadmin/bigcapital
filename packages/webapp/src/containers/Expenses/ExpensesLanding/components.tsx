@@ -49,6 +49,8 @@ export function ActionsMenu({
   row: { original },
   payload: { onPublish, onEdit, onDelete, onViewDetails, onAddPayment },
 }) {
+  const dueAmount = Number(original.due_amount ?? original.dueAmount) || 0;
+
   return (
     <Menu>
       <MenuItem
@@ -74,7 +76,7 @@ export function ActionsMenu({
         />
       </Can>
       <Can I={PaymentMadeAction.Create} a={AbilitySubject.PaymentMade}>
-        <If condition={original.is_open && !original.is_fully_paid}>
+        <If condition={original.is_open && dueAmount > 0}>
           <MenuItem
             icon={<Icon icon="arrow-upward" iconSize={16} />}
             text={intl.get('add_payment')}

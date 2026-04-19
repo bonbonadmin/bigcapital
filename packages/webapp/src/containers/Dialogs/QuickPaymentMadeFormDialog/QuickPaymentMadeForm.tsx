@@ -88,6 +88,7 @@ function QuickPaymentMadeForm({
     <Formik
       validationSchema={CreateQuickPaymentMadeFormSchema}
       initialValues={initialValues}
+      enableReinitialize={true}
       onSubmit={handleFormSubmit}
       component={QuickPaymentMadeFormContent}
     />

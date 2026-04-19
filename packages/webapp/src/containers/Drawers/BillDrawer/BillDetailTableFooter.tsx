@@ -6,14 +6,36 @@ import {
   T,
   TotalLines,
   TotalLine,
+  Money,
 } from '@/components';
 import { useBillDrawerContext } from './BillDrawerProvider';
+
+const getBillBalance = (bill) => {
+  const paymentAmount = Number(bill.payment_amount) || 0;
+  const creditedAmount = Number(bill.credited_amount) || 0;
+
+  return paymentAmount + creditedAmount;
+};
+
+const getBillDueAmount = (bill) => {
+  const totalAmount = Number(bill.total) || 0;
+
+  return Math.max(totalAmount - getBillBalance(bill), 0);
+};
+
+const getBillOverPaymentAmount = (bill) => {
+  const totalAmount = Number(bill.total) || 0;
+
+  return Math.max(getBillBalance(bill) - totalAmount, 0);
+};
 
 /**
  * Bill read-only details table footer.
  */
 export function BillDetailTableFooter() {
   const { bill } = useBillDrawerContext();
+  const dueAmount = getBillDueAmount(bill);
+  const overPaymentAmount = getBillOverPaymentAmount(bill);
 
   return (
     <BillDetailsFooterRoot>
@@ -69,9 +91,10 @@ export function BillDetailTableFooter() {
             />
           }
           value={
-            bill.is_over_paid
-              ? bill.formatted_over_payment_amount
-              : bill.formatted_due_amount
+            <Money
+              amount={bill.is_over_paid ? overPaymentAmount : dueAmount}
+              currency={bill.currency_code}
+            />
           }
           textStyle={TotalLineTextStyle.Bold}
         />

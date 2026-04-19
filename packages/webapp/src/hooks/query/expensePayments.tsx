@@ -7,6 +7,7 @@ import t from './types';
 
 const commonInvalidateQueries = (client) => {
   client.invalidateQueries(t.EXPENSE_PAYMENTS);
+  client.invalidateQueries(t.EXPENSE_PAYMENT);
   client.invalidateQueries(t.EXPENSE_PAYMENT_NEW_ENTRIES);
   client.invalidateQueries(t.EXPENSE_PAYMENT_EDIT_PAGE);
   client.invalidateQueries(t.EXPENSES);
@@ -70,11 +71,27 @@ export function useDeleteExpensePayment(props) {
   const apiRequest = useApiRequest();
 
   return useMutation((id) => apiRequest.delete(`expense-payments/${id}`), {
-    onSuccess: () => {
+    onSuccess: (res, id) => {
       commonInvalidateQueries(client);
+      client.invalidateQueries([t.EXPENSE_PAYMENT, id]);
     },
     ...props,
   });
+}
+
+export function useExpensePayment(id, props) {
+  return useRequestQuery(
+    [t.EXPENSE_PAYMENT, id],
+    {
+      method: 'get',
+      url: `expense-payments/${id}`,
+    },
+    {
+      select: (res) => res.data,
+      defaultData: {},
+      ...props,
+    },
+  );
 }
 
 export function useExpensePaymentEditPage(id, props) {

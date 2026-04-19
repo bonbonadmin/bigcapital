@@ -8,6 +8,7 @@ export enum DRAWERS {
   RECEIPT_DETAILS = 'receipt-detail-drawer',
   PAYMENT_RECEIVED_DETAILS = 'payment-receive-detail-drawer',
   PAYMENT_MADE_DETAILS = 'payment-made-drawer',
+  EXPENSE_PAYMENT_DETAILS = 'expense-payment-drawer',
   ESTIMATE_DETAILS = 'estimate-detail-drawer',
   ITEM_DETAILS = 'item-detail-drawer',
   CUSTOMER_DETAILS = 'customer-detail-drawer',

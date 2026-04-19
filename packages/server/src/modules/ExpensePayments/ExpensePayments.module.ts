@@ -15,6 +15,7 @@ import { CreateExpensePaymentService } from './commands/CreateExpensePayment.ser
 import { EditExpensePaymentService } from './commands/EditExpensePayment.service';
 import { DeleteExpensePaymentService } from './commands/DeleteExpensePayment.service';
 import { GetExpensePaymentsService } from './queries/GetExpensePayments.service';
+import { GetExpensePaymentService } from './queries/GetExpensePayment.service';
 
 @Module({
   imports: [LedgerModule, AccountsModule],
@@ -29,6 +30,7 @@ import { GetExpensePaymentsService } from './queries/GetExpensePayments.service'
     EditExpensePaymentService,
     DeleteExpensePaymentService,
     GetExpensePaymentsService,
+    GetExpensePaymentService,
     BranchTransactionDTOTransformer,
     BranchesSettingsService,
     TenancyContext,

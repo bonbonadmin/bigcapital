@@ -3,7 +3,10 @@ import { TenantBaseModel } from '@/modules/System/models/TenantBaseModel';
 import { Vendor } from '@/modules/Vendors/models/Vendor';
 import type { Account } from '@/modules/Accounts/models/Account.model';
 import { ExpensePaymentEntry } from './ExpensePaymentEntry';
+import { Document } from '@/modules/ChromiumlyTenancy/models/Document';
+import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttachable.decorator';
 
+@InjectAttachable()
 export class ExpensePayment extends TenantBaseModel {
   vendorId: number;
   amount: number;
@@ -24,6 +27,7 @@ export class ExpensePayment extends TenantBaseModel {
   vendor?: Vendor;
   paymentAccount?: Account;
   payableAccount?: Account;
+  attachments?: Document[];
 
   static get tableName() {
     return 'expense_payments';
@@ -46,6 +50,7 @@ export class ExpensePayment extends TenantBaseModel {
     const { Vendor } = require('../../Vendors/models/Vendor');
     const { Account } = require('../../Accounts/models/Account.model');
     const { Branch } = require('../../Branches/models/Branch.model');
+    const { Document } = require('../../ChromiumlyTenancy/models/Document');
 
     return {
       entries: {
@@ -96,6 +101,22 @@ export class ExpensePayment extends TenantBaseModel {
         join: {
           from: 'expense_payments.branchId',
           to: 'branches.id',
+        },
+      },
+
+      attachments: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Document,
+        join: {
+          from: 'expense_payments.id',
+          through: {
+            from: 'document_links.modelId',
+            to: 'document_links.documentId',
+          },
+          to: 'documents.id',
+        },
+        filter(query) {
+          query.where('model_ref', 'ExpensePayment');
         },
       },
     };

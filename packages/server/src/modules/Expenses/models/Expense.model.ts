@@ -146,7 +146,10 @@ export class Expense extends TenantBaseModel {
    * @returns {number}
    */
   get dueAmount() {
-    return Math.max(this.totalAmount - this.paymentAmount, 0);
+    const totalAmount = Number(this.totalAmount) || 0;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+
+    return Math.max(totalAmount - paymentAmount, 0);
   }
 
   /**
@@ -154,7 +157,10 @@ export class Expense extends TenantBaseModel {
    * @returns {number}
    */
   get overPaymentAmount() {
-    return Math.max(this.paymentAmount - this.totalAmount, 0);
+    const totalAmount = Number(this.totalAmount) || 0;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+
+    return Math.max(paymentAmount - totalAmount, 0);
   }
 
   /**
@@ -170,7 +176,9 @@ export class Expense extends TenantBaseModel {
    * @returns {boolean}
    */
   get isPartiallyPaid() {
-    return this.paymentAmount > 0 && this.dueAmount > 0;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+
+    return paymentAmount > 0 && this.dueAmount > 0;
   }
 
   /**
@@ -178,7 +186,10 @@ export class Expense extends TenantBaseModel {
    * @returns {boolean}
    */
   get isFullyPaid() {
-    return this.paymentAmount >= this.totalAmount;
+    const totalAmount = Number(this.totalAmount) || 0;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+
+    return paymentAmount >= totalAmount;
   }
 
   /**
@@ -194,7 +205,9 @@ export class Expense extends TenantBaseModel {
    * @returns {boolean}
    */
   get isPaid() {
-    return this.paymentAmount > 0;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+
+    return paymentAmount > 0;
   }
 
   /**

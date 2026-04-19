@@ -7,15 +7,32 @@ import {
   TotalLines,
   TotalLineBorderStyle,
   TotalLineTextStyle,
+  Money,
 } from '@/components';
 import { useExpenseDrawerContext } from './ExpenseDrawerProvider';
 import { TotalLine } from '@/components';
+
+const getExpenseDueAmount = (expense) => {
+  const totalAmount = Number(expense.total_amount) || 0;
+  const paymentAmount = Number(expense.payment_amount) || 0;
+
+  return Math.max(totalAmount - paymentAmount, 0);
+};
+
+const getExpenseOverPaymentAmount = (expense) => {
+  const totalAmount = Number(expense.total_amount) || 0;
+  const paymentAmount = Number(expense.payment_amount) || 0;
+
+  return Math.max(paymentAmount - totalAmount, 0);
+};
 
 /**
  * Footer details of expense readonly details.
  */
 export default function ExpenseDrawerFooter() {
   const { expense } = useExpenseDrawerContext();
+  const dueAmount = getExpenseDueAmount(expense);
+  const overPaymentAmount = getExpenseOverPaymentAmount(expense);
 
   return (
     <ExpenseDetailsFooterRoot>
@@ -42,9 +59,10 @@ export default function ExpenseDrawerFooter() {
             />
           }
           value={
-            expense.is_over_paid
-              ? expense.formatted_over_payment_amount
-              : expense.formatted_due_amount
+            <Money
+              amount={expense.is_over_paid ? overPaymentAmount : dueAmount}
+              currency={expense.currency_code}
+            />
           }
           textStyle={TotalLineTextStyle.Bold}
         />

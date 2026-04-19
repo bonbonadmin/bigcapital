@@ -10,10 +10,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiExtraModels,
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { RequirePermission } from '@/modules/Roles/RequirePermission.decorator';
 import { PermissionGuard } from '@/modules/Roles/Permission.guard';
@@ -26,9 +29,13 @@ import {
   EditExpensePaymentDto,
 } from './dtos/ExpensePayment.dto';
 import { GetExpensePaymentsFilterDto } from './dtos/GetExpensePaymentsFilter.dto';
+import { ExpensePaymentResponseDto } from './dtos/ExpensePaymentResponse.dto';
+import { PaginatedResponseDto } from '@/common/dtos/PaginatedResults.dto';
 
 @Controller('expense-payments')
 @ApiTags('Expense Payments')
+@ApiExtraModels(ExpensePaymentResponseDto)
+@ApiExtraModels(PaginatedResponseDto)
 @UseGuards(AuthorizationGuard, PermissionGuard)
 export class ExpensePaymentsController {
   constructor(
@@ -98,6 +105,24 @@ export class ExpensePaymentsController {
   ) {
     return this.expensePaymentsApplication.getExpensePaymentEditPage(
       expensePaymentId,
+    );
+  }
+
+  @Get(':expensePaymentId')
+  @RequirePermission(IPaymentMadeAction.View, AbilitySubject.PaymentMade)
+  @ApiOperation({ summary: 'Retrieves the expense payment details.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The expense payment details have been successfully retrieved.',
+    schema: {
+      $ref: getSchemaPath(ExpensePaymentResponseDto),
+    },
+  })
+  public getExpensePayment(
+    @Param('expensePaymentId') expensePaymentId: string,
+  ) {
+    return this.expensePaymentsApplication.getExpensePayment(
+      Number(expensePaymentId),
     );
   }
 

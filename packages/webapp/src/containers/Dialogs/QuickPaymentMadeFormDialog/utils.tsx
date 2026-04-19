@@ -77,6 +77,6 @@ export const transformResourceToForm = (resource) => {
       'vendor_display_name',
       'currency_code',
     ]),
-    amount: resource?.due_amount,
+    amount: resource?.due_amount ?? resource?.dueAmount ?? '',
   };
 };

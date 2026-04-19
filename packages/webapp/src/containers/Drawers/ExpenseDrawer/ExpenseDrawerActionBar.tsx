@@ -46,6 +46,7 @@ function ExpenseDrawerActionBar({
 
   // Expense drawer context.
   const { expense } = useExpenseDrawerContext();
+  const dueAmount = Number(expense?.due_amount ?? expense?.dueAmount) || 0;
 
   // Handle the expense edit action.
   const handleEditExpense = () => {
@@ -70,7 +71,7 @@ function ExpenseDrawerActionBar({
           />
         </Can>
         <Can I={PaymentMadeAction.Create} a={AbilitySubject.PaymentMade}>
-          {expense.is_open && !expense.is_fully_paid && (
+          {expense.is_open && dueAmount > 0 && (
             <>
               <NavbarDivider />
               <Button

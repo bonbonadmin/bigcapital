@@ -17,6 +17,9 @@ import { useMemorizedColumnsWidths } from '@/hooks';
 import { AppToaster } from '@/components';
 import { useDeleteExpensePayment } from '@/hooks/query';
 import { useExpensePaymentsListContext } from './ExpensePaymentsListProvider';
+import { withDrawerActions } from '@/containers/Drawer/withDrawerActions';
+import { compose } from '@/utils';
+import { DRAWERS } from '@/constants/drawers';
 
 function AmountAccessor(row) {
   return <Money amount={row.amount} currency={row.currency_code} />;
@@ -28,10 +31,16 @@ function DateAccessor(row) {
 
 function ActionsMenu({
   row: { original },
-  payload: { onEdit, onDelete },
+  payload: { onViewDetails, onEdit, onDelete },
 }) {
   return (
     <Menu>
+      <MenuItem
+        icon={<Icon icon="reader-18" />}
+        text={intl.get('view_details')}
+        onClick={() => onViewDetails(original)}
+      />
+      <MenuDivider />
       <MenuItem
         icon={<Icon icon="pen-18" />}
         text={intl.get('edit_payment_made')}
@@ -48,7 +57,11 @@ function ActionsMenu({
   );
 }
 
-export default function ExpensePaymentsTable({ tableState, setTableState }) {
+function ExpensePaymentsTable({
+  tableState,
+  setTableState,
+  openDrawer,
+}) {
   const history = useHistory();
   const {
     expensePayments,
@@ -122,6 +135,12 @@ export default function ExpensePaymentsTable({ tableState, setTableState }) {
     history.push(`/expenses/payments-made/${payment.id}/edit`);
   };
 
+  const handleViewDetails = (payment) => {
+    openDrawer(DRAWERS.EXPENSE_PAYMENT_DETAILS, {
+      expensePaymentId: payment.id,
+    });
+  };
+
   const handleDelete = async (payment) => {
     if (!window.confirm('Delete this payment?')) {
       return;
@@ -153,10 +172,11 @@ export default function ExpensePaymentsTable({ tableState, setTableState }) {
         TableLoadingRenderer={TableSkeletonRows}
         TableHeaderSkeletonRenderer={TableSkeletonHeader}
         ContextMenu={ActionsMenu}
-        onCellClick={(cell) => handleEdit(cell.row.original)}
+        onCellClick={(cell) => handleViewDetails(cell.row.original)}
         initialColumnsWidths={initialColumnsWidths}
         onColumnResizing={handleColumnResizing}
         payload={{
+          onViewDetails: handleViewDetails,
           onEdit: handleEdit,
           onDelete: handleDelete,
         }}
@@ -164,3 +184,5 @@ export default function ExpensePaymentsTable({ tableState, setTableState }) {
     </DashboardContentTable>
   );
 }
+
+export default compose(withDrawerActions)(ExpensePaymentsTable);
