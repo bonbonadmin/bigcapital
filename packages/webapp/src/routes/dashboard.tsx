@@ -1167,7 +1167,7 @@ export const getDashboardRoutes = () => [
     component: lazy(
       () =>
         import(
-          '@/containers/Purchases/PaymentsMade/PaymentForm/PaymentMadeFormPage'
+          '@/containers/Purchases/PaymentsMade/CombinedPaymentForm/CombinedPaymentFormPage'
         ),
     ),
     name: 'payment-made-new',

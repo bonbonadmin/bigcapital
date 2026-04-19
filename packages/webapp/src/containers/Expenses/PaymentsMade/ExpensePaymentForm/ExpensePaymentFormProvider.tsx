@@ -39,7 +39,9 @@ export function ExpensePaymentFormProvider({
   } = useExpensePaymentEditPage(expensePaymentId, {
     enabled: !!expensePaymentId,
   });
-  const paymentEditPage = expensePaymentEditData?.expense_payment;
+  const paymentEditPage =
+    expensePaymentEditData?.expense_payment ||
+    expensePaymentEditData?.expensePayment;
   const paymentEntriesEditPage = expensePaymentEditData?.entries;
 
   const {
