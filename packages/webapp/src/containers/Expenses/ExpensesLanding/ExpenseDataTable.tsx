@@ -18,12 +18,14 @@ import ExpensesEmptyStatus from './ExpensesEmptyStatus';
 import { withDashboardActions } from '@/containers/Dashboard/withDashboardActions';
 import { withExpensesActions } from './withExpensesActions';
 import { withAlertActions } from '@/containers/Alert/withAlertActions';
+import { withDialogActions } from '@/containers/Dialog/withDialogActions';
 import { withDrawerActions } from '@/containers/Drawer/withDrawerActions';
 import { withSettings } from '@/containers/Settings/withSettings';
 import { withExpenses } from './withExpenses';
 
 import { ActionsMenu, useExpensesTableColumns } from './components';
 import { DRAWERS } from '@/constants/drawers';
+import { DialogsName } from '@/constants/dialogs';
 
 /**
  * Expenses datatable.
@@ -38,6 +40,9 @@ function ExpensesDataTable({
 
   // #withAlertActions
   openAlert,
+
+  // #withDialogActions
+  openDialog,
 
   // #withSettings
   expensesTableSize,
@@ -92,7 +97,7 @@ function ExpensesDataTable({
   };
 
   const handleAddPaymentExpense = ({ id }) => {
-    history.push(`/expenses/payments-made/new?expense_id=${id}`);
+    openDialog(DialogsName.QuickPaymentMadeForm, { expenseId: id });
   };
 
   // Handle view detail expense.
@@ -160,6 +165,7 @@ function ExpensesDataTable({
 export default compose(
   withDashboardActions,
   withAlertActions,
+  withDialogActions,
   withDrawerActions,
   withExpensesActions,
   withSettings(({ expenseSettings }) => ({

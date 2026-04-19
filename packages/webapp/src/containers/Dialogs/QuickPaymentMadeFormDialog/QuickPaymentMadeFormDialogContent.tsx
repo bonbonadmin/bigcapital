@@ -13,9 +13,14 @@ export default function QuickPaymentMadeFormDialogContent({
   // #ownProps
   dialogName,
   bill,
+  expense,
 }) {
   return (
-    <QuickPaymentMadeFormProvider billId={bill} dialogName={dialogName}>
+    <QuickPaymentMadeFormProvider
+      billId={bill}
+      expenseId={expense}
+      dialogName={dialogName}
+    >
       <QuickPaymentMadeForm />
     </QuickPaymentMadeFormProvider>
   );

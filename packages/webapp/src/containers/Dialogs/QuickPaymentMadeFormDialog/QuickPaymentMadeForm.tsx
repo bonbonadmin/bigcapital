@@ -10,7 +10,11 @@ import { useQuickPaymentMadeContext } from './QuickPaymentMadeFormProvider';
 import QuickPaymentMadeFormContent from './QuickPaymentMadeFormContent';
 
 import { withDialogActions } from '@/containers/Dialog/withDialogActions';
-import { defaultPaymentMade, transformBillToForm, transformErrors } from './utils';
+import {
+  defaultPaymentMade,
+  transformResourceToForm,
+  transformErrors,
+} from './utils';
 import { compose } from '@/utils';
 
 /**
@@ -20,26 +24,43 @@ function QuickPaymentMadeForm({
   // #withDialogActions
   closeDialog,
 }) {
-  const { bill, dialogName, createPaymentMadeMutate } =
-    useQuickPaymentMadeContext();
+  const {
+    resource,
+    resourceType,
+    dialogName,
+    createPaymentMadeMutate,
+    createExpensePaymentMutate,
+  } = useQuickPaymentMadeContext();
 
   // Initial form values.
   const initialValues = {
     ...defaultPaymentMade,
-    ...transformBillToForm(bill),
+    ...transformResourceToForm(resource),
   };
   // Handles the form submit.
   const handleFormSubmit = (values, { setSubmitting, setFieldError }) => {
-    const entries = [
-      {
-        payment_amount: values.amount,
-        bill_id: values.bill_id,
-      },
-    ];
+    const entries =
+      resourceType === 'expense'
+        ? [
+            {
+              payment_amount: values.amount,
+              expense_id: values.expense_id,
+            },
+          ]
+        : [
+            {
+              payment_amount: values.amount,
+              bill_id: values.bill_id,
+            },
+          ];
     const form = {
-      ...omit(values, ['bill_id']),
+      ...omit(values, ['bill_id', 'expense_id', 'vendor_display_name']),
       entries,
     };
+    const createPaymentMutate =
+      resourceType === 'expense'
+        ? createExpensePaymentMutate
+        : createPaymentMadeMutate;
 
     // Handle request response success.
     const onSuccess = () => {
@@ -60,7 +81,7 @@ function QuickPaymentMadeForm({
       }
       setSubmitting(false);
     };
-    createPaymentMadeMutate(form).then(onSuccess).catch(onError);
+    createPaymentMutate(form).then(onSuccess).catch(onError);
   };
 
   return (

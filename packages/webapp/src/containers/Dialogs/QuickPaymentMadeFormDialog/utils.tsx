@@ -12,7 +12,9 @@ import { PAYMENT_MADE_ERRORS } from '@/containers/Purchases/PaymentsMade/constan
 // Default initial values of payment made.
 export const defaultPaymentMade = {
   bill_id: '',
+  expense_id: '',
   vendor_id: '',
+  vendor_display_name: '',
   payment_account_id: '',
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
   reference: '',
@@ -26,16 +28,22 @@ export const defaultPaymentMade = {
 export const transformErrors = (errors, { setFieldError }) => {
   const getError = (errorType) => errors.find((e) => e.type === errorType);
 
-  if (getError(PAYMENT_MADE_ERRORS.PAYMENT_NUMBER_NOT_UNIQUE)) {
+  if (
+    getError(PAYMENT_MADE_ERRORS.PAYMENT_NUMBER_NOT_UNIQUE) ||
+    getError('EXPENSE_PAYMENT_NUMBER_NOT_UNIQUE')
+  ) {
     setFieldError('payment_number', intl.get('payment_number_is_not_unique'));
   }
-  if (getError(PAYMENT_MADE_ERRORS.INVALID_BILL_PAYMENT_AMOUNT)) {
-    setFieldError(
-      'payment_amount',
-      intl.get('the_payment_amount_bigger_than_invoice_due_amount'),
-    );
+  if (
+    getError(PAYMENT_MADE_ERRORS.INVALID_BILL_PAYMENT_AMOUNT) ||
+    getError('INVALID_EXPENSE_PAYMENT_AMOUNT')
+  ) {
+    setFieldError('amount', intl.get('the_payment_amount_bigger_than_invoice_due_amount'));
   }
-  if (getError(PAYMENT_MADE_ERRORS.WITHDRAWAL_ACCOUNT_CURRENCY_INVALID)) {
+  if (
+    getError(PAYMENT_MADE_ERRORS.WITHDRAWAL_ACCOUNT_CURRENCY_INVALID) ||
+    getError('EXPENSE_PAYMENT_WITHDRAWAL_ACCOUNT_CURRENCY_INVALID')
+  ) {
     AppToaster.show({
       message: intl.get(
         'payment_made.error.withdrawal_account_currency_invalid',
@@ -60,10 +68,15 @@ export const useSetPrimaryBranchToForm = () => {
   }, [isBranchesSuccess, setFieldValue, branches]);
 };
 
-export const transformBillToForm = (bill) => {
+export const transformResourceToForm = (resource) => {
   return {
-    ...pick(bill, ['vendor_id', 'currency_code']),
-    amount: bill.due_amount,
-    bill_id: bill.id,
+    ...pick(resource, [
+      'bill_id',
+      'expense_id',
+      'vendor_id',
+      'vendor_display_name',
+      'currency_code',
+    ]),
+    amount: resource?.due_amount,
   };
-}
+};

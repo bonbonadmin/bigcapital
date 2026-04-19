@@ -72,8 +72,15 @@ function QuickPaymentMadeFormFields({
       <Row>
         {/* ------------- Vendor name ------------- */}
         <Col xs={5}>
-          <FFormGroup name={'vendor_id'} label={<T id={'vendor_name'} />}>
-            <FInputGroup name={'vendor_id'} minimal={true} disabled={true} />
+          <FFormGroup
+            name={'vendor_display_name'}
+            label={<T id={'vendor_name'} />}
+          >
+            <FInputGroup
+              name={'vendor_display_name'}
+              minimal={true}
+              disabled={true}
+            />
           </FFormGroup>
         </Col>
 

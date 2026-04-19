@@ -13,7 +13,7 @@ const QuickPaymentMadeFormDialogContent = lazy(
  */
 function QuickPaymentMadeFormDialog({
   dialogName,
-  payload = { billId: null },
+  payload = { billId: null, expenseId: null },
   isOpen,
 }) {
   return (
@@ -28,6 +28,7 @@ function QuickPaymentMadeFormDialog({
       <DialogSuspense>
         <QuickPaymentMadeFormDialogContent
           bill={payload.billId}
+          expense={payload.expenseId}
           dialogName={dialogName}
         />
       </DialogSuspense>
