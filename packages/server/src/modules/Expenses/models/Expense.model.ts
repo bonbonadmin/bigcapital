@@ -77,10 +77,12 @@ export class Expense extends TenantBaseModel {
       'localAllocatedCostAmount',
       'billableAmount',
       'dueAmount',
+      'overPaymentAmount',
       'isOpen',
       'isPartiallyPaid',
       'isFullyPaid',
       'isPaid',
+      'isOverPaid',
     ];
   }
 
@@ -148,6 +150,14 @@ export class Expense extends TenantBaseModel {
   }
 
   /**
+   * Retrieves the over payment amount for the expense.
+   * @returns {number}
+   */
+  get overPaymentAmount() {
+    return Math.max(this.paymentAmount - this.totalAmount, 0);
+  }
+
+  /**
    * Determines whether the expense is opened as payable.
    * @returns {boolean}
    */
@@ -169,6 +179,14 @@ export class Expense extends TenantBaseModel {
    */
   get isFullyPaid() {
     return this.paymentAmount >= this.totalAmount;
+  }
+
+  /**
+   * Determines whether the expense is over paid.
+   * @returns {boolean}
+   */
+  get isOverPaid() {
+    return this.overPaymentAmount > 0;
   }
 
   /**

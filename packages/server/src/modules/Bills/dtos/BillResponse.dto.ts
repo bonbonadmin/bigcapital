@@ -187,6 +187,13 @@ export class BillResponseDto {
   dueAmount: number;
 
   @ApiProperty({
+    description: 'The amount overpaid on this bill',
+    example: 0,
+    required: false,
+  })
+  overPaymentAmount?: number;
+
+  @ApiProperty({
     description: 'Whether the bill is overdue',
     example: false,
   })
@@ -203,6 +210,12 @@ export class BillResponseDto {
     example: false,
   })
   isFullyPaid: boolean;
+
+  @ApiProperty({
+    description: 'Whether the bill has been overpaid',
+    example: false,
+  })
+  isOverPaid: boolean;
 
   @ApiProperty({
     description: 'The date when the bill was created',

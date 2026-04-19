@@ -70,8 +70,16 @@ export default function BillDetailHeader() {
             minLabelSize={'140px'}
             textAlign={'right'}
           >
-            <DetailItem label={intl.get('due_amount')}>
-              <strong>{bill.formatted_due_amount}</strong>
+            <DetailItem
+              label={intl.get(
+                bill.is_over_paid ? 'over_payment_amount' : 'due_amount',
+              )}
+            >
+              <strong>
+                {bill.is_over_paid
+                  ? bill.formatted_over_payment_amount
+                  : bill.formatted_due_amount}
+              </strong>
             </DetailItem>
             <DetailItem
               label={intl.get('reference')}

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { sumBy, difference } from 'lodash';
+import { difference } from 'lodash';
 import { ERRORS } from '../constants';
 import { Bill } from '../../Bills/models/Bill';
 import { BillPayment } from '../models/BillPayment';
@@ -173,41 +173,8 @@ export class BillPaymentValidators {
     billPaymentEntries: BillPaymentEntryDto[],
     oldPaymentEntries: BillPaymentEntry[] = [],
   ) {
-    const billsIds = billPaymentEntries.map(
-      (entry: BillPaymentEntryDto) => entry.billId,
-    );
-
-    const storedBills = await this.billModel().query().whereIn('id', billsIds);
-    const storedBillsMap = new Map(
-      storedBills.map((bill) => {
-        const oldEntries = oldPaymentEntries.filter(
-          (entry) => entry.billId === bill.id,
-        );
-        const oldPaymentAmount = sumBy(oldEntries, 'paymentAmount') || 0;
-
-        return [
-          bill.id,
-          { ...bill, dueAmount: bill.dueAmount + oldPaymentAmount },
-        ];
-      }),
-    );
-    interface invalidPaymentAmountError {
-      index: number;
-      due_amount: number;
-    }
-    const hasWrongPaymentAmount: invalidPaymentAmountError[] = [];
-
-    billPaymentEntries.forEach((entry: BillPaymentEntryDto, index: number) => {
-      const entryBill = storedBillsMap.get(entry.billId);
-      const { dueAmount } = entryBill;
-
-      if (dueAmount < entry.paymentAmount) {
-        hasWrongPaymentAmount.push({ index, due_amount: dueAmount });
-      }
-    });
-    if (hasWrongPaymentAmount.length > 0) {
-      throw new ServiceError(ERRORS.INVALID_BILL_PAYMENT_AMOUNT);
-    }
+    void billPaymentEntries;
+    void oldPaymentEntries;
   }
 
   /**

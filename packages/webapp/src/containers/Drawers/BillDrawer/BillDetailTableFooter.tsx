@@ -59,8 +59,20 @@ export function BillDetailTableFooter() {
           value={bill.formatted_payment_amount}
         />
         <TotalLine
-          title={<T id={'bill.details.due_amount'} />}
-          value={bill.formatted_due_amount}
+          title={
+            <T
+              id={
+                bill.is_over_paid
+                  ? 'over_payment_amount'
+                  : 'bill.details.due_amount'
+              }
+            />
+          }
+          value={
+            bill.is_over_paid
+              ? bill.formatted_over_payment_amount
+              : bill.formatted_due_amount
+          }
           textStyle={TotalLineTextStyle.Bold}
         />
       </BillTotalLines>

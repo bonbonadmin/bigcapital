@@ -566,6 +566,7 @@
   "invoice_amount": "قيمة الفاتورة",
   "amount_due": "المبلغ المستحق",
   "payment_amount": "مبلغ الدفع",
+  "over_payment_amount": "مبلغ الدفع الزائد",
   "edit_invoice": "تعديل الفاتورة",
   "delete_invoice": "حذف الفاتورة",
   "new_invoice": "فاتورة جديدة",

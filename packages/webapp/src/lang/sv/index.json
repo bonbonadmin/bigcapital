@@ -551,6 +551,7 @@
   "invocie_number": "Fakturanummer",
   "amount_due": "Förfallet belopp",
   "payment_amount": "Betalningsbelopp",
+  "over_payment_amount": "Överbetalat belopp",
   "edit_invoice": "Redigera faktura",
   "delete_invoice": "Ta bort faktura",
   "new_invoice": "Ny faktura",

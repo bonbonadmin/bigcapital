@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { sumBy, difference } from 'lodash';
+import { difference } from 'lodash';
 import { Account } from '@/modules/Accounts/models/Account.model';
 import { Expense } from '@/modules/Expenses/models/Expense.model';
 import { ServiceError } from '@/modules/Items/ServiceError';
@@ -131,35 +131,8 @@ export class ExpensePaymentValidators {
     paymentEntries: ExpensePaymentEntryDto[],
     oldPaymentEntries: ExpensePaymentEntry[] = [],
   ) {
-    const expenseIds = paymentEntries.map((entry) => entry.expenseId);
-    const storedExpenses = await this.expenseModel().query().whereIn('id', expenseIds);
-    const storedExpensesMap = new Map(
-      storedExpenses.map((expense) => {
-        const oldEntries = oldPaymentEntries.filter(
-          (entry) => entry.expenseId === expense.id,
-        );
-        const oldPaymentAmount = sumBy(oldEntries, 'paymentAmount') || 0;
-
-        return [
-          expense.id,
-          { ...expense, dueAmount: expense.dueAmount + oldPaymentAmount },
-        ];
-      }),
-    );
-
-    const hasWrongPaymentAmount = [];
-
-    paymentEntries.forEach((entry, index) => {
-      const entryExpense = storedExpensesMap.get(entry.expenseId);
-      const dueAmount = entryExpense?.dueAmount ?? 0;
-
-      if (dueAmount < entry.paymentAmount) {
-        hasWrongPaymentAmount.push({ index, due_amount: dueAmount });
-      }
-    });
-    if (hasWrongPaymentAmount.length > 0) {
-      throw new ServiceError(ERRORS.INVALID_EXPENSE_PAYMENT_AMOUNT);
-    }
+    void paymentEntries;
+    void oldPaymentEntries;
   }
 
   public async validateEntriesIdsExistance(

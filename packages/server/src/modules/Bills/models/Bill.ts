@@ -72,10 +72,12 @@ export class Bill extends TenantBaseModel {
     return [
       'balance',
       'dueAmount',
+      'overPaymentAmount',
       'isOpen',
       'isPartiallyPaid',
       'isFullyPaid',
       'isPaid',
+      'isOverPaid',
       'remainingDays',
       'overdueDays',
       'isOverdue',
@@ -249,6 +251,14 @@ export class Bill extends TenantBaseModel {
   }
 
   /**
+   * Over payment amount of the given bill.
+   * @return {number}
+   */
+  get overPaymentAmount(): number {
+    return Math.max(this.balance - this.total, 0);
+  }
+
+  /**
    * Detarmine whether the bill is open.
    * @return {boolean}
    */
@@ -270,6 +280,14 @@ export class Bill extends TenantBaseModel {
    */
   get isFullyPaid(): boolean {
     return this.dueAmount === 0;
+  }
+
+  /**
+   * Determine whether the bill is over paid.
+   * @return {boolean}
+   */
+  get isOverPaid(): boolean {
+    return this.overPaymentAmount > 0;
   }
 
   /**

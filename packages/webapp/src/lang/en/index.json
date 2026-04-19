@@ -519,6 +519,7 @@
   "invocie_number": "Invoice Number",
   "amount_due": "Amount Due",
   "payment_amount": "Payment Amount",
+  "over_payment_amount": "Over Payment Amount",
   "edit_invoice": "Edit Invoice",
   "delete_invoice": "Delete Invoice",
   "new_invoice": "New Invoice",

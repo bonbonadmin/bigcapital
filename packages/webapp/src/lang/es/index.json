@@ -562,6 +562,7 @@
   "invocie_number": "Número de factura",
   "amount_due": "Monto adeudado",
   "payment_amount": "Monto del pago",
+  "over_payment_amount": "Monto de sobrepago",
   "edit_invoice": "Editar factura",
   "delete_invoice": "Eliminar factura",
   "new_invoice": "Nueva factura",

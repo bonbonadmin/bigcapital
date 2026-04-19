@@ -14,6 +14,7 @@ export class ExpenseTransfromer extends Transformer {
       'formattedAmount',
       'formattedPaymentAmount',
       'formattedDueAmount',
+      'formattedOverPaymentAmount',
       'formattedLandedCostAmount',
       'formattedAllocatedCostAmount',
       'formattedDate',
@@ -49,6 +50,15 @@ export class ExpenseTransfromer extends Transformer {
    */
   protected formattedDueAmount = (expense: Expense): string => {
     return this.formatNumber(expense.dueAmount, {
+      currencyCode: expense.currencyCode,
+    });
+  };
+
+  /**
+   * Retrieve formatted expense over payment amount.
+   */
+  protected formattedOverPaymentAmount = (expense: Expense): string => {
+    return this.formatNumber(expense.overPaymentAmount, {
       currencyCode: expense.currencyCode,
     });
   };

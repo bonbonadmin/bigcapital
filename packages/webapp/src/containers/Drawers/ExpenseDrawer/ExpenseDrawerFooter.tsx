@@ -31,6 +31,23 @@ export default function ExpenseDrawerFooter() {
           borderStyle={TotalLineBorderStyle.DoubleDark}
           textStyle={TotalLineTextStyle.Bold}
         />
+        <TotalLine
+          title={<T id={'payment_amount'} />}
+          value={expense.formatted_payment_amount}
+        />
+        <TotalLine
+          title={
+            <T
+              id={expense.is_over_paid ? 'over_payment_amount' : 'due_amount'}
+            />
+          }
+          value={
+            expense.is_over_paid
+              ? expense.formatted_over_payment_amount
+              : expense.formatted_due_amount
+          }
+          textStyle={TotalLineTextStyle.Bold}
+        />
       </ExpenseTotalLines>
     </ExpenseDetailsFooterRoot>
   );

@@ -218,6 +218,12 @@ export class ExpenseResponseDto {
   dueAmount: number;
 
   @ApiProperty({
+    example: 0,
+    description: 'The amount overpaid against this expense',
+  })
+  overPaymentAmount: number;
+
+  @ApiProperty({
     example: true,
     description: 'Whether the expense is opened as payable',
   })
@@ -234,6 +240,12 @@ export class ExpenseResponseDto {
     description: 'Whether the expense is fully paid',
   })
   isFullyPaid: boolean;
+
+  @ApiProperty({
+    example: false,
+    description: 'Whether the expense is over paid',
+  })
+  isOverPaid: boolean;
 
   @ApiProperty({
     type: [ExpenseCategoryResponseDto],

@@ -17,6 +17,7 @@ export class BillTransformer extends Transformer {
       'formattedPaymentAmount',
       'formattedBalance',
       'formattedDueAmount',
+      'formattedOverPaymentAmount',
       'formattedExchangeRate',
       'subtotalFormatted',
       'subtotalLocalFormatted',
@@ -96,6 +97,18 @@ export class BillTransformer extends Transformer {
    */
   protected formattedDueAmount = (bill: Bill): string => {
     return this.formatNumber(bill.dueAmount, {
+      currencyCode: bill.currencyCode,
+      money: true,
+    });
+  };
+
+  /**
+   * Retrieve formatted bill over payment amount.
+   * @param {IBill} bill
+   * @returns {string}
+   */
+  protected formattedOverPaymentAmount = (bill: Bill): string => {
+    return this.formatNumber(bill.overPaymentAmount, {
       currencyCode: bill.currencyCode,
       money: true,
     });

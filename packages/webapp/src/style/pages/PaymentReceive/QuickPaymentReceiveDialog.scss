@@ -1,4 +1,7 @@
 .dialog--quick-payment-receive {
+    position: relative;
+    z-index: 10000000;
+
     .bp4-form-group {
       margin-bottom: 15px;
 

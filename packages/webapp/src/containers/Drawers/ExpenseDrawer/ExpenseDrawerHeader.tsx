@@ -63,12 +63,30 @@ export default function ExpenseDrawerHeader() {
             direction={'horizantal'}
             minLabelSize={'180px'}
           >
+            <DetailItem
+              label={
+                <T
+                  id={
+                    expense.is_over_paid
+                      ? 'over_payment_amount'
+                      : 'due_amount'
+                  }
+                />
+              }
+            >
+              <strong>
+                {expense.is_over_paid
+                  ? expense.formatted_over_payment_amount
+                  : expense.formatted_due_amount}
+              </strong>
+            </DetailItem>
+
             <DetailItem label={<T id={'published_at'} />}>
               {expense.formatted_published_at || '—'}
             </DetailItem>
 
             <DetailItem label={<T id={'created_at'} />}>
-              {expense.formatted_created_at} 
+              {expense.formatted_created_at}
             </DetailItem>
           </DetailsMenu>
         </Col>

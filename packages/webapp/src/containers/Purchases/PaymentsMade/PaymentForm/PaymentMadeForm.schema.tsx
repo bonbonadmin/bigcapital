@@ -22,7 +22,7 @@ const Schema = Yup.object().shape({
     Yup.object().shape({
       id: Yup.number().nullable(),
       due_amount: Yup.number().nullable(),
-      payment_amount: Yup.number().nullable().max(Yup.ref('due_amount')),
+      payment_amount: Yup.number().nullable(),
       bill_id: Yup.number()
         .nullable()
         .when(['payment_amount'], {
