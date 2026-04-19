@@ -395,7 +395,7 @@ export const SidebarMenu = [
             children: [
               {
                 text: 'Payments Made',
-                href: '/payments-made',
+                href: '/payment-list/payments-made',
                 type: ISidebarMenuItemType.Link,
                 permission: {
                   subject: AbilitySubject.PaymentMade,

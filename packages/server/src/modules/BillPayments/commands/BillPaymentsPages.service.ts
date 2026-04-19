@@ -44,6 +44,7 @@ export class BillPaymentsPages {
       ...this.mapBillToPageEntry(entry.bill),
       dueAmount: entry.bill.dueAmount + entry.paymentAmount,
       paymentAmount: entry.paymentAmount,
+      id: entry.id,
     }));
 
     const resPayableBills = await this.billModel()

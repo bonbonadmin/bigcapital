@@ -15,6 +15,11 @@ import { ToNumber } from '@/common/decorators/Validators';
 export class BillPaymentEntryDto {
   @ToNumber()
   @IsNumber()
+  @IsOptional()
+  id?: number;
+
+  @ToNumber()
+  @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ description: 'The id of the bill', example: 1 })
   billId: number;

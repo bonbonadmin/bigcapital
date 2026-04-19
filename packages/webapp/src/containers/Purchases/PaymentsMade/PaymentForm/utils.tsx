@@ -107,6 +107,7 @@ export const transformFormToRequest = (form) => {
     .map((entry) => ({
       bill_id: entry.bill_id,
       payment_amount: Number(entry.payment_amount),
+      ...(entry.id ? { id: entry.id } : {}),
     }));
 
   const attachments = transformAttachmentsToRequest(form);

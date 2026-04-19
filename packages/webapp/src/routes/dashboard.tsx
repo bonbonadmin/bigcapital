@@ -1195,6 +1195,19 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/payment-list/payments-made`,
+    component: lazy(
+      () =>
+        import(
+          '@/containers/Purchases/PaymentsMade/PaymentsLanding/CombinedPaymentMadeList'
+        ),
+    ),
+    breadcrumb: intl.get('payments_made_list'),
+    pageTitle: intl.get('payments_made_list'),
+    defaultSearchResource: RESOURCES_TYPES.PAYMENT_MADE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/payments-made`,
     component: lazy(
       () =>

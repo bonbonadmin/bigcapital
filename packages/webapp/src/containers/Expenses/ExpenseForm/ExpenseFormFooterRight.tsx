@@ -28,7 +28,7 @@ export function ExpenseFormFooterRight() {
     () => [
       {
         id: '',
-        nameFormatted: 'No withholding tax',
+        name_formatted: 'No withholding tax',
       },
       ...withholdingTaxes,
     ],
@@ -51,8 +51,8 @@ export function ExpenseFormFooterRight() {
                 name={'withholding_tax_id'}
                 items={withholdingTaxOptions}
                 valueAccessor={'id'}
-                textAccessor={'nameFormatted'}
-                labelAccessor={'nameFormatted'}
+                textAccessor={'name_formatted'}
+                labelAccessor={'name_formatted'}
                 placeholder={'Select withholding tax'}
                 fill={true}
               />

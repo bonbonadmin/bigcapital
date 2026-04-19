@@ -119,19 +119,12 @@ export class EditBillPayment {
       } as IBillPaymentEditingPayload);
 
       // Edits the bill payment transaction graph on the storage.
-      await this.billPaymentModel()
+      const billPayment = await this.billPaymentModel()
         .query(trx)
-        .upsertGraph({
+        .upsertGraphAndFetch({
           id: billPaymentId,
           ...billPaymentObj,
         });
-
-      // Fetch the bill payment with entries to ensure they're loaded for the subscriber.
-      const billPayment = await this.billPaymentModel()
-        .query(trx)
-        .withGraphFetched('entries')
-        .findById(billPaymentId)
-        .throwIfNotFound();
 
       // Triggers `onBillPaymentEdited` event.
       await this.eventPublisher.emitAsync(events.billPayment.onEdited, {
