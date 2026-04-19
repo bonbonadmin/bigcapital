@@ -8,6 +8,7 @@ import { transformToForm } from '@/utils';
 export const defaultInitialValues = {
   name: '',
   code: '',
+  account_id: '',
   rate: '',
   description: '',
   is_compound: false,
@@ -42,7 +43,12 @@ export const transformFormToReq = (form) => {
  * @returns {boolean}
  */
 export const isTaxRateChange = (initialValues, formValues) => {
-  return initialValues.rate !== formValues.rate;
+  return (
+    initialValues.rate !== formValues.rate ||
+    initialValues.code !== formValues.code ||
+    initialValues.name !== formValues.name ||
+    String(initialValues.account_id || '') !== String(formValues.account_id || '')
+  );
 };
 
 /**

@@ -42,8 +42,9 @@ export class BillPaymentsPages {
     }
     const paymentEntries = billPayment.entries.map((entry) => ({
       ...this.mapBillToPageEntry(entry.bill),
-      dueAmount: entry.bill.dueAmount + entry.paymentAmount,
-      paymentAmount: entry.paymentAmount,
+      dueAmount:
+        (Number(entry.bill.dueAmount) || 0) + (Number(entry.paymentAmount) || 0),
+      paymentAmount: Number(entry.paymentAmount) || 0,
       id: entry.id,
     }));
 

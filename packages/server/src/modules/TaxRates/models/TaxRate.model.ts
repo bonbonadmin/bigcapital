@@ -10,6 +10,7 @@ import { ExportableModel } from '@/modules/Export/decorators/ExportableModel.dec
 @ExportableModel()
 export class TaxRateModel extends BaseModel {
   active!: boolean;
+  accountId?: number | null;
   code!: string;
   name!: string;
   rate!: number;
@@ -61,6 +62,17 @@ export class TaxRateModel extends BaseModel {
    * Relationship mapping.
    */
   static get relationMappings() {
-    return {};
+    const { Account } = require('../../Accounts/models/Account.model');
+
+    return {
+      account: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'tax_rates.accountId',
+          to: 'accounts.id',
+        },
+      },
+    };
   }
 }

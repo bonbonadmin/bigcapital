@@ -12,18 +12,30 @@ import {
 import {
   useExpenseSubtotalFormatted,
   useExpenseTotalFormatted,
+  useExpenseSalesTaxAmountFormatted,
   useExpenseWithholdingTaxAmountFormatted,
 } from './utils';
 import { useExpenseFormContext } from './ExpenseFormPageProvider';
 
 export function ExpenseFormFooterRight() {
-  const { withholdingTaxes } = useExpenseFormContext();
+  const { taxRates, withholdingTaxes } = useExpenseFormContext();
   const {
     values: { expense_mode },
   } = useFormikContext();
   const totalFormatted = useExpenseTotalFormatted();
   const subtotalFormatted = useExpenseSubtotalFormatted();
+  const salesTaxAmountFormatted = useExpenseSalesTaxAmountFormatted();
   const withholdingTaxAmountFormatted = useExpenseWithholdingTaxAmountFormatted();
+  const salesTaxOptions = React.useMemo(
+    () => [
+      {
+        id: '',
+        name_formatted: 'No sales tax',
+      },
+      ...taxRates.filter((taxRate) => taxRate.account_id),
+    ],
+    [taxRates],
+  );
   const withholdingTaxOptions = React.useMemo(
     () => [
       {
@@ -59,6 +71,26 @@ export function ExpenseFormFooterRight() {
             </WithholdingTaxLineTitle>
           }
           value={withholdingTaxAmountFormatted}
+          borderStyle={TotalLineBorderStyle.None}
+        />
+      )}
+      {expense_mode === 'payable' && (
+        <TotalLine
+          title={
+            <WithholdingTaxLineTitle>
+              <span>Sales Tax</span>
+              <WithholdingTaxSelect
+                name={'sales_tax_rate_id'}
+                items={salesTaxOptions}
+                valueAccessor={'id'}
+                textAccessor={'name_formatted'}
+                labelAccessor={'name_formatted'}
+                placeholder={'Select sales tax'}
+                fill={true}
+              />
+            </WithholdingTaxLineTitle>
+          }
+          value={salesTaxAmountFormatted}
           borderStyle={TotalLineBorderStyle.None}
         />
       )}

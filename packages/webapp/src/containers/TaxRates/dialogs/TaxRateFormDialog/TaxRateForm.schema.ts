@@ -5,6 +5,7 @@ const getSchema = () =>
   Yup.object().shape({
     name: Yup.string().required().label('Name'),
     code: Yup.string().required().label('Code'),
+    account_id: Yup.number().required().label('Account'),
     active: Yup.boolean().optional().label('Active'),
     describtion: Yup.string().optional().label('Description'),
     rate: Yup.number()

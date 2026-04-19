@@ -30,8 +30,10 @@ export class ExpensePaymentsPages {
     }
     const paymentEntries = expensePayment.entries.map((entry) => ({
       ...this.mapExpenseToPageEntry(entry.expense),
-      dueAmount: entry.expense.dueAmount + entry.paymentAmount,
-      paymentAmount: entry.paymentAmount,
+      dueAmount:
+        (Number(entry.expense.dueAmount) || 0) +
+        (Number(entry.paymentAmount) || 0),
+      paymentAmount: Number(entry.paymentAmount) || 0,
       id: entry.id,
     }));
 

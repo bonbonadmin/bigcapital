@@ -46,6 +46,20 @@ export class TaxRateResponseDto {
   description?: string;
 
   @ApiProperty({
+    description: 'The account id associated with the tax rate',
+    example: 1201,
+    required: false,
+  })
+  accountId?: number;
+
+  @ApiProperty({
+    description: 'The account name associated with the tax rate',
+    example: 'VAT In',
+    required: false,
+  })
+  accountName?: string;
+
+  @ApiProperty({
     description: 'Whether the tax is non-recoverable',
     example: false,
   })

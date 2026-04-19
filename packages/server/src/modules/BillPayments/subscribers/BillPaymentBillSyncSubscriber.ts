@@ -22,12 +22,11 @@ export class BillPaymentBillSyncSubscriber {
   @OnEvent(events.billPayment.onCreated)
   async handleBillIncrementPaymentOnceCreated({
     billPayment,
+    billPaymentDTO,
     trx,
   }: IBillPaymentEventCreatedPayload) {
-    // Ensure entries are available - they should be included in insertGraphAndFetch
-    const entries = billPayment.entries || [];
     await this.billPaymentBillSync.saveChangeBillsPaymentAmount(
-      entries.map((entry) => ({
+      (billPaymentDTO.entries || []).map((entry) => ({
         billId: entry.billId,
         paymentAmount: entry.paymentAmount,
       })),
@@ -42,14 +41,14 @@ export class BillPaymentBillSyncSubscriber {
   @OnEvent(events.billPayment.onEdited)
   async handleBillIncrementPaymentOnceEdited({
     billPayment,
+    billPaymentDTO,
     oldBillPayment,
     trx,
   }: IBillPaymentEventEditedPayload) {
-    const entries = billPayment.entries || [];
     const oldEntries = oldBillPayment?.entries || null;
 
     await this.billPaymentBillSync.saveChangeBillsPaymentAmount(
-      entries.map((entry) => ({
+      (billPaymentDTO.entries || []).map((entry) => ({
         billId: entry.billId,
         paymentAmount: entry.paymentAmount,
       })),

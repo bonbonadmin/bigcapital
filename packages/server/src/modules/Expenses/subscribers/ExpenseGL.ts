@@ -54,7 +54,10 @@ export class ExpenseGL {
 
     return {
       ...commonEntry,
-      credit: this.expense.localAmount - this.expense.withholdingTaxAmountLocal,
+      credit:
+        this.expense.localAmount +
+        (this.expense.salesTaxAmountLocal || 0) -
+        (this.expense.withholdingTaxAmountLocal || 0),
       accountId,
       ...(this.expense.payeeId &&
       settlementAccount?.isAccountType(ACCOUNT_TYPE.ACCOUNTS_PAYABLE)
@@ -93,6 +96,26 @@ export class ExpenseGL {
     };
   };
 
+  private getExpenseGLSalesTaxEntry = (index: number): ILedgerEntry | null => {
+    if (!this.expense.salesTaxAmount || !this.expense.salesTaxAccountId) {
+      return null;
+    }
+    const commonEntry = this.getExpenseGLCommonEntry();
+    const salesTaxAccount = this.expense.salesTaxAccount;
+
+    return {
+      ...commonEntry,
+      debit: this.expense.salesTaxAmountLocal,
+      accountId: this.expense.salesTaxAccountId,
+      accountNormal:
+        salesTaxAccount?.accountNormal === 'debit'
+          ? AccountNormal.DEBIT
+          : AccountNormal.CREDIT,
+      note: this.expense.salesTaxName || undefined,
+      index,
+    };
+  };
+
   /**
    * Retrieves the expense GL category entry.
    * @param {ExpenseCategory} category - Expense category.
@@ -125,13 +148,18 @@ export class ExpenseGL {
 
     const paymentEntry = this.getExpenseGLPaymentEntry();
     const withholdingTaxEntry = this.getExpenseGLWithholdingTaxEntry();
-    const categoryStartIndex = withholdingTaxEntry ? 3 : 2;
+    const salesTaxEntry = this.getExpenseGLSalesTaxEntry(
+      withholdingTaxEntry ? 3 : 2,
+    );
+    const categoryStartIndex =
+      2 + (withholdingTaxEntry ? 1 : 0) + (salesTaxEntry ? 1 : 0);
     const categoryEntries = this.expense.categories.map((category, index) =>
       getCategoryEntry(category, index, categoryStartIndex),
     );
     return [
       paymentEntry,
       ...(withholdingTaxEntry ? [withholdingTaxEntry] : []),
+      ...(salesTaxEntry ? [salesTaxEntry] : []),
       ...categoryEntries,
     ];
   };

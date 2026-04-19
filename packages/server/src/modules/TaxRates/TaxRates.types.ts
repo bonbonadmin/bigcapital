@@ -3,6 +3,7 @@ import { TaxRateModel } from './models/TaxRate.model';
 
 export interface ITaxRate {
   id?: number;
+  accountId?: number;
   name: string;
   code: string;
   rate: number;
@@ -13,6 +14,7 @@ export interface ITaxRate {
 }
 
 export interface ICommonTaxRateDTO {
+  accountId: number;
   name: string;
   code: string;
   rate: number;

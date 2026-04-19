@@ -41,6 +41,14 @@ const DescriptionAccessor = (taxRate) => {
   );
 };
 
+const accountAccessor = (taxRate) => {
+  return (
+    <span className={clsx(Classes.TEXT_MUTED)}>
+      {taxRate.account_name || '-'}
+    </span>
+  );
+};
+
 /**
  * Retrieves the tax rates table columns.
  */
@@ -63,6 +71,11 @@ export const useTaxRatesTableColumns = () => {
       width: 30,
     },
     {
+      Header: 'Account',
+      accessor: accountAccessor,
+      width: 55,
+    },
+    {
       Header: 'Description',
       accessor: DescriptionAccessor,
       width: 100,
@@ -75,4 +88,3 @@ export const useTaxRatesTableColumns = () => {
     },
   ];
 };
-

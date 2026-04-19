@@ -1,5 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Knex } from 'knex';
+import { ACCOUNT_ROOT_TYPE } from '@/constants/accounts';
+import { Account } from '@/modules/Accounts/models/Account.model';
 import {
   ICreateTaxRateDTO,
   ITaxRateCreatedPayload,
@@ -12,6 +14,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { events } from '@/common/events/events';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CreateTaxRateDto } from '../dtos/TaxRate.dto';
+import { ServiceError } from '@/modules/Items/ServiceError';
+
+const ERRORS = {
+  TAX_RATE_ACCOUNT_INVALID_TYPE: 'TAX_RATE_ACCOUNT_INVALID_TYPE',
+};
 
 @Injectable()
 export class CreateTaxRate {
@@ -26,9 +33,26 @@ export class CreateTaxRate {
     private readonly uow: UnitOfWork,
     private readonly validators: CommandTaxRatesValidators,
 
+    @Inject(Account.name)
+    private readonly accountModel: TenantModelProxy<typeof Account>,
+
     @Inject(TaxRateModel.name)
     private readonly taxRateModel: TenantModelProxy<typeof TaxRateModel>,
   ) {}
+
+  private async validateAccount(accountId: number, trx?: Knex.Transaction) {
+    const account = await this.accountModel()
+      .query(trx)
+      .findById(accountId)
+      .throwIfNotFound();
+
+    if (
+      !account.isRootType(ACCOUNT_ROOT_TYPE.ASSET) &&
+      !account.isRootType(ACCOUNT_ROOT_TYPE.LIABILITY)
+    ) {
+      throw new ServiceError(ERRORS.TAX_RATE_ACCOUNT_INVALID_TYPE);
+    }
+  }
 
   /**
    * Creates a new tax rate.
@@ -40,6 +64,7 @@ export class CreateTaxRate {
   ) {
     // Validates the tax code uniquiness.
     await this.validators.validateTaxCodeUnique(createTaxRateDTO.code, trx);
+    await this.validateAccount(createTaxRateDTO.accountId, trx);
 
     return this.uow.withTransaction(async (trx: Knex.Transaction) => {
       // Triggers `onTaxRateCreating` event.

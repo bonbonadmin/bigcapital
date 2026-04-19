@@ -13,6 +13,7 @@ import { Expense } from '../models/Expense.model';
 import { events } from '@/common/events/events';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { EditExpenseDto } from '../dtos/Expense.dto';
+import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { Vendor } from '@/modules/Vendors/models/Vendor';
 import { ERRORS } from '../constants';
 import { ServiceError } from '@/modules/Items/ServiceError';
@@ -42,6 +43,9 @@ export class EditExpense {
     @Inject(Vendor.name)
     private vendorModel: TenantModelProxy<typeof Vendor>,
 
+    @Inject(TaxRateModel.name)
+    private readonly taxRateModel: TenantModelProxy<typeof TaxRateModel>,
+
     @Inject(WithholdingTax.name)
     private readonly withholdingTaxModel: TenantModelProxy<typeof WithholdingTax>,
   ) {}
@@ -53,6 +57,7 @@ export class EditExpense {
   public authorize = async (
     oldExpense: Expense,
     expenseDTO: EditExpenseDto,
+    salesTaxSnapshot,
     withholdingTaxSnapshot,
   ) => {
     if (expenseDTO.payeeId) {
@@ -69,6 +74,10 @@ export class EditExpense {
     this.validator.validateWithholdingTaxExpense(
       expenseDTO.payableAccountId,
       withholdingTaxSnapshot?.withholdingTaxId,
+    );
+    this.validator.validateSalesTaxExpense(
+      expenseDTO.payableAccountId,
+      salesTaxSnapshot?.salesTaxRateId,
     );
 
     if (expenseDTO.paymentAccountId) {
@@ -104,6 +113,19 @@ export class EditExpense {
       this.validator.validateWithholdingTaxAccountType(withholdingTaxAccount);
     }
 
+    if (salesTaxSnapshot?.salesTaxRateId) {
+      const salesTaxRate = await this.taxRateModel()
+        .query()
+        .findById(salesTaxSnapshot.salesTaxRateId)
+        .throwIfNotFound();
+      const salesTaxAccount = await this.accountModel()
+        .query()
+        .findById(salesTaxRate.accountId)
+        .throwIfNotFound();
+
+      this.validator.validateSalesTaxAccountType(salesTaxAccount);
+    }
+
     // Retrieves the DTO expense accounts ids.
     const DTOExpenseAccountsIds = expenseDTO.categories.map(
       (category) => category.expenseAccountId,
@@ -128,6 +150,7 @@ export class EditExpense {
       ),
       oldExpense.paymentAmount || 0,
       withholdingTaxSnapshot?.withholdingTaxAmount || 0,
+      salesTaxSnapshot?.salesTaxAmount || 0,
     );
 
     if (
@@ -143,6 +166,17 @@ export class EditExpense {
       oldExpense.payeeId !== expenseDTO.payeeId
     ) {
       throw new ServiceError(ERRORS.EXPENSE_PAYEE_SHOULD_NOT_MODIFY);
+    }
+    if (
+      oldExpense.paymentAmount > 0 &&
+      ((oldExpense.salesTaxRateId || null) !==
+        (salesTaxSnapshot?.salesTaxRateId || null) ||
+        Number(oldExpense.salesTaxRate || 0) !==
+          Number(salesTaxSnapshot?.salesTaxRate || 0) ||
+        Number(oldExpense.salesTaxAccountId || 0) !==
+          Number(salesTaxSnapshot?.salesTaxAccountId || 0))
+    ) {
+      throw new ServiceError(ERRORS.EXPENSE_SALES_TAX_SHOULD_NOT_MODIFY);
     }
     if (
       oldExpense.paymentAmount > 0 &&
@@ -194,15 +228,23 @@ export class EditExpense {
       .withGraphFetched('categories')
       .throwIfNotFound();
 
+    const salesTaxSnapshot =
+      await this.transformDTO.resolveSalesTaxSnapshot(expenseDTO);
     const withholdingTaxSnapshot =
       await this.transformDTO.resolveWithholdingTaxSnapshot(expenseDTO);
 
     // Authorize expense DTO before editing.
-    await this.authorize(oldExpense, expenseDTO, withholdingTaxSnapshot);
+    await this.authorize(
+      oldExpense,
+      expenseDTO,
+      salesTaxSnapshot,
+      withholdingTaxSnapshot,
+    );
 
     // Update the expense on the storage.
     const expenseObj = await this.transformDTO.expenseEditDTO(
       expenseDTO,
+      salesTaxSnapshot,
       withholdingTaxSnapshot,
     );
 

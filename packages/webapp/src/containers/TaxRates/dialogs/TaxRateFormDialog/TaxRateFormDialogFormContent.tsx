@@ -3,7 +3,15 @@ import React from 'react';
 import { useFormikContext } from 'formik';
 import { Tag, Text } from '@blueprintjs/core';
 import styled from 'styled-components';
-import { FCheckbox, FFormGroup, FInputGroup, Hint } from '@/components';
+import {
+  AccountsSelect,
+  FCheckbox,
+  FFormGroup,
+  FInputGroup,
+  Hint,
+} from '@/components';
+import { ACCOUNT_ROOT_TYPE } from '@/constants/accountTypes';
+import { useAccounts } from '@/hooks/query/accounts';
 import { transformTaxRateCodeValue, useIsTaxRateChanged } from './utils';
 import { useTaxRateFormDialogContext } from './TaxRateFormDialogBoot';
 
@@ -12,6 +20,8 @@ import { useTaxRateFormDialogContext } from './TaxRateFormDialogBoot';
  * @returns {JSX.Element}
  */
 export default function TaxRateFormDialogContent() {
+  const { data: accounts } = useAccounts();
+
   return (
     <div>
       <FFormGroup
@@ -50,6 +60,25 @@ export default function TaxRateFormDialogContent() {
         fastField={true}
       >
         <FInputGroup name={'description'} fastField={true} />
+      </FFormGroup>
+
+      <FFormGroup
+        name={'account_id'}
+        label={'Account'}
+        labelInfo={<Tag minimal>Required</Tag>}
+        fastField={true}
+      >
+        <AccountsSelect
+          name={'account_id'}
+          items={accounts || []}
+          filterByRootTypes={[
+            ACCOUNT_ROOT_TYPE.ASSET,
+            ACCOUNT_ROOT_TYPE.LIABILITY,
+          ]}
+          placeholder={'Select tax account'}
+          allowCreate={true}
+          fastField={true}
+        />
       </FFormGroup>
 
       <CompoundFormGroup name={'is_compound'} fastField={true}>

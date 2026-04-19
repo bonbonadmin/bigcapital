@@ -186,6 +186,41 @@ export class ExpenseResponseDto {
   withholdingTaxAmount?: number;
 
   @ApiProperty({
+    example: 1,
+    description: 'The sales tax rate id applied to this expense',
+    required: false,
+  })
+  salesTaxRateId?: number;
+
+  @ApiProperty({
+    example: 'VAT In',
+    description: 'The sales tax name snapshot applied to this expense',
+    required: false,
+  })
+  salesTaxName?: string;
+
+  @ApiProperty({
+    example: 11,
+    description: 'The sales tax rate snapshot applied to this expense',
+    required: false,
+  })
+  salesTaxRate?: number;
+
+  @ApiProperty({
+    example: 1201,
+    description: 'The sales tax account snapshot applied to this expense',
+    required: false,
+  })
+  salesTaxAccountId?: number;
+
+  @ApiProperty({
+    example: 110,
+    description: 'The sales tax amount applied to this expense',
+    required: false,
+  })
+  salesTaxAmount?: number;
+
+  @ApiProperty({
     example: 0,
     description: 'The invoiced amount of the expense',
   })

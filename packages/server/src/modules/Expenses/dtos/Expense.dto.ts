@@ -173,6 +173,16 @@ export class CommandExpenseDto {
   })
   withholdingTaxId?: number;
 
+  @ToNumber()
+  @IsInt()
+  @IsOptional()
+  @ApiProperty({
+    description: 'The sales tax rate id applied to the expense',
+    example: 1,
+    required: false,
+  })
+  salesTaxRateId?: number;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ExpenseCategoryDto)

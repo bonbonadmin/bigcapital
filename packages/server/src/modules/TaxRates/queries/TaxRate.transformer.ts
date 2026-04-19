@@ -7,7 +7,7 @@ export class TaxRateTransformer extends Transformer {
    * @returns {Array}
    */
   public includeAttributes = (): string[] => {
-    return ['nameFormatted', 'rateFormatted'];
+    return ['nameFormatted', 'rateFormatted', 'accountName'];
   };
 
   /**
@@ -26,5 +26,9 @@ export class TaxRateTransformer extends Transformer {
    */
   protected nameFormatted = (taxRate: TaxRateModel): string => {
     return `${taxRate.name} [${taxRate.rate}%]`;
+  };
+
+  protected accountName = (taxRate: any): string | null => {
+    return taxRate.account?.name || null;
   };
 }

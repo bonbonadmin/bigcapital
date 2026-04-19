@@ -43,6 +43,7 @@ export const defaultExpense = {
   expense_mode: 'paid',
   payment_account_id: '',
   payable_account_id: '',
+  sales_tax_rate_id: '',
   withholding_tax_id: '',
   payee_id: '',
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
@@ -151,6 +152,7 @@ export const transformFormValuesToRequest = (values) => {
     ...R.omit(['expense_mode'], values),
     payment_account_id: isPayableExpense ? null : values.payment_account_id,
     payable_account_id: isPayableExpense ? values.payable_account_id : null,
+    sales_tax_rate_id: isPayableExpense ? values.sales_tax_rate_id || null : null,
     withholding_tax_id: isPayableExpense ? values.withholding_tax_id || null : null,
     payee_id: isPayableExpense ? values.payee_id : null,
     categories: R.compose(orderingLinesIndexes)(categories),
@@ -205,8 +207,38 @@ export const useExpenseSubtotalFormatted = () => {
  */
 export const useExpenseTotal = () => {
   const subtotal = useExpenseSubtotal();
+  const salesTaxAmount = useExpenseSalesTaxAmount();
 
-  return subtotal;
+  return subtotal + salesTaxAmount;
+};
+
+export const useExpenseSalesTaxAmount = () => {
+  const subtotal = useExpenseSubtotal();
+  const { values } = useFormikContext();
+  const { taxRates } = useExpenseFormContext();
+
+  return React.useMemo(() => {
+    if (values.expense_mode !== 'payable' || !values.sales_tax_rate_id) {
+      return 0;
+    }
+    const salesTaxRate = taxRates.find(
+      (taxRate) => String(taxRate.id) === String(values.sales_tax_rate_id),
+    );
+
+    if (!salesTaxRate) {
+      return 0;
+    }
+    return (subtotal * (Number(salesTaxRate.rate) || 0)) / 100;
+  }, [subtotal, values.expense_mode, values.sales_tax_rate_id, taxRates]);
+};
+
+export const useExpenseSalesTaxAmountFormatted = () => {
+  const salesTaxAmount = useExpenseSalesTaxAmount();
+  const {
+    values: { currency_code },
+  } = useFormikContext();
+
+  return formattedAmount(salesTaxAmount, currency_code);
 };
 
 export const useExpenseWithholdingTaxAmount = () => {

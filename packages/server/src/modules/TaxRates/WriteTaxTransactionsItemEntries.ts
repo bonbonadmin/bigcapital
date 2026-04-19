@@ -41,6 +41,7 @@ export class WriteTaxTransactionsItemEntries {
       referenceType: entry.referenceType,
       referenceId: entry.referenceId,
       rate: entry.taxRate || (taxRatesById[entry.taxRateId]?.rate as number),
+      taxAccountId: taxRatesById[entry.taxRateId]?.accountId || null,
     }));
     await this.taxRateTransactionModel()
       .query(trx)

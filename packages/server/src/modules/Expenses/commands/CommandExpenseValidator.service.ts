@@ -145,6 +145,18 @@ export class CommandExpenseValidator {
   }
 
   /**
+   * Validates sales tax is only used for payable expenses.
+   */
+  public validateSalesTaxExpense(
+    payableAccountId?: number,
+    salesTaxRateId?: number,
+  ) {
+    if (salesTaxRateId && !payableAccountId) {
+      throw new ServiceError(ERRORS.SALES_TAX_ONLY_SUPPORTED_FOR_PAYABLE_EXPENSES);
+    }
+  }
+
+  /**
    * Validates the withholding tax account type.
    */
   public validateWithholdingTaxAccountType(withholdingTaxAccount: Account) {
@@ -157,14 +169,27 @@ export class CommandExpenseValidator {
   }
 
   /**
+   * Validates the sales tax account type.
+   */
+  public validateSalesTaxAccountType(salesTaxAccount: Account) {
+    if (
+      !salesTaxAccount.isRootType(ACCOUNT_ROOT_TYPE.ASSET) &&
+      !salesTaxAccount.isRootType(ACCOUNT_ROOT_TYPE.LIABILITY)
+    ) {
+      throw new ServiceError(ERRORS.SALES_TAX_ACCOUNT_HAS_INVALID_TYPE);
+    }
+  }
+
+  /**
    * Validates current payment amount does not exceed the expense amount.
    */
   public validateExistingPaymentAmount(
     totalAmount: number,
     paymentAmount: number,
     withholdingTaxAmount: number = 0,
+    salesTaxAmount: number = 0,
   ) {
-    if (paymentAmount + withholdingTaxAmount > totalAmount) {
+    if (paymentAmount + withholdingTaxAmount > totalAmount + salesTaxAmount) {
       throw new ServiceError(ERRORS.EXPENSE_PAYMENT_TOTAL_EXCEEDS_AMOUNT);
     }
   }

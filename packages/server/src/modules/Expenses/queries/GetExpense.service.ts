@@ -25,6 +25,7 @@ export class GetExpenseService {
       .withGraphFetched('categories.expenseAccount')
       .withGraphFetched('paymentAccount')
       .withGraphFetched('payableAccount')
+      .withGraphFetched('salesTaxAccount')
       .withGraphFetched('withholdingTaxAccount')
       .withGraphFetched('branch')
       .withGraphFetched('attachments')

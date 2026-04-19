@@ -13,6 +13,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { events } from '@/common/events/events';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CreateExpenseDto } from '../dtos/Expense.dto';
+import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { Vendor } from '@/modules/Vendors/models/Vendor';
 import { ServiceError } from '@/modules/Items/ServiceError';
 import { ERRORS } from '../constants';
@@ -40,6 +41,9 @@ export class CreateExpense {
     @Inject(Vendor.name)
     private readonly vendorModel: TenantModelProxy<typeof Vendor>,
 
+    @Inject(TaxRateModel.name)
+    private readonly taxRateModel: TenantModelProxy<typeof TaxRateModel>,
+
     @Inject(WithholdingTax.name)
     private readonly withholdingTaxModel: TenantModelProxy<typeof WithholdingTax>,
 
@@ -51,7 +55,11 @@ export class CreateExpense {
    * Authorize before create a new expense transaction.
    * @param {IExpenseDTO} expenseDTO
    */
-  private authorize = async (expenseDTO: CreateExpenseDto, withholdingTaxSnapshot) => {
+  private authorize = async (
+    expenseDTO: CreateExpenseDto,
+    salesTaxSnapshot,
+    withholdingTaxSnapshot,
+  ) => {
     if (expenseDTO.payeeId) {
       await this.vendorModel()
         .query()
@@ -66,6 +74,10 @@ export class CreateExpense {
     this.validator.validateWithholdingTaxExpense(
       expenseDTO.payableAccountId,
       withholdingTaxSnapshot?.withholdingTaxId,
+    );
+    this.validator.validateSalesTaxExpense(
+      expenseDTO.payableAccountId,
+      salesTaxSnapshot?.salesTaxRateId,
     );
 
     if (expenseDTO.paymentAccountId) {
@@ -99,6 +111,19 @@ export class CreateExpense {
         .throwIfNotFound();
 
       this.validator.validateWithholdingTaxAccountType(withholdingTaxAccount);
+    }
+
+    if (salesTaxSnapshot?.salesTaxRateId) {
+      const salesTaxRate = await this.taxRateModel()
+        .query()
+        .findById(salesTaxSnapshot.salesTaxRateId)
+        .throwIfNotFound();
+      const salesTaxAccount = await this.accountModel()
+        .query()
+        .findById(salesTaxRate.accountId)
+        .throwIfNotFound();
+
+      this.validator.validateSalesTaxAccountType(salesTaxAccount);
     }
 
     // Retrieves the DTO expense accounts ids.
@@ -139,15 +164,18 @@ export class CreateExpense {
     expenseDTO: CreateExpenseDto,
     trx?: Knex.Transaction,
   ): Promise<Expense> => {
+    const salesTaxSnapshot =
+      await this.transformDTO.resolveSalesTaxSnapshot(expenseDTO);
     const withholdingTaxSnapshot =
       await this.transformDTO.resolveWithholdingTaxSnapshot(expenseDTO);
 
     // Authorize before create a new expense.
-    await this.authorize(expenseDTO, withholdingTaxSnapshot);
+    await this.authorize(expenseDTO, salesTaxSnapshot, withholdingTaxSnapshot);
 
     // Save the expense to the storage.
     const expenseObj = await this.transformDTO.expenseCreateDTO(
       expenseDTO,
+      salesTaxSnapshot,
       withholdingTaxSnapshot,
     );
 

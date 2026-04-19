@@ -11,6 +11,7 @@ import {
   useBranches,
   useCreateExpense,
   useEditExpense,
+  useTaxRates,
   useVendors,
   useWithholdingTaxes,
 } from '@/hooks/query';
@@ -57,6 +58,11 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
   } = useProjects({}, { enabled: !!isProjectsFeatureCan });
 
   const {
+    data: taxRates,
+    isLoading: isTaxRatesLoading,
+  } = useTaxRates();
+
+  const {
     data: withholdingTaxes,
     isLoading: isWithholdingTaxesLoading,
   } = useWithholdingTaxes();
@@ -92,6 +98,7 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
     accounts,
     branches,
     projects,
+    taxRates,
     withholdingTaxes,
 
     isCurrenciesLoading,
@@ -99,6 +106,7 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
     isVendorsLoading,
     isAccountsLoading,
     isBranchesSuccess,
+    isTaxRatesLoading,
     isWithholdingTaxesLoading,
 
     createExpenseMutate,
@@ -114,6 +122,7 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
         isVendorsLoading ||
         isAccountsLoading ||
         isProjectsLoading ||
+        isTaxRatesLoading ||
         isWithholdingTaxesLoading
       }
       name={'expense-form'}

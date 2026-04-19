@@ -31,6 +31,7 @@ export class ExpenseGLEntriesService {
       .withGraphFetched('categories')
       .withGraphFetched('paymentAccount')
       .withGraphFetched('payableAccount')
+      .withGraphFetched('salesTaxAccount')
       .withGraphFetched('withholdingTaxAccount')
       .throwIfNotFound();
 

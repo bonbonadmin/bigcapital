@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
+  IsInt,
   IsNumber,
   IsNotEmpty,
   IsOptional,
@@ -48,6 +49,18 @@ export class CommandTaxRateDto {
     example: 'VAT',
   })
   description?: string;
+
+  /**
+   * Tax rate account.
+   */
+  @IsInt()
+  @IsNotEmpty()
+  @ToNumber()
+  @ApiProperty({
+    description: 'The account associated with the tax rate.',
+    example: 1201,
+  })
+  accountId: number;
 
   /**
    * Whether the tax is non-recoverable.

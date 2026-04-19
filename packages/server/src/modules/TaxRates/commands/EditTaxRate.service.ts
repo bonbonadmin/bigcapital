@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Knex } from 'knex';
 import { omit } from 'lodash';
+import { ACCOUNT_ROOT_TYPE } from '@/constants/accounts';
+import { Account } from '@/modules/Accounts/models/Account.model';
 import {
   IEditTaxRateDTO,
   ITaxRateEditedPayload,
@@ -13,6 +15,11 @@ import { events } from '@/common/events/events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { EditTaxRateDto } from '../dtos/TaxRate.dto';
+import { ServiceError } from '@/modules/Items/ServiceError';
+
+const ERRORS = {
+  TAX_RATE_ACCOUNT_INVALID_TYPE: 'TAX_RATE_ACCOUNT_INVALID_TYPE',
+};
 
 @Injectable()
 export class EditTaxRateService {
@@ -27,9 +34,26 @@ export class EditTaxRateService {
     private readonly uow: UnitOfWork,
     private readonly validators: CommandTaxRatesValidators,
 
+    @Inject(Account.name)
+    private readonly accountModel: TenantModelProxy<typeof Account>,
+
     @Inject(TaxRateModel.name)
     private readonly taxRateModel: TenantModelProxy<typeof TaxRateModel>,
   ) {}
+
+  private async validateAccount(accountId: number, trx?: Knex.Transaction) {
+    const account = await this.accountModel()
+      .query(trx)
+      .findById(accountId)
+      .throwIfNotFound();
+
+    if (
+      !account.isRootType(ACCOUNT_ROOT_TYPE.ASSET) &&
+      !account.isRootType(ACCOUNT_ROOT_TYPE.LIABILITY)
+    ) {
+      throw new ServiceError(ERRORS.TAX_RATE_ACCOUNT_INVALID_TYPE);
+    }
+  }
 
   /**
    * Determines whether the tax rate, name or code have been changed.
@@ -44,7 +68,8 @@ export class EditTaxRateService {
     return (
       taxRate.rate !== editTaxRateDTO.rate ||
       taxRate.name !== editTaxRateDTO.name ||
-      taxRate.code !== editTaxRateDTO.code
+      taxRate.code !== editTaxRateDTO.code ||
+      Number(taxRate.accountId || 0) !== Number(editTaxRateDTO.accountId || 0)
     );
   };
 
@@ -96,6 +121,7 @@ export class EditTaxRateService {
 
     // Validates the tax rate existance.
     this.validators.validateTaxRateExistance(oldTaxRate);
+    await this.validateAccount(editTaxRateDTO.accountId);
 
     return this.uow.withTransaction(async (trx: Knex.Transaction) => {
       // Triggers `onTaxRateEditing` event.

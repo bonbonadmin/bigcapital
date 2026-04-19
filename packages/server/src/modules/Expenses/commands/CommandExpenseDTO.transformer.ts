@@ -8,6 +8,7 @@ import { Expense } from '../models/Expense.model';
 import { assocItemEntriesDefaultIndex } from '@/utils/associate-item-entries-index';
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { CreateExpenseDto, EditExpenseDto } from '../dtos/Expense.dto';
+import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { WithholdingTax } from '@/modules/WithholdingTaxes/models/WithholdingTax.model';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 
@@ -21,9 +22,36 @@ export class ExpenseDTOTransformer {
     private readonly branchDTOTransform: BranchTransactionDTOTransformer,
     private readonly tenancyContext: TenancyContext,
 
+    @Inject(TaxRateModel.name)
+    private readonly taxRateModel: TenantModelProxy<typeof TaxRateModel>,
+
     @Inject(WithholdingTax.name)
     private readonly withholdingTaxModel: TenantModelProxy<typeof WithholdingTax>,
   ) {}
+
+  public resolveSalesTaxSnapshot = async (
+    expenseDTO: CreateExpenseDto | EditExpenseDto,
+  ) => {
+    if (!expenseDTO.salesTaxRateId) {
+      return null;
+    }
+    const salesTaxRate = await this.taxRateModel()
+      .query()
+      .findById(expenseDTO.salesTaxRateId)
+      .throwIfNotFound();
+
+    const totalAmount = this.getExpenseCategoriesTotal(expenseDTO.categories);
+    const rate = Number(salesTaxRate.rate) || 0;
+    const amount = Number(((totalAmount * rate) / 100).toFixed(3));
+
+    return {
+      salesTaxRateId: salesTaxRate.id,
+      salesTaxName: salesTaxRate.name,
+      salesTaxRate: rate,
+      salesTaxAccountId: salesTaxRate.accountId,
+      salesTaxAmount: amount,
+    };
+  };
 
   public resolveWithholdingTaxSnapshot = async (
     expenseDTO: CreateExpenseDto | EditExpenseDto,
@@ -80,11 +108,14 @@ export class ExpenseDTOTransformer {
    */
   private async expenseDTOToModel(
     expenseDTO: CreateExpenseDto | EditExpenseDto,
+    salesTaxSnapshot = null,
     withholdingTaxSnapshot = null,
   ): Promise<Expense> {
     const landedCostAmount = this.getExpenseLandedCostAmount(expenseDTO);
     const totalAmount = this.getExpenseCategoriesTotal(expenseDTO.categories);
     const isPayableExpense = Boolean(expenseDTO.payableAccountId);
+    const resolvedSalesTaxSnapshot =
+      salesTaxSnapshot || (await this.resolveSalesTaxSnapshot(expenseDTO));
     const resolvedWithholdingTaxSnapshot =
       withholdingTaxSnapshot ||
       (await this.resolveWithholdingTaxSnapshot(expenseDTO));
@@ -99,7 +130,16 @@ export class ExpenseDTOTransformer {
       categories,
       totalAmount,
       landedCostAmount,
-      paymentAmount: isPayableExpense ? 0 : totalAmount,
+      paymentAmount: isPayableExpense
+        ? 0
+        : totalAmount + (resolvedSalesTaxSnapshot?.salesTaxAmount || 0),
+      ...(resolvedSalesTaxSnapshot || {
+        salesTaxRateId: null,
+        salesTaxName: null,
+        salesTaxRate: null,
+        salesTaxAccountId: null,
+        salesTaxAmount: 0,
+      }),
       ...(resolvedWithholdingTaxSnapshot || {
         withholdingTaxId: null,
         withholdingTaxName: null,
@@ -132,10 +172,12 @@ export class ExpenseDTOTransformer {
    */
   public expenseCreateDTO = async (
     expenseDTO: CreateExpenseDto | EditExpenseDto,
+    salesTaxSnapshot = null,
     withholdingTaxSnapshot = null,
   ): Promise<Partial<Expense>> => {
     const initialDTO = await this.expenseDTOToModel(
       expenseDTO,
+      salesTaxSnapshot,
       withholdingTaxSnapshot,
     );
     const tenant = await this.tenancyContext.getTenant(true);
@@ -159,8 +201,13 @@ export class ExpenseDTOTransformer {
    */
   public expenseEditDTO = async (
     expenseDTO: EditExpenseDto,
+    salesTaxSnapshot = null,
     withholdingTaxSnapshot = null,
   ): Promise<Expense> => {
-    return this.expenseDTOToModel(expenseDTO, withholdingTaxSnapshot);
+    return this.expenseDTOToModel(
+      expenseDTO,
+      salesTaxSnapshot,
+      withholdingTaxSnapshot,
+    );
   };
 }
