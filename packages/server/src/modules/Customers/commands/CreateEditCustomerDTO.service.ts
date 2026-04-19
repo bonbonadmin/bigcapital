@@ -20,9 +20,17 @@ export class CreateEditCustomerDTO {
   private transformCommonDTO = (
     customerDTO: ICustomerNewDTO | ICustomerEditDTO,
   ) => {
+    const normalizedCode =
+      typeof customerDTO.code === 'string'
+        ? customerDTO.code.trim() || null
+        : customerDTO.code;
+
     return {
       ...omit(customerDTO, ['customerType']),
       contactType: customerDTO.customerType,
+      ...(typeof customerDTO.code !== 'undefined'
+        ? { code: normalizedCode }
+        : {}),
     };
   };
 

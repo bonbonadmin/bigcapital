@@ -20,8 +20,16 @@ export class CreateEditVendorDTOService {
    * @returns {IVendorNewDTO | IVendorEditDTO}
    */
   private transformCommonDTO = (vendorDTO: IVendorNewDTO | IVendorEditDTO) => {
+    const normalizedCode =
+      typeof vendorDTO.code === 'string'
+        ? vendorDTO.code.trim() || null
+        : vendorDTO.code;
+
     return {
       ...vendorDTO,
+      ...(typeof vendorDTO.code !== 'undefined'
+        ? { code: normalizedCode }
+        : {}),
     };
   };
 

@@ -508,7 +508,7 @@ function CombinedPaymentEntriesTable({ entries, onUpdateData, isLoading }) {
         payload={{
           errors: errors?.entries || [],
           updateData: handleUpdateData,
-          currencyCode,
+          currencyCode: currency_code,
         }}
         noResults={noResultsMessage}
       />
