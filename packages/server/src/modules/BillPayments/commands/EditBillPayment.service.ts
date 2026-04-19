@@ -59,6 +59,12 @@ export class EditBillPayment {
       .findById(billPaymentId)
       .withGraphFetched('entries')
       .throwIfNotFound();
+    const oldBillPaymentSnapshot = {
+      ...oldBillPayment,
+      entries: (oldBillPayment.entries || []).map((entry) => ({
+        ...entry,
+      })),
+    } as BillPayment;
 
     const vendor = await this.vendorModel()
       .query()
@@ -93,7 +99,7 @@ export class EditBillPayment {
     // Validates the bills due payment amount.
     await this.validators.validateBillsDueAmount(
       billPaymentObj.entries,
-      oldBillPayment.entries,
+      oldBillPaymentSnapshot.entries,
     );
     // Validate the payment number uniquiness.
     if (billPaymentObj.paymentNumber) {
@@ -113,24 +119,29 @@ export class EditBillPayment {
     return this.uow.withTransaction(async (trx: Knex.Transaction) => {
       // Triggers `onBillPaymentEditing` event.
       await this.eventPublisher.emitAsync(events.billPayment.onEditing, {
-        oldBillPayment,
+        oldBillPayment: oldBillPaymentSnapshot,
         billPaymentDTO,
         trx,
       } as IBillPaymentEditingPayload);
 
       // Edits the bill payment transaction graph on the storage.
-      const billPayment = await this.billPaymentModel()
+      await this.billPaymentModel()
         .query(trx)
-        .upsertGraphAndFetch({
+        .upsertGraph({
           id: billPaymentId,
           ...billPaymentObj,
         });
+      const billPayment = await this.billPaymentModel()
+        .query(trx)
+        .withGraphFetched('entries')
+        .findById(billPaymentId)
+        .throwIfNotFound();
 
       // Triggers `onBillPaymentEdited` event.
       await this.eventPublisher.emitAsync(events.billPayment.onEdited, {
         billPaymentId,
         billPayment,
-        oldBillPayment,
+        oldBillPayment: oldBillPaymentSnapshot,
         billPaymentDTO,
         trx,
       } as IBillPaymentEventEditedPayload);
