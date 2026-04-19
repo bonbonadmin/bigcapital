@@ -17,6 +17,8 @@ export class ExpensePayment extends TenantBaseModel {
   statement?: string;
   exchangeRate: number;
   branchId?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 
   entries?: ExpensePaymentEntry[];
   vendor?: Vendor;

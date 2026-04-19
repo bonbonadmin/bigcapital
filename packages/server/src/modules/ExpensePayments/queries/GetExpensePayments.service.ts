@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import type { OrderByDirection } from 'objection';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { ExpensePayment } from '../models/ExpensePayment';
 import { GetExpensePaymentsFilterDto } from '../dtos/GetExpensePaymentsFilter.dto';
@@ -26,7 +27,7 @@ export class GetExpensePaymentsService {
     const pageSize = filterDTO.pageSize || 12;
     const sortField =
       SORT_FIELDS[filterDTO.columnSortBy] || SORT_FIELDS.created_at;
-    const sortOrder = filterDTO.sortOrder || 'desc';
+    const sortOrder: OrderByDirection = filterDTO.sortOrder || 'desc';
 
     const query = this.expensePaymentModel()
       .query()

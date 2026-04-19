@@ -8,7 +8,7 @@ export class GetExpensePaymentsFilterDto {
 
   @IsOptional()
   @IsIn(['desc', 'asc'])
-  readonly sortOrder?: string;
+  readonly sortOrder?: 'desc' | 'asc';
 
   @IsOptional()
   @IsNumber()
