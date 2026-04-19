@@ -16,6 +16,7 @@ import { EditExpenseDto } from '../dtos/Expense.dto';
 import { Vendor } from '@/modules/Vendors/models/Vendor';
 import { ERRORS } from '../constants';
 import { ServiceError } from '@/modules/Items/ServiceError';
+import { WithholdingTax } from '@/modules/WithholdingTaxes/models/WithholdingTax.model';
 
 @Injectable()
 export class EditExpense {
@@ -40,6 +41,9 @@ export class EditExpense {
 
     @Inject(Vendor.name)
     private vendorModel: TenantModelProxy<typeof Vendor>,
+
+    @Inject(WithholdingTax.name)
+    private readonly withholdingTaxModel: TenantModelProxy<typeof WithholdingTax>,
   ) {}
 
   /**
@@ -49,6 +53,7 @@ export class EditExpense {
   public authorize = async (
     oldExpense: Expense,
     expenseDTO: EditExpenseDto,
+    withholdingTaxSnapshot,
   ) => {
     if (expenseDTO.payeeId) {
       await this.vendorModel()
@@ -60,6 +65,10 @@ export class EditExpense {
     this.validator.validatePayableExpenseVendor(
       expenseDTO.payableAccountId,
       expenseDTO.payeeId,
+    );
+    this.validator.validateWithholdingTaxExpense(
+      expenseDTO.payableAccountId,
+      withholdingTaxSnapshot?.withholdingTaxId,
     );
 
     if (expenseDTO.paymentAccountId) {
@@ -80,6 +89,19 @@ export class EditExpense {
         .throwIfNotFound();
 
       await this.validator.validatePayableAccountType(payableAccount);
+    }
+
+    if (withholdingTaxSnapshot?.withholdingTaxId) {
+      const withholdingTax = await this.withholdingTaxModel()
+        .query()
+        .findById(withholdingTaxSnapshot.withholdingTaxId)
+        .throwIfNotFound();
+      const withholdingTaxAccount = await this.accountModel()
+        .query()
+        .findById(withholdingTax.accountId)
+        .throwIfNotFound();
+
+      this.validator.validateWithholdingTaxAccountType(withholdingTaxAccount);
     }
 
     // Retrieves the DTO expense accounts ids.
@@ -105,6 +127,7 @@ export class EditExpense {
         0,
       ),
       oldExpense.paymentAmount || 0,
+      withholdingTaxSnapshot?.withholdingTaxAmount || 0,
     );
 
     if (
@@ -120,6 +143,17 @@ export class EditExpense {
       oldExpense.payeeId !== expenseDTO.payeeId
     ) {
       throw new ServiceError(ERRORS.EXPENSE_PAYEE_SHOULD_NOT_MODIFY);
+    }
+    if (
+      oldExpense.paymentAmount > 0 &&
+      ((oldExpense.withholdingTaxId || null) !==
+        (withholdingTaxSnapshot?.withholdingTaxId || null) ||
+        Number(oldExpense.withholdingTaxRate || 0) !==
+          Number(withholdingTaxSnapshot?.withholdingTaxRate || 0) ||
+        Number(oldExpense.withholdingTaxAccountId || 0) !==
+          Number(withholdingTaxSnapshot?.withholdingTaxAccountId || 0))
+    ) {
+      throw new ServiceError(ERRORS.EXPENSE_WITHHOLDING_TAX_SHOULD_NOT_MODIFY);
     }
 
     // Validate expense entries that have allocated landed cost cannot be deleted.
@@ -160,11 +194,17 @@ export class EditExpense {
       .withGraphFetched('categories')
       .throwIfNotFound();
 
+    const withholdingTaxSnapshot =
+      await this.transformDTO.resolveWithholdingTaxSnapshot(expenseDTO);
+
     // Authorize expense DTO before editing.
-    await this.authorize(oldExpense, expenseDTO);
+    await this.authorize(oldExpense, expenseDTO, withholdingTaxSnapshot);
 
     // Update the expense on the storage.
-    const expenseObj = await this.transformDTO.expenseEditDTO(expenseDTO);
+    const expenseObj = await this.transformDTO.expenseEditDTO(
+      expenseDTO,
+      withholdingTaxSnapshot,
+    );
 
     // Edits expense transactions and associated transactions under UOW envirement.
     return this.uow.withTransaction(async (trx: Knex.Transaction) => {

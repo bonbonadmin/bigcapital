@@ -43,6 +43,7 @@ export const defaultExpense = {
   expense_mode: 'paid',
   payment_account_id: '',
   payable_account_id: '',
+  withholding_tax_id: '',
   payee_id: '',
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
   description: '',
@@ -150,6 +151,7 @@ export const transformFormValuesToRequest = (values) => {
     ...R.omit(['expense_mode'], values),
     payment_account_id: isPayableExpense ? null : values.payment_account_id,
     payable_account_id: isPayableExpense ? values.payable_account_id : null,
+    withholding_tax_id: isPayableExpense ? values.withholding_tax_id || null : null,
     payee_id: isPayableExpense ? values.payee_id : null,
     categories: R.compose(orderingLinesIndexes)(categories),
     attachments,
@@ -205,6 +207,40 @@ export const useExpenseTotal = () => {
   const subtotal = useExpenseSubtotal();
 
   return subtotal;
+};
+
+export const useExpenseWithholdingTaxAmount = () => {
+  const subtotal = useExpenseSubtotal();
+  const { values } = useFormikContext();
+  const { withholdingTaxes } = useExpenseFormContext();
+
+  return React.useMemo(() => {
+    if (values.expense_mode !== 'payable' || !values.withholding_tax_id) {
+      return 0;
+    }
+    const withholdingTax = withholdingTaxes.find(
+      (tax) => String(tax.id) === String(values.withholding_tax_id),
+    );
+
+    if (!withholdingTax) {
+      return 0;
+    }
+    return (subtotal * (Number(withholdingTax.rate) || 0)) / 100;
+  }, [
+    subtotal,
+    values.expense_mode,
+    values.withholding_tax_id,
+    withholdingTaxes,
+  ]);
+};
+
+export const useExpenseWithholdingTaxAmountFormatted = () => {
+  const withholdingTaxAmount = useExpenseWithholdingTaxAmount();
+  const {
+    values: { currency_code },
+  } = useFormikContext();
+
+  return formattedAmount(withholdingTaxAmount, currency_code);
 };
 
 /**

@@ -163,6 +163,16 @@ export class CommandExpenseDto {
   })
   branchId?: number;
 
+  @ToNumber()
+  @IsInt()
+  @IsOptional()
+  @ApiProperty({
+    description: 'The withholding tax id applied to the expense',
+    example: 1,
+    required: false,
+  })
+  withholdingTaxId?: number;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ExpenseCategoryDto)

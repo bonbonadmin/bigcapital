@@ -12,6 +12,7 @@ import {
   useCreateExpense,
   useEditExpense,
   useVendors,
+  useWithholdingTaxes,
 } from '@/hooks/query';
 import { useProjects } from '@/containers/Projects/hooks';
 
@@ -55,6 +56,11 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
     isLoading: isProjectsLoading,
   } = useProjects({}, { enabled: !!isProjectsFeatureCan });
 
+  const {
+    data: withholdingTaxes,
+    isLoading: isWithholdingTaxesLoading,
+  } = useWithholdingTaxes();
+
   // Create and edit expense mutate.
   const { mutateAsync: createExpenseMutate } = useCreateExpense();
   const { mutateAsync: editExpenseMutate } = useEditExpense();
@@ -86,12 +92,14 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
     accounts,
     branches,
     projects,
+    withholdingTaxes,
 
     isCurrenciesLoading,
     isExpenseLoading,
     isVendorsLoading,
     isAccountsLoading,
     isBranchesSuccess,
+    isWithholdingTaxesLoading,
 
     createExpenseMutate,
     editExpenseMutate,
@@ -105,7 +113,8 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
         isExpenseLoading ||
         isVendorsLoading ||
         isAccountsLoading ||
-        isProjectsLoading
+        isProjectsLoading ||
+        isWithholdingTaxesLoading
       }
       name={'expense-form'}
       className={css`

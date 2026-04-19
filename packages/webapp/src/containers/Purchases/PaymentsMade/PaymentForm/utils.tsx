@@ -105,12 +105,19 @@ export const transformFormToRequest = (form) => {
   const entries = form.entries
     .filter((item) => item.bill_id && item.payment_amount)
     .map((entry) => ({
-      ...pick(entry, ['payment_amount', 'bill_id']),
+      bill_id: entry.bill_id,
+      payment_amount: Number(entry.payment_amount),
     }));
 
   const attachments = transformAttachmentsToRequest(form);
 
-  return { ...form, entries: orderingLinesIndexes(entries), attachments };
+  return {
+    ...form,
+    amount: form.amount ? Number(form.amount) : undefined,
+    exchange_rate: form.exchange_rate ? Number(form.exchange_rate) : undefined,
+    entries: orderingLinesIndexes(entries),
+    attachments,
+  };
 };
 
 export const useSetPrimaryBranchToForm = () => {

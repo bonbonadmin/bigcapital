@@ -54,7 +54,7 @@ export class ExpenseGL {
 
     return {
       ...commonEntry,
-      credit: this.expense.localAmount,
+      credit: this.expense.localAmount - this.expense.withholdingTaxAmountLocal,
       accountId,
       ...(this.expense.payeeId &&
       settlementAccount?.isAccountType(ACCOUNT_TYPE.ACCOUNTS_PAYABLE)
@@ -70,6 +70,29 @@ export class ExpenseGL {
     };
   };
 
+  private getExpenseGLWithholdingTaxEntry = (): ILedgerEntry | null => {
+    if (
+      !this.expense.withholdingTaxAmount ||
+      !this.expense.withholdingTaxAccountId
+    ) {
+      return null;
+    }
+    const commonEntry = this.getExpenseGLCommonEntry();
+    const withholdingTaxAccount = this.expense.withholdingTaxAccount;
+
+    return {
+      ...commonEntry,
+      credit: this.expense.withholdingTaxAmountLocal,
+      accountId: this.expense.withholdingTaxAccountId,
+      accountNormal:
+        withholdingTaxAccount?.accountNormal === 'debit'
+          ? AccountNormal.DEBIT
+          : AccountNormal.CREDIT,
+      note: this.expense.withholdingTaxName || undefined,
+      index: 2,
+    };
+  };
+
   /**
    * Retrieves the expense GL category entry.
    * @param {ExpenseCategory} category - Expense category.
@@ -77,7 +100,7 @@ export class ExpenseGL {
    * @returns {ILedgerEntry}
    */
   private getExpenseGLCategoryEntry = R.curry(
-    (category: ExpenseCategory, index: number): ILedgerEntry => {
+    (category: ExpenseCategory, index: number, startIndex: number): ILedgerEntry => {
       const commonEntry = this.getExpenseGLCommonEntry();
       const localAmount = category.amount * this.expense.exchangeRate;
 
@@ -87,7 +110,7 @@ export class ExpenseGL {
         accountNormal: AccountNormal.DEBIT,
         debit: localAmount,
         note: category.description,
-        index: index + 2,
+        index: index + startIndex,
         projectId: category.projectId,
       };
     },
@@ -101,10 +124,16 @@ export class ExpenseGL {
     const getCategoryEntry = this.getExpenseGLCategoryEntry();
 
     const paymentEntry = this.getExpenseGLPaymentEntry();
+    const withholdingTaxEntry = this.getExpenseGLWithholdingTaxEntry();
+    const categoryStartIndex = withholdingTaxEntry ? 3 : 2;
     const categoryEntries = this.expense.categories.map((category, index) =>
-      getCategoryEntry(category, index),
+      getCategoryEntry(category, index, categoryStartIndex),
     );
-    return [paymentEntry, ...categoryEntries];
+    return [
+      paymentEntry,
+      ...(withholdingTaxEntry ? [withholdingTaxEntry] : []),
+      ...categoryEntries,
+    ];
   };
 
   /**

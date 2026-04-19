@@ -244,6 +244,10 @@ export const TAX_RATES = {
   TAX_RATES: 'TAX_RATES',
 };
 
+export const WITHHOLDING_TAXES = {
+  WITHHOLDING_TAXES: 'WITHHOLDING_TAXES',
+};
+
 export const EXCHANGE_RATE = {
   EXCHANGE_RATE: 'EXCHANGE_RATE',
 };
@@ -287,6 +291,7 @@ export default {
   ...DASHBOARD,
   ...ORGANIZATION,
   ...TAX_RATES,
+  ...WITHHOLDING_TAXES,
   ...EXCHANGE_RATE,
   ...API_KEYS,
 };

@@ -131,10 +131,40 @@ export class CommandExpenseValidator {
   }
 
   /**
+   * Validates withholding tax is only used for payable expenses.
+   */
+  public validateWithholdingTaxExpense(
+    payableAccountId?: number,
+    withholdingTaxId?: number,
+  ) {
+    if (withholdingTaxId && !payableAccountId) {
+      throw new ServiceError(
+        ERRORS.WITHHOLDING_TAX_ONLY_SUPPORTED_FOR_PAYABLE_EXPENSES,
+      );
+    }
+  }
+
+  /**
+   * Validates the withholding tax account type.
+   */
+  public validateWithholdingTaxAccountType(withholdingTaxAccount: Account) {
+    if (
+      !withholdingTaxAccount.isRootType(ACCOUNT_ROOT_TYPE.ASSET) &&
+      !withholdingTaxAccount.isRootType(ACCOUNT_ROOT_TYPE.LIABILITY)
+    ) {
+      throw new ServiceError(ERRORS.WITHHOLDING_TAX_ACCOUNT_HAS_INVALID_TYPE);
+    }
+  }
+
+  /**
    * Validates current payment amount does not exceed the expense amount.
    */
-  public validateExistingPaymentAmount(totalAmount: number, paymentAmount: number) {
-    if (paymentAmount > totalAmount) {
+  public validateExistingPaymentAmount(
+    totalAmount: number,
+    paymentAmount: number,
+    withholdingTaxAmount: number = 0,
+  ) {
+    if (paymentAmount + withholdingTaxAmount > totalAmount) {
       throw new ServiceError(ERRORS.EXPENSE_PAYMENT_TOTAL_EXCEEDS_AMOUNT);
     }
   }

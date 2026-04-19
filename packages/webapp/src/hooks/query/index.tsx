@@ -40,3 +40,4 @@ export * from './warehousesTransfers';
 export * from './plaid';
 export * from './FinancialReports';
 export * from './apiKeys';
+export * from './withholdingTaxes';

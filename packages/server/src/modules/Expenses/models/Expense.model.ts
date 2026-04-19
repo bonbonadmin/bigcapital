@@ -25,6 +25,11 @@ export class Expense extends TenantBaseModel {
   description?: string;
   paymentAccountId!: number | null;
   payableAccountId!: number | null;
+  withholdingTaxId!: number | null;
+  withholdingTaxName!: string | null;
+  withholdingTaxRate!: number | null;
+  withholdingTaxAccountId!: number | null;
+  withholdingTaxAmount!: number | null;
   peyeeId!: number;
   referenceNo!: string;
   publishedAt!: Date | null;
@@ -41,6 +46,7 @@ export class Expense extends TenantBaseModel {
   categories!: ExpenseCategory[];
   paymentAccount!: Account;
   payableAccount!: Account;
+  withholdingTaxAccount!: Account;
   attachments!: Document[];
 
   /**
@@ -83,6 +89,7 @@ export class Expense extends TenantBaseModel {
       'isFullyPaid',
       'isPaid',
       'isOverPaid',
+      'withholdingTaxAmountLocal',
     ];
   }
 
@@ -92,6 +99,14 @@ export class Expense extends TenantBaseModel {
    */
   get localAmount() {
     return this.totalAmount * this.exchangeRate;
+  }
+
+  get withholdingTaxAmountLocal() {
+    return (Number(this.withholdingTaxAmount) || 0) * this.exchangeRate;
+  }
+
+  get settledAmount() {
+    return (Number(this.paymentAmount) || 0) + (Number(this.withholdingTaxAmount) || 0);
   }
 
   /**
@@ -147,9 +162,9 @@ export class Expense extends TenantBaseModel {
    */
   get dueAmount() {
     const totalAmount = Number(this.totalAmount) || 0;
-    const paymentAmount = Number(this.paymentAmount) || 0;
+    const settledAmount = Number(this.settledAmount) || 0;
 
-    return Math.max(totalAmount - paymentAmount, 0);
+    return Math.max(totalAmount - settledAmount, 0);
   }
 
   /**
@@ -158,9 +173,9 @@ export class Expense extends TenantBaseModel {
    */
   get overPaymentAmount() {
     const totalAmount = Number(this.totalAmount) || 0;
-    const paymentAmount = Number(this.paymentAmount) || 0;
+    const settledAmount = Number(this.settledAmount) || 0;
 
-    return Math.max(paymentAmount - totalAmount, 0);
+    return Math.max(settledAmount - totalAmount, 0);
   }
 
   /**
@@ -176,9 +191,9 @@ export class Expense extends TenantBaseModel {
    * @returns {boolean}
    */
   get isPartiallyPaid() {
-    const paymentAmount = Number(this.paymentAmount) || 0;
+    const settledAmount = Number(this.settledAmount) || 0;
 
-    return paymentAmount > 0 && this.dueAmount > 0;
+    return settledAmount > 0 && this.dueAmount > 0;
   }
 
   /**
@@ -187,9 +202,9 @@ export class Expense extends TenantBaseModel {
    */
   get isFullyPaid() {
     const totalAmount = Number(this.totalAmount) || 0;
-    const paymentAmount = Number(this.paymentAmount) || 0;
+    const settledAmount = Number(this.settledAmount) || 0;
 
-    return paymentAmount >= totalAmount;
+    return settledAmount >= totalAmount;
   }
 
   /**
@@ -205,9 +220,9 @@ export class Expense extends TenantBaseModel {
    * @returns {boolean}
    */
   get isPaid() {
-    const paymentAmount = Number(this.paymentAmount) || 0;
+    const settledAmount = Number(this.settledAmount) || 0;
 
-    return paymentAmount > 0;
+    return settledAmount > 0;
   }
 
   /**
@@ -289,24 +304,38 @@ export class Expense extends TenantBaseModel {
 
       dueExpenses(query) {
         query.where(
-          raw('COALESCE(TOTAL_AMOUNT, 0) - COALESCE(PAYMENT_AMOUNT, 0) > 0'),
+          raw(
+            'COALESCE(TOTAL_AMOUNT, 0) - COALESCE(PAYMENT_AMOUNT, 0) - COALESCE(WITHHOLDING_TAX_AMOUNT, 0) > 0',
+          ),
         );
       },
 
       unpaid(query) {
-        query.where('payment_amount', 0);
+        query.where(
+          raw(
+            'COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) = 0',
+          ),
+        );
       },
 
       partiallyPaid(query) {
-        query.whereNot('payment_amount', 0);
         query.where(
-          raw('COALESCE(PAYMENT_AMOUNT, 0) < COALESCE(TOTAL_AMOUNT, 0)'),
+          raw(
+            'COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) > 0',
+          ),
+        );
+        query.where(
+          raw(
+            'COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) < COALESCE(TOTAL_AMOUNT, 0)',
+          ),
         );
       },
 
       paid(query) {
         query.where(
-          raw('COALESCE(PAYMENT_AMOUNT, 0) >= COALESCE(TOTAL_AMOUNT, 0)'),
+          raw(
+            'COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) >= COALESCE(TOTAL_AMOUNT, 0)',
+          ),
         );
       },
 
@@ -327,6 +356,7 @@ export class Expense extends TenantBaseModel {
     const { ExpenseCategory } = require('./ExpenseCategory.model');
     const { Document } = require('../../ChromiumlyTenancy/models/Document');
     const { Branch } = require('../../Branches/models/Branch.model');
+    const { WithholdingTax } = require('../../WithholdingTaxes/models/WithholdingTax.model');
     const {
       MatchedBankTransaction,
     } = require('../../BankingMatching/models/MatchedBankTransaction');
@@ -349,6 +379,24 @@ export class Expense extends TenantBaseModel {
         modelClass: Account,
         join: {
           from: 'expenses_transactions.payableAccountId',
+          to: 'accounts.id',
+        },
+      },
+
+      withholdingTax: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: WithholdingTax,
+        join: {
+          from: 'expenses_transactions.withholdingTaxId',
+          to: 'withholding_taxes.id',
+        },
+      },
+
+      withholdingTaxAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'expenses_transactions.withholdingTaxAccountId',
           to: 'accounts.id',
         },
       },

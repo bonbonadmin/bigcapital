@@ -151,6 +151,41 @@ export class ExpenseResponseDto {
   paymentAmount: number;
 
   @ApiProperty({
+    example: 1,
+    description: 'The withholding tax ID applied to this expense',
+    required: false,
+  })
+  withholdingTaxId?: number;
+
+  @ApiProperty({
+    example: 'PPh 23',
+    description: 'The withholding tax name snapshot applied to this expense',
+    required: false,
+  })
+  withholdingTaxName?: string;
+
+  @ApiProperty({
+    example: 2,
+    description: 'The withholding tax rate snapshot applied to this expense',
+    required: false,
+  })
+  withholdingTaxRate?: number;
+
+  @ApiProperty({
+    example: 1201,
+    description: 'The withholding tax account snapshot applied to this expense',
+    required: false,
+  })
+  withholdingTaxAccountId?: number;
+
+  @ApiProperty({
+    example: 20,
+    description: 'The withholding tax amount applied to this expense',
+    required: false,
+  })
+  withholdingTaxAmount?: number;
+
+  @ApiProperty({
     example: 0,
     description: 'The invoiced amount of the expense',
   })

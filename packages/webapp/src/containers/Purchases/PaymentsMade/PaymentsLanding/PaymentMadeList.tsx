@@ -252,7 +252,7 @@ function PaymentMadeList({ openDrawer }) {
               className={Classes.MINIMAL}
               icon={<Icon icon={'plus'} />}
               text={<T id={'new_payment_made'} />}
-              onClick={() => history.push('/payments-made/new')}
+              onClick={() => history.push('/payment-list/payments-made/new')}
             />
           </Can>
         </NavbarGroup>

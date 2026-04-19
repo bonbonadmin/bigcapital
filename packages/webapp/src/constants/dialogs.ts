@@ -48,6 +48,7 @@ export enum DialogsName {
   ProjectBillableEntriesForm = 'project-billable-entries',
   InvoiceNumberSettings = 'InvoiceNumberSettings',
   TaxRateForm = 'tax-rate-form',
+  WithholdingTaxForm = 'withholding-tax-form',
   InvoiceExchangeRateChangeNotice = 'InvoiceExchangeRateChangeNotice',
   InvoiceBulkDelete = 'invoices-bulk-delete',
   EstimateBulkDelete = 'estimates-bulk-delete',

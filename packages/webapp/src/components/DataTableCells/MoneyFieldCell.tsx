@@ -44,7 +44,7 @@ const MoneyFieldCellRenderer = ({
         value={value}
         // prefix={'$'}
         onChange={handleFieldChange}
-        onBlur={handleFieldBlur}
+        onBlurValue={handleFieldBlur}
         {...moneyInputGroupProps}
       />
     </FormGroup>

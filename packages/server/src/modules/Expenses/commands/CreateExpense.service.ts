@@ -16,6 +16,7 @@ import { CreateExpenseDto } from '../dtos/Expense.dto';
 import { Vendor } from '@/modules/Vendors/models/Vendor';
 import { ServiceError } from '@/modules/Items/ServiceError';
 import { ERRORS } from '../constants';
+import { WithholdingTax } from '@/modules/WithholdingTaxes/models/WithholdingTax.model';
 
 @Injectable()
 export class CreateExpense {
@@ -39,6 +40,9 @@ export class CreateExpense {
     @Inject(Vendor.name)
     private readonly vendorModel: TenantModelProxy<typeof Vendor>,
 
+    @Inject(WithholdingTax.name)
+    private readonly withholdingTaxModel: TenantModelProxy<typeof WithholdingTax>,
+
     @Inject(Expense.name)
     private readonly expenseModel: TenantModelProxy<typeof Expense>,
   ) {}
@@ -47,7 +51,7 @@ export class CreateExpense {
    * Authorize before create a new expense transaction.
    * @param {IExpenseDTO} expenseDTO
    */
-  private authorize = async (expenseDTO: CreateExpenseDto) => {
+  private authorize = async (expenseDTO: CreateExpenseDto, withholdingTaxSnapshot) => {
     if (expenseDTO.payeeId) {
       await this.vendorModel()
         .query()
@@ -58,6 +62,10 @@ export class CreateExpense {
     this.validator.validatePayableExpenseVendor(
       expenseDTO.payableAccountId,
       expenseDTO.payeeId,
+    );
+    this.validator.validateWithholdingTaxExpense(
+      expenseDTO.payableAccountId,
+      withholdingTaxSnapshot?.withholdingTaxId,
     );
 
     if (expenseDTO.paymentAccountId) {
@@ -78,6 +86,19 @@ export class CreateExpense {
         .throwIfNotFound();
 
       this.validator.validatePayableAccountType(payableAccount);
+    }
+
+    if (withholdingTaxSnapshot?.withholdingTaxId) {
+      const withholdingTax = await this.withholdingTaxModel()
+        .query()
+        .findById(withholdingTaxSnapshot.withholdingTaxId)
+        .throwIfNotFound();
+      const withholdingTaxAccount = await this.accountModel()
+        .query()
+        .findById(withholdingTax.accountId)
+        .throwIfNotFound();
+
+      this.validator.validateWithholdingTaxAccountType(withholdingTaxAccount);
     }
 
     // Retrieves the DTO expense accounts ids.
@@ -118,11 +139,17 @@ export class CreateExpense {
     expenseDTO: CreateExpenseDto,
     trx?: Knex.Transaction,
   ): Promise<Expense> => {
+    const withholdingTaxSnapshot =
+      await this.transformDTO.resolveWithholdingTaxSnapshot(expenseDTO);
+
     // Authorize before create a new expense.
-    await this.authorize(expenseDTO);
+    await this.authorize(expenseDTO, withholdingTaxSnapshot);
 
     // Save the expense to the storage.
-    const expenseObj = await this.transformDTO.expenseCreateDTO(expenseDTO);
+    const expenseObj = await this.transformDTO.expenseCreateDTO(
+      expenseDTO,
+      withholdingTaxSnapshot,
+    );
 
     // Writes the expense transaction with associated transactions under
     // unit-of-work envirement.

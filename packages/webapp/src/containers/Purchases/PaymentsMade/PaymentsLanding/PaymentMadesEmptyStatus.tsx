@@ -23,7 +23,7 @@ export default function PaymentMadesEmptyStatus() {
               intent={Intent.PRIMARY}
               large={true}
               onClick={() => {
-                history.push('/payments-made/new');
+                history.push('/payment-list/payments-made/new');
               }}
             >
               <T id={'new_bill_payment'} />

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { omit, sumBy } from 'lodash';
 import * as moment from 'moment';
 import * as R from 'ramda';
@@ -8,6 +8,8 @@ import { Expense } from '../models/Expense.model';
 import { assocItemEntriesDefaultIndex } from '@/utils/associate-item-entries-index';
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { CreateExpenseDto, EditExpenseDto } from '../dtos/Expense.dto';
+import { WithholdingTax } from '@/modules/WithholdingTaxes/models/WithholdingTax.model';
+import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 
 @Injectable()
 export class ExpenseDTOTransformer {
@@ -18,7 +20,34 @@ export class ExpenseDTOTransformer {
   constructor(
     private readonly branchDTOTransform: BranchTransactionDTOTransformer,
     private readonly tenancyContext: TenancyContext,
+
+    @Inject(WithholdingTax.name)
+    private readonly withholdingTaxModel: TenantModelProxy<typeof WithholdingTax>,
   ) {}
+
+  public resolveWithholdingTaxSnapshot = async (
+    expenseDTO: CreateExpenseDto | EditExpenseDto,
+  ) => {
+    if (!expenseDTO.withholdingTaxId) {
+      return null;
+    }
+    const withholdingTax = await this.withholdingTaxModel()
+      .query()
+      .findById(expenseDTO.withholdingTaxId)
+      .throwIfNotFound();
+
+    const totalAmount = this.getExpenseCategoriesTotal(expenseDTO.categories);
+    const rate = Number(withholdingTax.rate) || 0;
+    const amount = Number(((totalAmount * rate) / 100).toFixed(3));
+
+    return {
+      withholdingTaxId: withholdingTax.id,
+      withholdingTaxName: withholdingTax.name,
+      withholdingTaxRate: rate,
+      withholdingTaxAccountId: withholdingTax.accountId,
+      withholdingTaxAmount: amount,
+    };
+  };
 
   /**
    * Retrieve the expense landed cost amount.
@@ -51,10 +80,14 @@ export class ExpenseDTOTransformer {
    */
   private async expenseDTOToModel(
     expenseDTO: CreateExpenseDto | EditExpenseDto,
+    withholdingTaxSnapshot = null,
   ): Promise<Expense> {
     const landedCostAmount = this.getExpenseLandedCostAmount(expenseDTO);
     const totalAmount = this.getExpenseCategoriesTotal(expenseDTO.categories);
     const isPayableExpense = Boolean(expenseDTO.payableAccountId);
+    const resolvedWithholdingTaxSnapshot =
+      withholdingTaxSnapshot ||
+      (await this.resolveWithholdingTaxSnapshot(expenseDTO));
 
     const categories = R.compose(
       // Associate the default index to categories lines.
@@ -67,6 +100,13 @@ export class ExpenseDTOTransformer {
       totalAmount,
       landedCostAmount,
       paymentAmount: isPayableExpense ? 0 : totalAmount,
+      ...(resolvedWithholdingTaxSnapshot || {
+        withholdingTaxId: null,
+        withholdingTaxName: null,
+        withholdingTaxRate: null,
+        withholdingTaxAccountId: null,
+        withholdingTaxAmount: 0,
+      }),
       openedAt:
         isPayableExpense && expenseDTO.publish
           ? moment().toMySqlDateTime()
@@ -92,8 +132,12 @@ export class ExpenseDTOTransformer {
    */
   public expenseCreateDTO = async (
     expenseDTO: CreateExpenseDto | EditExpenseDto,
+    withholdingTaxSnapshot = null,
   ): Promise<Partial<Expense>> => {
-    const initialDTO = await this.expenseDTOToModel(expenseDTO);
+    const initialDTO = await this.expenseDTOToModel(
+      expenseDTO,
+      withholdingTaxSnapshot,
+    );
     const tenant = await this.tenancyContext.getTenant(true);
 
     return {
@@ -115,7 +159,8 @@ export class ExpenseDTOTransformer {
    */
   public expenseEditDTO = async (
     expenseDTO: EditExpenseDto,
+    withholdingTaxSnapshot = null,
   ): Promise<Expense> => {
-    return this.expenseDTOToModel(expenseDTO);
+    return this.expenseDTOToModel(expenseDTO, withholdingTaxSnapshot);
   };
 }

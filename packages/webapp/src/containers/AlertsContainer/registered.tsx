@@ -25,6 +25,7 @@ import WarehousesTransfersAlerts from '@/containers/WarehouseTransfers/Warehouse
 import BranchesAlerts from '@/containers/Preferences/Branches/BranchesAlerts';
 import ProjectAlerts from '@/containers/Projects/containers/ProjectAlerts';
 import TaxRatesAlerts from '@/containers/TaxRates/alerts';
+import WithholdingTaxesAlerts from '@/containers/WithholdingTaxes/alerts';
 import { CashflowAlerts } from '../CashFlow/CashflowAlerts';
 import { BankRulesAlerts } from '../Banking/Rules/RulesList/BankRulesAlerts';
 import { SubscriptionAlerts } from '../Subscriptions/alerts/alerts';
@@ -59,6 +60,7 @@ export default [
   ...BranchesAlerts,
   ...ProjectAlerts,
   ...TaxRatesAlerts,
+  ...WithholdingTaxesAlerts,
   ...CashflowAlerts,
   ...BankRulesAlerts,
   ...SubscriptionAlerts,

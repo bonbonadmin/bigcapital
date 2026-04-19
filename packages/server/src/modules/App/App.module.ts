@@ -35,6 +35,7 @@ import { AccountsModule } from '../Accounts/Accounts.module';
 import { ExpensesModule } from '../Expenses/Expenses.module';
 import { ItemCategoryModule } from '../ItemCategories/ItemCategory.module';
 import { TaxRatesModule } from '../TaxRates/TaxRate.module';
+import { WithholdingTaxesModule } from '../WithholdingTaxes/WithholdingTaxes.module';
 import { PdfTemplatesModule } from '../PdfTemplate/PdfTemplates.module';
 import { BranchesModule } from '../Branches/Branches.module';
 import { WarehousesModule } from '../Warehouses/Warehouses.module';
@@ -201,6 +202,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     AccountsModule,
     ExpensesModule,
     TaxRatesModule,
+    WithholdingTaxesModule,
     PdfTemplatesModule,
     BranchesModule,
     WarehousesModule,

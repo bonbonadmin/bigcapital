@@ -1167,10 +1167,26 @@ export const getDashboardRoutes = () => [
     component: lazy(
       () =>
         import(
-          '@/containers/Purchases/PaymentsMade/CombinedPaymentForm/CombinedPaymentFormPage'
+          '@/containers/Purchases/PaymentsMade/PaymentForm/PaymentMadeFormPage'
         ),
     ),
     name: 'payment-made-new',
+    breadcrumb: intl.get('new_payment_made'),
+    pageTitle: intl.get('new_payment_made'),
+    sidebarExpand: false,
+    backLink: true,
+    defaultSearchResource: RESOURCES_TYPES.PAYMENT_MADE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/payment-list/payments-made/new`,
+    component: lazy(
+      () =>
+        import(
+          '@/containers/Purchases/PaymentsMade/CombinedPaymentForm/CombinedPaymentFormPage'
+        ),
+    ),
+    name: 'payment-list-payment-made-new',
     breadcrumb: intl.get('new_payment_made'),
     pageTitle: intl.get('new_payment_made'),
     sidebarExpand: false,
@@ -1267,6 +1283,14 @@ export const getDashboardRoutes = () => [
       () => import('@/containers/TaxRates/pages/TaxRatesLanding'),
     ),
     pageTitle: 'Tax Rates',
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: '/financial-withholding-taxes',
+    component: lazy(
+      () => import('@/containers/WithholdingTaxes/pages/WithholdingTaxesLanding'),
+    ),
+    pageTitle: 'Withholding Taxes',
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   // Bank Rules

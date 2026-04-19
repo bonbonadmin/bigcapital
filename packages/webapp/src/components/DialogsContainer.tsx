@@ -42,6 +42,7 @@ import EstimatedExpenseFormDialog from '@/containers/Projects/containers/Estimat
 import ProjectInvoicingFormDialog from '@/containers/Projects/containers/ProjectInvoicingFormDialog';
 import ProjectBillableEntriesFormDialog from '@/containers/Projects/containers/ProjectBillableEntriesFormDialog';
 import TaxRateFormDialog from '@/containers/TaxRates/dialogs/TaxRateFormDialog/TaxRateFormDialog';
+import WithholdingTaxFormDialog from '@/containers/WithholdingTaxes/dialogs/WithholdingTaxFormDialog/WithholdingTaxFormDialog';
 import { DialogsName } from '@/constants/dialogs';
 import InvoiceExchangeRateChangeDialog from '@/containers/Sales/Invoices/InvoiceForm/Dialogs/InvoiceExchangeRateChangeDialog';
 import { ExportDialog } from '@/containers/Dialogs/ExportDialog';
@@ -149,6 +150,7 @@ export default function DialogsContainer() {
         dialogName={DialogsName.ProjectBillableEntriesForm}
       />
       <TaxRateFormDialog dialogName={DialogsName.TaxRateForm} />
+      <WithholdingTaxFormDialog dialogName={DialogsName.WithholdingTaxForm} />
       <InvoiceExchangeRateChangeDialog
         dialogName={DialogsName.InvoiceExchangeRateChangeNotice}
       />

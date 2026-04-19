@@ -20,6 +20,7 @@ const Schema = Yup.object().shape({
     is: 'payable',
     then: Yup.number().required().label(intl.get('payable_account_')),
   }),
+  withholding_tax_id: Yup.number().nullable(),
   payment_date: Yup.date().required().label(intl.get('payment_date_')),
   reference_no: Yup.string().min(1).max(DATATYPES_LENGTH.STRING).nullable(),
   currency_code: Yup.string()

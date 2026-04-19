@@ -78,11 +78,16 @@ export const transformFormToRequest = (form) => {
     .filter((item) => item.expense_id && item.payment_amount)
     .map((entry) => ({
       expense_id: entry.expense_id,
-      payment_amount: entry.payment_amount,
+      payment_amount: Number(entry.payment_amount),
       ...(entry.id ? { id: entry.id } : {}),
     }));
 
-  return { ...form, entries: orderingLinesIndexes(entries) };
+  return {
+    ...form,
+    amount: form.amount ? Number(form.amount) : undefined,
+    exchange_rate: form.exchange_rate ? Number(form.exchange_rate) : undefined,
+    entries: orderingLinesIndexes(entries),
+  };
 };
 
 export const useSetPrimaryBranchToForm = () => {

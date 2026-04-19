@@ -404,7 +404,7 @@ export const SidebarMenu = [
               },
               {
                 text: 'New Payments Made',
-                href: '/payments-made/new',
+                href: '/payment-list/payments-made/new',
                 type: ISidebarMenuItemType.Link,
                 permission: {
                   subject: AbilitySubject.PaymentMade,
@@ -465,6 +465,15 @@ export const SidebarMenu = [
                   ability: TaxRateAction.View,
                 },
               },
+              {
+                text: 'Withholding Taxes',
+                href: '/financial-withholding-taxes',
+                type: ISidebarMenuItemType.Link,
+                permission: {
+                  subject: AbilitySubject.TaxRate,
+                  ability: TaxRateAction.View,
+                },
+              },
             ],
           },
           {
@@ -485,7 +494,7 @@ export const SidebarMenu = [
         ],
       },
       {
-        text: 'banking',
+        text: 'Banking',
         type: ISidebarMenuItemType.Overlay,
         overlayId: ISidebarMenuOverlayIds.Cashflow,
         children: [
@@ -559,7 +568,7 @@ export const SidebarMenu = [
         ],
       },
       {
-        text: 'report',
+        text: 'Report',
         type: ISidebarMenuItemType.Overlay,
         overlayId: ISidebarMenuOverlayIds.Reports,
         children: [
