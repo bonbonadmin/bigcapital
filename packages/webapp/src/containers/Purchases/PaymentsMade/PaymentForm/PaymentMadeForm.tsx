@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Intent } from '@blueprintjs/core';
 import { defaultTo } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { css } from '@emotion/css';
 
 import { CLASSES } from '@/constants/classes';
@@ -52,6 +52,9 @@ function PaymentMadeForm({
   openDialog,
 }) {
   const history = useHistory();
+  const location = useLocation();
+  const redirectTo =
+    submitPayload.redirectTo || location.state?.redirectTo || '/payments-made';
 
   // Payment made form context.
   const {
@@ -122,7 +125,7 @@ function PaymentMadeForm({
       });
       setSubmitting(false);
 
-      submitPayload.redirect && history.push('/payments-made');
+      submitPayload.redirect && history.push(redirectTo);
       submitPayload.resetForm && resetForm();
     };
 

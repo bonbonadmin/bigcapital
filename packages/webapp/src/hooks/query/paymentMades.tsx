@@ -91,6 +91,8 @@ export function useEditPaymentMade(props) {
 
         // Invalidate specific payment made.
         client.invalidateQueries([t.PAYMENT_MADE, id]);
+        // Force the bills-only list to be fetched fresh when returning from edit.
+        client.removeQueries(t.PAYMENT_MADES, { exact: false });
       },
       ...props,
     },

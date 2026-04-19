@@ -209,10 +209,14 @@ export function CombinedPaymentMadeList({ openDrawer }) {
 
   const handleEdit = (payment) => {
     if (payment.paymentSource === 'expense') {
-      history.push(`/expenses/payments-made/${payment.id}/edit`);
+      history.push(`/expenses/payments-made/${payment.id}/edit`, {
+        redirectTo: '/payment-list/payments-made',
+      });
       return;
     }
-    history.push(`/payments-made/${payment.id}/edit`);
+    history.push(`/payments-made/${payment.id}/edit`, {
+      redirectTo: '/payment-list/payments-made',
+    });
   };
 
   const handleDelete = async (payment) => {

@@ -185,7 +185,10 @@ export const useExpenseSubtotal = () => {
   } = useFormikContext();
 
   // Calculates the expense entries amount.
-  return React.useMemo(() => sumBy(categories, 'amount'), [categories]);
+  return React.useMemo(
+    () => sumBy(categories, (category) => Number(category.amount) || 0),
+    [categories],
+  );
 };
 
 /**

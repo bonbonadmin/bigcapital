@@ -17,18 +17,23 @@ import {
 import { useExpenseDrawerContext } from './ExpenseDrawerProvider';
 import { ExpenseDetailsStatus } from './components';
 
-const getExpenseDueAmount = (expense) => {
-  const totalAmount = Number(expense.total_amount) || 0;
-  const paymentAmount = Number(expense.payment_amount) || 0;
+const getNumericExpenseField = (expense, snakeKey, camelKey) =>
+  Number(expense?.[snakeKey] ?? expense?.[camelKey]) || 0;
 
-  return Math.max(totalAmount - paymentAmount, 0);
+const getExpenseDueAmount = (expense) => {
+  const dueAmount = getNumericExpenseField(expense, 'due_amount', 'dueAmount');
+
+  return Math.max(dueAmount, 0);
 };
 
 const getExpenseOverPaymentAmount = (expense) => {
-  const totalAmount = Number(expense.total_amount) || 0;
-  const paymentAmount = Number(expense.payment_amount) || 0;
+  const overPaymentAmount = getNumericExpenseField(
+    expense,
+    'over_payment_amount',
+    'overPaymentAmount',
+  );
 
-  return Math.max(paymentAmount - totalAmount, 0);
+  return Math.max(overPaymentAmount, 0);
 };
 
 /**

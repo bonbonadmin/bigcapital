@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/css';
 import intl from 'react-intl-universal';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Formik, Form, FastField, useFormikContext } from 'formik';
 import {
   Intent,
@@ -340,6 +340,11 @@ function ExpensePaymentFormRoot({
   organization: { base_currency },
 }) {
   const history = useHistory();
+  const location = useLocation();
+  const redirectTo =
+    submitPayload.redirectTo ||
+    location.state?.redirectTo ||
+    '/expenses/payments-made';
   const {
     isNewMode,
     expensePaymentId,
@@ -397,7 +402,7 @@ function ExpensePaymentFormRoot({
       setSubmitting(false);
 
       if (submitPayload.redirect) {
-        history.push('/expenses/payments-made');
+        history.push(redirectTo);
       }
       if (submitPayload.resetForm) {
         resetForm();
