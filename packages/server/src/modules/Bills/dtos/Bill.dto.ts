@@ -91,6 +91,16 @@ export class CommandBillDto {
   vendorId: number;
 
   @ApiProperty({
+    description: 'Accounts payable account identifier',
+    example: 401,
+    required: false,
+  })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  payableAccountId?: number;
+
+  @ApiProperty({
     description: 'Exchange rate applied to bill amounts',
     example: 1.25,
     required: false,

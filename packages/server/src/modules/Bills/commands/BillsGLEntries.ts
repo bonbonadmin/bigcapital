@@ -38,12 +38,15 @@ export class BillGLEntries {
       .withGraphFetched('entries.allocatedCostEntries')
       .withGraphFetched('locatedLandedCosts.allocateEntries');
 
-    // Finds or create a A/P account based on the given currency.
-    const APAccount = await this.accountRepository.findOrCreateAccountsPayable(
-      bill.currencyCode,
-      {},
-      trx,
-    );
+    const payableAccountId =
+      bill.payableAccountId ||
+      (
+        await this.accountRepository.findOrCreateAccountsPayable(
+          bill.currencyCode,
+          {},
+          trx,
+        )
+      ).id;
     // Find or create tax payable account.
     const taxPayableAccount =
       await this.accountRepository.findOrCreateTaxPayable({}, trx);
@@ -58,7 +61,7 @@ export class BillGLEntries {
 
     // Retrieves the bill ledger.
     const billLedger = new BillGL(bill)
-      .setPayableAccountId(APAccount.id)
+      .setPayableAccountId(payableAccountId)
       .setTaxPayableAccountId(taxPayableAccount.id)
       .setPurchaseDiscountAccountId(purchaseDiscountAccount.id)
       .setOtherExpensesAccountId(otherExpensesAccount.id)

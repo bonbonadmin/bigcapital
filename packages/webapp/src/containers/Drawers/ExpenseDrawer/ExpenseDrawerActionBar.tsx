@@ -14,7 +14,11 @@ import {
   Can,
   FormattedMessage as T,
 } from '@/components';
-import { ExpenseAction, AbilitySubject } from '@/constants/abilityOption';
+import {
+  ExpenseAction,
+  PaymentMadeAction,
+  AbilitySubject,
+} from '@/constants/abilityOption';
 import { useExpenseDrawerContext } from './ExpenseDrawerProvider';
 
 import { withAlertActions } from '@/containers/Alert/withAlertActions';
@@ -59,6 +63,21 @@ function ExpenseDrawerActionBar({
             text={<T id={'edit_expense'} />}
             onClick={handleEditExpense}
           />
+        </Can>
+        <Can I={PaymentMadeAction.Create} a={AbilitySubject.PaymentMade}>
+          {expense.is_open && !expense.is_fully_paid && (
+            <>
+              <NavbarDivider />
+              <Button
+                className={Classes.MINIMAL}
+                icon={<Icon icon="arrow-upward" iconSize={16} />}
+                text={<T id={'add_payment'} />}
+                onClick={() =>
+                  history.push(`/expenses/payments-made/new?expense_id=${expense.id}`)
+                }
+              />
+            </>
+          )}
         </Can>
         <Can I={ExpenseAction.Delete} a={AbilitySubject.Expense}>
           <NavbarDivider />

@@ -43,6 +43,7 @@ export class GetBillPaymentsService {
       .onBuild((builder) => {
         builder.withGraphFetched('vendor');
         builder.withGraphFetched('paymentAccount');
+        builder.withGraphFetched('payableAccount');
 
         dynamicList.buildQuery()(builder);
         filter?.filterQuery && filter?.filterQuery(builder);

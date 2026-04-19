@@ -13,12 +13,27 @@ import { accountsFieldShouldUpdate } from './utils';
 import { ACCOUNT_TYPE } from '@/constants/accountTypes';
 import { useItemFormContext } from './ItemFormProvider';
 import { compose } from '@/utils';
+import { DialogsName } from '@/constants/dialogs';
+import { AccountDialogAction } from '@/containers/Dialogs/AccountDialog/utils';
+import { useDialogActions } from '@/hooks/state/dashboard';
 
 /**
  * Item form inventory sections.
  */
 function ItemFormInventorySection({ organization: { base_currency } }) {
   const { accounts } = useItemFormContext();
+  const { openDialog } = useDialogActions();
+
+  const handleCreateInventoryAccount = React.useCallback(
+    (account) => {
+      openDialog(DialogsName.AccountForm, {
+        action: AccountDialogAction.NewDefinedType,
+        accountType: ACCOUNT_TYPE.INVENTORY,
+        name: account?.name || '',
+      });
+    },
+    [openDialog],
+  );
 
   return (
     <div class="page-form__section page-form__section--inventory">
@@ -44,6 +59,8 @@ function ItemFormInventorySection({ organization: { base_currency } }) {
               filterByTypes={[ACCOUNT_TYPE.INVENTORY]}
               fastField={true}
               shouldUpdate={accountsFieldShouldUpdate}
+              allowCreate={true}
+              onCreateItemSelect={handleCreateInventoryAccount}
             />
           </FFormGroup>
         </Col>

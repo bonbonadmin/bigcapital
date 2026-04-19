@@ -16,7 +16,11 @@ import {
 import clsx from 'classnames';
 
 import { CLASSES } from '@/constants/classes';
-import { ExpenseAction, AbilitySubject } from '@/constants/abilityOption';
+import {
+  ExpenseAction,
+  PaymentMadeAction,
+  AbilitySubject,
+} from '@/constants/abilityOption';
 import { FormattedMessage as T, Icon, If, Can } from '@/components';
 import { safeCallback } from '@/utils';
 
@@ -43,7 +47,7 @@ export function DescriptionAccessor(row) {
  */
 export function ActionsMenu({
   row: { original },
-  payload: { onPublish, onEdit, onDelete, onViewDetails },
+  payload: { onPublish, onEdit, onDelete, onViewDetails, onAddPayment },
 }) {
   return (
     <Menu>
@@ -68,6 +72,15 @@ export function ActionsMenu({
           text={intl.get('edit_expense')}
           onClick={safeCallback(onEdit, original)}
         />
+      </Can>
+      <Can I={PaymentMadeAction.Create} a={AbilitySubject.PaymentMade}>
+        <If condition={original.is_open && !original.is_fully_paid}>
+          <MenuItem
+            icon={<Icon icon="arrow-upward" iconSize={16} />}
+            text={intl.get('add_payment')}
+            onClick={safeCallback(onAddPayment, original)}
+          />
+        </If>
       </Can>
       <Can I={ExpenseAction.Delete} a={AbilitySubject.Expense}>
         <MenuDivider />
@@ -149,7 +162,8 @@ export function useExpensesTableColumns() {
       {
         id: 'payment_account',
         Header: intl.get('payment_account'),
-        accessor: 'payment_account.name',
+        accessor: (row) =>
+          row.payable_account?.name || row.payment_account?.name || '',
         width: 150,
         clickable: true,
         className: clsx(CLASSES.TEXT_MUTED),

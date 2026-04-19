@@ -68,9 +68,16 @@ export class CreateBillPaymentService {
       .throwIfNotFound();
 
     // Transform create DTO to model object.
+    const bills = await this.validators.validateBillsExistance(
+      billPaymentDTO.entries,
+      billPaymentDTO.vendorId,
+    );
+    const payableAccountId =
+      await this.validators.getPayableAccountIdFromBillsOrThrowError(bills);
     const billPaymentObj = await this.commandTransformerDTO.transformDTOToModel(
       billPaymentDTO,
       vendor,
+      payableAccountId,
     );
     // Validate the payment account existance and type.
     const paymentAccount = await this.validators.getPaymentAccountOrThrowError(
@@ -81,10 +88,6 @@ export class CreateBillPaymentService {
       await this.validators.validatePaymentNumber(billPaymentObj.paymentNumber);
     }
     // Validates the bills existance and associated to the given vendor.
-    await this.validators.validateBillsExistance(
-      billPaymentObj.entries,
-      billPaymentDTO.vendorId,
-    );
     // Validates the bills due payment amount.
     await this.validators.validateBillsDueAmount(billPaymentObj.entries);
     // Validates the withdrawal account currency code.

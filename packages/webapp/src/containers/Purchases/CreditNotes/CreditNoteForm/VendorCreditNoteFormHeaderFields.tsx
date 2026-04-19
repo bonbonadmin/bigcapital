@@ -25,10 +25,13 @@ import {
   Stack,
   FDateInput,
   FInputGroup,
+  AccountsSelect,
 } from '@/components';
 import {
+  accountsFieldShouldUpdate,
   vendorsFieldShouldUpdate,
   useObserveVendorCreditNoSettings,
+  useSetDefaultPayableAccountToForm,
 } from './utils';
 
 import { useVendorCreditNoteFormContext } from './VendorCreditNoteFormProvider';
@@ -40,6 +43,7 @@ import {
   inputIntent,
   handleDateChange,
 } from '@/utils';
+import { ACCOUNT_TYPE } from '@/constants/accountTypes';
 
 import { withSettings } from '@/containers/Settings/withSettings';
 import { withDialogActions } from '@/containers/Dialog/withDialogActions';
@@ -76,6 +80,7 @@ function VendorCreditNoteFormHeaderFields({
   const theme = useTheme();
   const fieldsClassName = getFieldsStyle(theme);
   const { values } = useFormikContext();
+  const { accounts } = useVendorCreditNoteFormContext();
 
   // Handle vendor credit number changing.
   const handleVendorCreditNumberChange = () => {
@@ -101,11 +106,33 @@ function VendorCreditNoteFormHeaderFields({
     vendorcreditNumberPrefix,
     vendorcreditNextNumber,
   );
+  useSetDefaultPayableAccountToForm();
 
   return (
     <Stack spacing={18} flex={1} className={fieldsClassName}>
       {/* ----------- Vendor name ----------- */}
       <VendorCreditFormVendorSelect />
+
+      {/* ----------- Payable account ----------- */}
+      <FFormGroup
+        name={'payable_account_id'}
+        label={<T id={'payable_account'} />}
+        inline
+        labelInfo={<FieldRequiredHint />}
+        items={accounts}
+        shouldUpdate={accountsFieldShouldUpdate}
+        fastField
+      >
+        <AccountsSelect
+          name={'payable_account_id'}
+          items={accounts}
+          placeholder={<T id={'select_payable_account'} />}
+          filterByTypes={[ACCOUNT_TYPE.ACCOUNTS_PAYABLE]}
+          shouldUpdate={accountsFieldShouldUpdate}
+          fastField
+          fill
+        />
+      </FFormGroup>
 
       {/* ----------- Exchange rate ----------- */}
       <VendorCreditNoteExchangeRateInputField

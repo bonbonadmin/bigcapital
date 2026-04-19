@@ -13,6 +13,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { events } from '@/common/events/events';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CreateExpenseDto } from '../dtos/Expense.dto';
+import { Vendor } from '@/modules/Vendors/models/Vendor';
+import { ServiceError } from '@/modules/Items/ServiceError';
+import { ERRORS } from '../constants';
 
 @Injectable()
 export class CreateExpense {
@@ -33,6 +36,9 @@ export class CreateExpense {
     @Inject(Account.name)
     private readonly accountModel: TenantModelProxy<typeof Account>,
 
+    @Inject(Vendor.name)
+    private readonly vendorModel: TenantModelProxy<typeof Vendor>,
+
     @Inject(Expense.name)
     private readonly expenseModel: TenantModelProxy<typeof Expense>,
   ) {}
@@ -42,11 +48,37 @@ export class CreateExpense {
    * @param {IExpenseDTO} expenseDTO
    */
   private authorize = async (expenseDTO: CreateExpenseDto) => {
-    // Validate payment account existance on the storage.
-    const paymentAccount = await this.accountModel()
-      .query()
-      .findById(expenseDTO.paymentAccountId)
-      .throwIfNotFound();
+    if (expenseDTO.payeeId) {
+      await this.vendorModel()
+        .query()
+        .findById(expenseDTO.payeeId)
+        .throwIfNotFound();
+    }
+
+    this.validator.validatePayableExpenseVendor(
+      expenseDTO.payableAccountId,
+      expenseDTO.payeeId,
+    );
+
+    if (expenseDTO.paymentAccountId) {
+      const paymentAccount = await this.accountModel()
+        .query()
+        .findById(expenseDTO.paymentAccountId)
+        .throwIfNotFound();
+
+      this.validator.validatePaymentAccountType(paymentAccount);
+    } else if (!expenseDTO.payableAccountId) {
+      throw new ServiceError(ERRORS.PAYMENT_ACCOUNT_NOT_FOUND);
+    }
+
+    if (expenseDTO.payableAccountId) {
+      const payableAccount = await this.accountModel()
+        .query()
+        .findById(expenseDTO.payableAccountId)
+        .throwIfNotFound();
+
+      this.validator.validatePayableAccountType(payableAccount);
+    }
 
     // Retrieves the DTO expense accounts ids.
     const DTOExpenseAccountsIds = expenseDTO.categories.map(
@@ -61,9 +93,6 @@ export class CreateExpense {
       expenseAccounts,
       DTOExpenseAccountsIds,
     );
-    // Validate payment account type.
-    this.validator.validatePaymentAccountType(paymentAccount);
-
     // Validate expenses accounts type.
     this.validator.validateExpensesAccountsType(expenseAccounts);
 

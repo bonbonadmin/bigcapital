@@ -10,6 +10,7 @@ import { TenantBaseModel } from '@/modules/System/models/TenantBaseModel';
 import { InjectModelDefaultViews } from '@/modules/Views/decorators/InjectModelDefaultViews.decorator';
 import { BillPaymentDefaultViews } from '../constants';
 import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttachable.decorator';
+import type { Account } from '@/modules/Accounts/models/Account.model';
 
 @InjectAttachable()
 @ImportableModel()
@@ -21,6 +22,7 @@ export class BillPayment extends TenantBaseModel {
   amount: number;
   currencyCode: string;
   paymentAccountId: number;
+  payableAccountId: number | null;
   paymentNumber: string;
   paymentDate: string;
   paymentMethod: string;
@@ -36,6 +38,7 @@ export class BillPayment extends TenantBaseModel {
 
   entries?: BillPaymentEntry[];
   vendor?: Vendor;
+  payableAccount?: Account;
   attachments?: Document[];
 
   /**
@@ -110,6 +113,15 @@ export class BillPayment extends TenantBaseModel {
         modelClass: Account,
         join: {
           from: 'bills_payments.paymentAccountId',
+          to: 'accounts.id',
+        },
+      },
+
+      payableAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'bills_payments.payableAccountId',
           to: 'accounts.id',
         },
       },

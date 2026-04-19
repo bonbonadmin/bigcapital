@@ -21,6 +21,7 @@ import { withCurrentOrganization } from '@/containers/Organization/withCurrentOr
 
 import { AppToaster, Box } from '@/components';
 import { PageForm } from '@/components/PageForm';
+import { ACCOUNT_TYPE } from '@/constants';
 import {
   CreateExpenseFormSchema,
   EditExpenseFormSchema,
@@ -31,7 +32,8 @@ import {
   transformToEditForm,
   transformFormValuesToRequest,
 } from './utils';
-import { compose } from '@/utils';
+import { compose, nestedArrayToflatten } from '@/utils';
+import { EXPENSE_FORM_MODE } from './constants';
 
 /**
  * Expense form.
@@ -48,6 +50,8 @@ function ExpenseForm({
     createExpenseMutate,
     expense,
     expenseId,
+    accounts,
+    expenseMode,
     submitPayloadRef,
   } = useExpenseFormContext();
 
@@ -57,19 +61,45 @@ function ExpenseForm({
   const history = useHistory();
 
   // Form initial values.
+  const preferredPayableAccount = useMemo(
+    () =>
+      nestedArrayToflatten(accounts).find(
+        (account) => account.account_type === ACCOUNT_TYPE.ACCOUNTS_PAYABLE,
+      )?.id,
+    [accounts],
+  );
+
   const initialValues = useMemo(
     () => ({
       ...(!isEmpty(expense)
         ? {
-          ...transformToEditForm(expense, defaultExpense),
-        }
+            ...transformToEditForm(expense, defaultExpense),
+            expense_mode:
+              expense.payable_account_id || expense.payableAccountId
+                ? EXPENSE_FORM_MODE.PAYABLE
+                : EXPENSE_FORM_MODE.PAID,
+          }
         : {
-          ...defaultExpense,
-          currency_code: base_currency,
-          payment_account_id: defaultTo(preferredPaymentAccount, ''),
-        }),
+            ...defaultExpense,
+            expense_mode: expenseMode,
+            currency_code: base_currency,
+            payment_account_id:
+              expenseMode === EXPENSE_FORM_MODE.PAID
+                ? defaultTo(preferredPaymentAccount, '')
+                : '',
+            payable_account_id:
+              expenseMode === EXPENSE_FORM_MODE.PAYABLE
+                ? defaultTo(preferredPayableAccount, '')
+                : '',
+          }),
     }),
-    [expense, base_currency, preferredPaymentAccount],
+    [
+      expense,
+      expenseMode,
+      base_currency,
+      preferredPayableAccount,
+      preferredPaymentAccount,
+    ],
   );
 
   //  Handle form submit.

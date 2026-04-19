@@ -9,12 +9,17 @@ import { WarehouseTransactionDTOTransform } from '@/modules/Warehouses/Integrati
 import { ItemEntry } from '@/modules/TransactionItemEntry/models/ItemEntry';
 import { Item } from '@/modules/Items/models/Item';
 import { Vendor } from '@/modules/Vendors/models/Vendor';
+import { Account } from '@/modules/Accounts/models/Account.model';
+import { ACCOUNT_TYPE } from '@/constants/accounts';
+import { AccountRepository } from '@/modules/Accounts/repositories/Account.repository';
 import { ItemEntriesTaxTransactions } from '@/modules/TaxRates/ItemEntriesTaxTransactions.service';
 import { Bill } from '../models/Bill';
 import { assocItemEntriesDefaultIndex } from '@/utils/associate-item-entries-index';
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CreateBillDto } from '../dtos/Bill.dto';
+import { ServiceError } from '@/modules/Items/ServiceError';
+import { ERRORS } from '../Bills.constants';
 
 @Injectable()
 export class BillDTOTransformer {
@@ -23,12 +28,47 @@ export class BillDTOTransformer {
     private warehouseDTOTransform: WarehouseTransactionDTOTransform,
     private taxDTOTransformer: ItemEntriesTaxTransactions,
     private tenancyContext: TenancyContext,
+    private accountRepository: AccountRepository,
 
     @Inject(ItemEntry.name)
     private itemEntryModel: TenantModelProxy<typeof ItemEntry>,
 
     @Inject(Item.name) private itemModel: TenantModelProxy<typeof Item>,
+
+    @Inject(Account.name)
+    private accountModel: TenantModelProxy<typeof Account>,
   ) {}
+
+  private async resolvePayableAccountId(
+    payableAccountId: number | undefined,
+    vendorCurrencyCode: string,
+    oldBill?: Bill,
+  ): Promise<number> {
+    if (payableAccountId) {
+      const payableAccount = await this.accountModel()
+        .query()
+        .findById(payableAccountId);
+
+      if (!payableAccount) {
+        throw new ServiceError(ERRORS.PAYABLE_ACCOUNT_NOT_FOUND);
+      }
+      if (!payableAccount.isAccountType(ACCOUNT_TYPE.ACCOUNTS_PAYABLE)) {
+        throw new ServiceError(
+          ERRORS.PAYABLE_ACCOUNT_NOT_ACCOUNTS_PAYABLE_TYPE,
+        );
+      }
+      return payableAccount.id;
+    }
+    if (oldBill?.payableAccountId) {
+      return oldBill.payableAccountId;
+    }
+    const payableAccount =
+      await this.accountRepository.findOrCreateAccountsPayable(
+        vendorCurrencyCode,
+      );
+
+    return payableAccount.id;
+  }
 
   /**
    * Retrieve the bill entries total.
@@ -65,6 +105,11 @@ export class BillDTOTransformer {
   ): Promise<Bill> {
     const amount = sumBy(billDTO.entries, (e) =>
       this.itemEntryModel().calcAmount(e),
+    );
+    const payableAccountId = await this.resolvePayableAccountId(
+      billDTO.payableAccountId,
+      vendor.currencyCode,
+      oldBill,
     );
     // Retrieve the landed cost amount from landed cost entries.
     const landedCostAmount = this.getBillLandedCostAmount(billDTO);
@@ -106,6 +151,7 @@ export class BillDTOTransformer {
       currencyCode: vendor.currencyCode,
       exchangeRate: billDTO.exchangeRate || 1,
       billNumber,
+      payableAccountId,
       entries,
       // Avoid rewrite the open date in edit mode when already opened.
       ...(billDTO.open &&

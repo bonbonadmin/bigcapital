@@ -62,6 +62,13 @@ export class BillPaymentResponseDto {
   paymentAccountId: number;
 
   @ApiProperty({
+    description: 'The accounts payable account ID',
+    example: 401,
+    required: false,
+  })
+  payableAccountId?: number;
+
+  @ApiProperty({
     description: 'The payment number',
     example: 'PAY-2024-001',
     required: false,

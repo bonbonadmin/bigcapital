@@ -24,6 +24,7 @@ export class GetExpenseService {
       .findById(expenseId)
       .withGraphFetched('categories.expenseAccount')
       .withGraphFetched('paymentAccount')
+      .withGraphFetched('payableAccount')
       .withGraphFetched('branch')
       .withGraphFetched('attachments')
       .throwIfNotFound();

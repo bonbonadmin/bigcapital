@@ -1,4 +1,4 @@
-import { ACCOUNT_TYPE } from "@/constants";
+import { ACCOUNT_TYPE } from '@/constants';
 
 export const SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES = [
   ACCOUNT_TYPE.CASH,
@@ -8,3 +8,12 @@ export const SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES = [
   ACCOUNT_TYPE.NON_CURRENT_ASSET,
   ACCOUNT_TYPE.FIXED_ASSET,
 ];
+
+export const SUPPORTED_EXPENSE_PAYABLE_ACCOUNT_TYPES = [
+  ACCOUNT_TYPE.ACCOUNTS_PAYABLE,
+];
+
+export const EXPENSE_FORM_MODE = {
+  PAID: 'paid',
+  PAYABLE: 'payable',
+};

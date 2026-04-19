@@ -91,14 +91,25 @@ export class CommandExpenseDto {
   })
   paymentDate: Date;
 
-  @IsNotEmpty()
   @ToNumber()
   @IsInt()
+  @IsOptional()
   @ApiProperty({
     description: 'The payment account id of the expense',
     example: 1,
+    required: false,
   })
-  paymentAccountId: number;
+  paymentAccountId?: number;
+
+  @ToNumber()
+  @IsInt()
+  @IsOptional()
+  @ApiProperty({
+    description: 'The payable account id of the expense',
+    example: 401,
+    required: false,
+  })
+  payableAccountId?: number;
 
   @IsString()
   @MaxLength(1000)

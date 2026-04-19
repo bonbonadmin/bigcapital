@@ -40,12 +40,15 @@ export class BillPaymentGLEntries {
     // Retrieves the given tenant metadata.
     const tenantMeta = await this.tenancyContext.getTenantMetadata();
 
-    // Finds or creates a new A/P account of the given currency.
-    const APAccount = await this.accountRepository.findOrCreateAccountsPayable(
-      payment.currencyCode,
-      {},
-      trx,
-    );
+    const payableAccountId =
+      payment.payableAccountId ||
+      (
+        await this.accountRepository.findOrCreateAccountsPayable(
+          payment.currencyCode,
+          {},
+          trx,
+        )
+      ).id;
     // Exchange gain or loss account.
     const EXGainLossAccount = await this.accountModel()
       .query(trx)
@@ -54,7 +57,7 @@ export class BillPaymentGLEntries {
 
     // Retrieves the bill payment ledger.
     const ledger = new BillPaymentGL(payment)
-      .setAPAccountId(APAccount.id)
+      .setAPAccountId(payableAccountId)
       .setGainLossAccountId(EXGainLossAccount.id)
       .setBaseCurrency(tenantMeta.baseCurrency)
       .getBillPaymentLedger();

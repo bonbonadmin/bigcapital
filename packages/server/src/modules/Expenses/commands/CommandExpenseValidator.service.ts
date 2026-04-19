@@ -1,5 +1,9 @@
 import { sumBy, difference } from 'lodash';
-import { ERRORS, SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES } from '../constants';
+import {
+  ERRORS,
+  SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES,
+  SUPPORTED_EXPENSE_PAYABLE_ACCOUNT_TYPES,
+} from '../constants';
 import { ACCOUNT_ROOT_TYPE } from '@/constants/accounts';
 import { Account } from '@/modules/Accounts/models/Account.model';
 import { Injectable } from '@nestjs/common';
@@ -77,6 +81,19 @@ export class CommandExpenseValidator {
   };
 
   /**
+   * Validates payable account type in case has invalid type throws errors.
+   * @param {Account} payableAccount
+   * @throws {ServiceError}
+   */
+  public validatePayableAccountType = (payableAccount: Account) => {
+    if (
+      !payableAccount.isAccountType(SUPPORTED_EXPENSE_PAYABLE_ACCOUNT_TYPES)
+    ) {
+      throw new ServiceError(ERRORS.PAYABLE_ACCOUNT_HAS_INVALID_TYPE);
+    }
+  };
+
+  /**
    * Validates the expense has not associated landed cost
    * references to the given expense.
    * @param {number} expenseId
@@ -98,6 +115,27 @@ export class CommandExpenseValidator {
   public validateExpenseIsNotPublished(expense: Expense) {
     if (expense.publishedAt) {
       throw new ServiceError(ERRORS.EXPENSE_ALREADY_PUBLISHED);
+    }
+  }
+
+  /**
+   * Validates payable expenses always have a vendor selected.
+   */
+  public validatePayableExpenseVendor(
+    payableAccountId?: number,
+    payeeId?: number,
+  ) {
+    if (payableAccountId && !payeeId) {
+      throw new ServiceError(ERRORS.EXPENSE_PAYABLE_VENDOR_REQUIRED);
+    }
+  }
+
+  /**
+   * Validates current payment amount does not exceed the expense amount.
+   */
+  public validateExistingPaymentAmount(totalAmount: number, paymentAmount: number) {
+    if (paymentAmount > totalAmount) {
+      throw new ServiceError(ERRORS.EXPENSE_PAYMENT_TOTAL_EXCEEDS_AMOUNT);
     }
   }
 }

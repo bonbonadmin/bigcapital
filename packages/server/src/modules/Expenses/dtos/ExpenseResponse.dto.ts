@@ -90,8 +90,16 @@ export class ExpenseResponseDto {
   @ApiProperty({
     example: 1,
     description: 'The ID of the payment account used for this expense',
+    required: false,
   })
-  paymentAccountId: number;
+  paymentAccountId?: number;
+
+  @ApiProperty({
+    example: 401,
+    description: 'The ID of the payable account used for this expense',
+    required: false,
+  })
+  payableAccountId?: number;
 
   @ApiProperty({
     example: 'EXP-2024-001',
@@ -135,6 +143,12 @@ export class ExpenseResponseDto {
     description: 'The allocated cost amount of the expense',
   })
   allocatedCostAmount: number;
+
+  @ApiProperty({
+    example: 250,
+    description: 'The amount paid against this expense',
+  })
+  paymentAmount: number;
 
   @ApiProperty({
     example: 0,
@@ -196,6 +210,30 @@ export class ExpenseResponseDto {
     description: 'The billable amount of the expense',
   })
   billableAmount: number;
+
+  @ApiProperty({
+    example: 750,
+    description: 'The amount still due against this expense',
+  })
+  dueAmount: number;
+
+  @ApiProperty({
+    example: true,
+    description: 'Whether the expense is opened as payable',
+  })
+  isOpen: boolean;
+
+  @ApiProperty({
+    example: false,
+    description: 'Whether the expense is partially paid',
+  })
+  isPartiallyPaid: boolean;
+
+  @ApiProperty({
+    example: false,
+    description: 'Whether the expense is fully paid',
+  })
+  isFullyPaid: boolean;
 
   @ApiProperty({
     type: [ExpenseCategoryResponseDto],

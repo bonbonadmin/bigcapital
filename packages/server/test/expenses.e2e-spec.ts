@@ -2,7 +2,10 @@ import * as request from 'supertest';
 import { faker } from '@faker-js/faker';
 import { app, AuthorizationHeader, orgainzationId } from './init-app-test';
 
-const makeExpenseRequest = () => ({
+let vendorId;
+let payableAccountId;
+
+const makeExpenseRequest = (overrides = {}) => ({
   exchangeRate: 1,
   description: faker.lorem.sentence(),
   paymentAccountId: 1000,
@@ -17,15 +20,50 @@ const makeExpenseRequest = () => ({
     },
   ],
   branchId: 1,
+  ...overrides,
 });
 
 describe('Expenses (e2e)', () => {
+  beforeAll(async () => {
+    const vendor = await request(app.getHttpServer())
+      .post('/vendors')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .send({ displayName: 'Test Expense Vendor' });
+
+    vendorId = vendor.body.id;
+
+    const accountsResponse = await request(app.getHttpServer())
+      .get('/accounts')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader);
+
+    payableAccountId = accountsResponse.body.accounts.find(
+      (account) => account.account_type === 'accounts-payable',
+    )?.id;
+  });
+
   it('/expenses (POST)', () => {
     return request(app.getHttpServer())
       .post('/expenses')
       .set('organization-id', orgainzationId)
       .set('Authorization', AuthorizationHeader)
       .send(makeExpenseRequest())
+      .expect(201);
+  });
+
+  it('/expenses (POST) allows payable account with vendor', () => {
+    return request(app.getHttpServer())
+      .post('/expenses')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .send(
+        makeExpenseRequest({
+          paymentAccountId: null,
+          payableAccountId,
+          payeeId: vendorId,
+        }),
+      )
       .expect(201);
   });
 

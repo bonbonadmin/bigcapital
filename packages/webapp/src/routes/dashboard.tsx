@@ -529,6 +529,46 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/expenses/payments-made/:id/edit`,
+    component: lazy(
+      () =>
+        import(
+          '@/containers/Expenses/PaymentsMade/ExpensePaymentForm/ExpensePaymentFormPage'
+        ),
+    ),
+    breadcrumb: intl.get('edit_payment_made'),
+    pageTitle: intl.get('edit_payment_made'),
+    sidebarExpand: false,
+    backLink: true,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/expenses/payments-made/new`,
+    component: lazy(
+      () =>
+        import(
+          '@/containers/Expenses/PaymentsMade/ExpensePaymentForm/ExpensePaymentFormPage'
+        ),
+    ),
+    breadcrumb: intl.get('new_payment_made'),
+    pageTitle: intl.get('new_payment_made'),
+    sidebarExpand: false,
+    backLink: true,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/expenses/payments-made`,
+    component: lazy(
+      () =>
+        import(
+          '@/containers/Expenses/PaymentsMade/PaymentsLanding/ExpensePaymentList'
+        ),
+    ),
+    breadcrumb: intl.get('payments_made_list'),
+    pageTitle: intl.get('payments_made_list'),
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/expenses/:id/edit`,
     component: lazy(
       () => import('@/containers/Expenses/ExpenseForm/ExpenseFormPage'),

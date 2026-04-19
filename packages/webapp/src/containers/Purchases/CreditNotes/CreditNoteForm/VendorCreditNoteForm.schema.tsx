@@ -6,6 +6,9 @@ import { isBlank } from '@/utils';
 
 const getSchema = Yup.object().shape({
   vendor_id: Yup.number().required().label(intl.get('vendor_name_')),
+  payable_account_id: Yup.number()
+    .required()
+    .label(intl.get('payable_account_')),
   vendor_credit_date: Yup.date().required().label(intl.get('bill_date_')),
   vendor_credit_number: Yup.string()
     .max(DATATYPES_LENGTH.STRING)

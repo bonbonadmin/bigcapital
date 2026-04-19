@@ -12,6 +12,8 @@ export class ExpenseTransfromer extends Transformer {
   public includeAttributes = (): string[] => {
     return [
       'formattedAmount',
+      'formattedPaymentAmount',
+      'formattedDueAmount',
       'formattedLandedCostAmount',
       'formattedAllocatedCostAmount',
       'formattedDate',
@@ -29,6 +31,24 @@ export class ExpenseTransfromer extends Transformer {
    */
   protected formattedAmount = (expense: Expense): string => {
     return this.formatNumber(expense.totalAmount, {
+      currencyCode: expense.currencyCode,
+    });
+  };
+
+  /**
+   * Retrieve formatted expense payment amount.
+   */
+  protected formattedPaymentAmount = (expense: Expense): string => {
+    return this.formatNumber(expense.paymentAmount, {
+      currencyCode: expense.currencyCode,
+    });
+  };
+
+  /**
+   * Retrieve formatted expense due amount.
+   */
+  protected formattedDueAmount = (expense: Expense): string => {
+    return this.formatNumber(expense.dueAmount, {
       currencyCode: expense.currencyCode,
     });
   };

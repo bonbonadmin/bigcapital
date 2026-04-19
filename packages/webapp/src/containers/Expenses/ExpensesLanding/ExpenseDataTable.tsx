@@ -91,6 +91,10 @@ function ExpensesDataTable({
     openAlert('expense-delete', { expenseId: expense.id });
   };
 
+  const handleAddPaymentExpense = ({ id }) => {
+    history.push(`/expenses/payments-made/new?expense_id=${id}`);
+  };
+
   // Handle view detail expense.
   const handleViewDetailExpense = ({ id }) => {
     openDrawer(DRAWERS.EXPENSE_DETAILS, {
@@ -146,6 +150,7 @@ function ExpensesDataTable({
           onDelete: handleDeleteExpense,
           onEdit: handleEditExpense,
           onViewDetails: handleViewDetailExpense,
+          onAddPayment: handleAddPaymentExpense,
         }}
       />
     </DashboardContentTable>

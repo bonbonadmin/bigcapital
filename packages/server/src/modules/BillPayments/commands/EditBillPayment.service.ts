@@ -65,9 +65,16 @@ export class EditBillPayment {
       .findById(billPaymentDTO.vendorId)
       .throwIfNotFound();
 
+    const bills = await this.validators.validateBillsExistance(
+      billPaymentDTO.entries,
+      billPaymentDTO.vendorId,
+    );
+    const payableAccountId =
+      await this.validators.getPayableAccountIdFromBillsOrThrowError(bills);
     const billPaymentObj = await this.transformer.transformDTOToModel(
       billPaymentDTO,
       vendor,
+      payableAccountId,
       oldBillPayment,
     );
     // Validate vendor not modified.
@@ -83,10 +90,6 @@ export class EditBillPayment {
       billPaymentObj.entries,
     );
     // Validate the bills existance and associated to the given vendor.
-    await this.validators.validateBillsExistance(
-      billPaymentObj.entries,
-      billPaymentDTO.vendorId,
-    );
     // Validates the bills due payment amount.
     await this.validators.validateBillsDueAmount(
       billPaymentObj.entries,

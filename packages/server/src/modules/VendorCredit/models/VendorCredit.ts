@@ -12,6 +12,7 @@ import { VendorCreditMeta } from './VendorCredit.meta';
 import { InjectModelDefaultViews } from '@/modules/Views/decorators/InjectModelDefaultViews.decorator';
 import { VendorCreditDefaultViews } from '../constants';
 import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttachable.decorator';
+import type { Account } from '@/modules/Accounts/models/Account.model';
 
 @InjectAttachable()
 @ExportableModel()
@@ -20,6 +21,7 @@ import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttacha
 @InjectModelDefaultViews(VendorCreditDefaultViews)
 export class VendorCredit extends TenantBaseModel {
   vendorId: number;
+  payableAccountId: number | null;
   amount: number;
   currencyCode: string;
 
@@ -42,6 +44,7 @@ export class VendorCredit extends TenantBaseModel {
   warehouseId: number;
 
   vendor?: Vendor;
+  payableAccount?: Account;
   warehouse?: Warehouse;
   branch?: Branch;
   entries?: ItemEntry[];
@@ -294,6 +297,7 @@ export class VendorCredit extends TenantBaseModel {
     const { Branch } = require('../../Branches/models/Branch.model');
     const { Document } = require('../../ChromiumlyTenancy/models/Document');
     const { Warehouse } = require('../../Warehouses/models/Warehouse.model');
+    const { Account } = require('../../Accounts/models/Account.model');
 
     return {
       /**
@@ -308,6 +312,15 @@ export class VendorCredit extends TenantBaseModel {
         },
         filter(query) {
           query.where('contact_service', 'vendor');
+        },
+      },
+
+      payableAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'vendor_credits.payableAccountId',
+          to: 'accounts.id',
         },
       },
 

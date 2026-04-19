@@ -13,6 +13,9 @@ import { Expense } from '../models/Expense.model';
 import { events } from '@/common/events/events';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { EditExpenseDto } from '../dtos/Expense.dto';
+import { Vendor } from '@/modules/Vendors/models/Vendor';
+import { ERRORS } from '../constants';
+import { ServiceError } from '@/modules/Items/ServiceError';
 
 @Injectable()
 export class EditExpense {
@@ -34,6 +37,9 @@ export class EditExpense {
 
     @Inject(Account.name)
     private accountModel: TenantModelProxy<typeof Account>,
+
+    @Inject(Vendor.name)
+    private vendorModel: TenantModelProxy<typeof Vendor>,
   ) {}
 
   /**
@@ -44,11 +50,37 @@ export class EditExpense {
     oldExpense: Expense,
     expenseDTO: EditExpenseDto,
   ) => {
-    // Validate payment account existance on the storage.
-    const paymentAccount = await this.accountModel()
-      .query()
-      .findById(expenseDTO.paymentAccountId)
-      .throwIfNotFound();
+    if (expenseDTO.payeeId) {
+      await this.vendorModel()
+        .query()
+        .findById(expenseDTO.payeeId)
+        .throwIfNotFound();
+    }
+
+    this.validator.validatePayableExpenseVendor(
+      expenseDTO.payableAccountId,
+      expenseDTO.payeeId,
+    );
+
+    if (expenseDTO.paymentAccountId) {
+      const paymentAccount = await this.accountModel()
+        .query()
+        .findById(expenseDTO.paymentAccountId)
+        .throwIfNotFound();
+
+      await this.validator.validatePaymentAccountType(paymentAccount);
+    } else if (!expenseDTO.payableAccountId) {
+      throw new ServiceError(ERRORS.PAYMENT_ACCOUNT_NOT_FOUND);
+    }
+
+    if (expenseDTO.payableAccountId) {
+      const payableAccount = await this.accountModel()
+        .query()
+        .findById(expenseDTO.payableAccountId)
+        .throwIfNotFound();
+
+      await this.validator.validatePayableAccountType(payableAccount);
+    }
 
     // Retrieves the DTO expense accounts ids.
     const DTOExpenseAccountsIds = expenseDTO.categories.map(
@@ -63,13 +95,32 @@ export class EditExpense {
       expenseAccounts,
       DTOExpenseAccountsIds,
     );
-    // Validate payment account type.
-    await this.validator.validatePaymentAccountType(paymentAccount);
-
     // Validate expenses accounts type.
     await this.validator.validateExpensesAccountsType(expenseAccounts);
     // Validate the given expense categories not equal zero.
     this.validator.validateCategoriesNotEqualZero(expenseDTO);
+    this.validator.validateExistingPaymentAmount(
+      expenseDTO.categories.reduce(
+        (sum, category) => sum + Number(category.amount || 0),
+        0,
+      ),
+      oldExpense.paymentAmount || 0,
+    );
+
+    if (
+      oldExpense.payableAccountId &&
+      oldExpense.paymentAmount > 0 &&
+      oldExpense.payableAccountId !== expenseDTO.payableAccountId
+    ) {
+      throw new ServiceError(ERRORS.EXPENSE_PAYABLE_ACCOUNT_SHOULD_NOT_MODIFY);
+    }
+    if (
+      oldExpense.payableAccountId &&
+      oldExpense.paymentAmount > 0 &&
+      oldExpense.payeeId !== expenseDTO.payeeId
+    ) {
+      throw new ServiceError(ERRORS.EXPENSE_PAYEE_SHOULD_NOT_MODIFY);
+    }
 
     // Validate expense entries that have allocated landed cost cannot be deleted.
     // this.entriesService.validateLandedCostEntriesNotDeleted(

@@ -535,6 +535,15 @@ export const SidebarMenu = [
               ability: ExpenseAction.View,
             },
           },
+          {
+            text: <T id={'sidebar.payments_made'} />,
+            href: '/expenses/payments-made',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.PaymentMade,
+              ability: PaymentMadeAction.View,
+            },
+          },
         ],
       },
       {
@@ -543,11 +552,20 @@ export const SidebarMenu = [
         children: [
           {
             text: <T id={'sidebar.new_expense'} />,
-            href: '/expenses/new',
+            href: '/expenses/new?mode=paid',
             type: ISidebarMenuItemType.Link,
             permission: {
               subject: AbilitySubject.Expense,
               ability: ExpenseAction.Create,
+            },
+          },
+          {
+            text: <T id={'sidebar.new_payment_made'} />,
+            href: '/expenses/payments-made/new',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.PaymentMade,
+              ability: PaymentMadeAction.Create,
             },
           },
         ],

@@ -6,6 +6,7 @@ export * from './items';
 export * from './itemsCategories';
 export * from './inventoryAdjustments';
 export * from './expenses';
+export * from './expensePayments';
 export * from './customers';
 export * from './vendors';
 export * from './manualJournals';

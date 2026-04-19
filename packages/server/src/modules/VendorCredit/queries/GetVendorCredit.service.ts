@@ -31,6 +31,7 @@ export class GetVendorCreditService {
       .findById(vendorCreditId)
       .withGraphFetched('entries.item')
       .withGraphFetched('vendor')
+      .withGraphFetched('payableAccount')
       .withGraphFetched('branch')
       .withGraphFetched('attachments');
 

@@ -27,6 +27,7 @@ export class CommandBillPaymentDTOTransformer {
   public async transformDTOToModel(
     billPaymentDTO: CreateBillPaymentDto | EditBillPaymentDto,
     vendor: Vendor,
+    payableAccountId: number | null,
     oldBillPayment?: BillPayment,
   ): Promise<BillPayment> {
     const amount =
@@ -45,6 +46,7 @@ export class CommandBillPaymentDTOTransformer {
       amount,
       currencyCode: vendor.currencyCode,
       exchangeRate: billPaymentDTO.exchangeRate || 1,
+      payableAccountId,
       entries,
     };
     return R.compose(this.branchDTOTransform.transformDTO<BillPayment>)(

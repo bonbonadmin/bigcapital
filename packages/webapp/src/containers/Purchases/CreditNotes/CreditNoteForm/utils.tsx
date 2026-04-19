@@ -21,6 +21,7 @@ import { useFormikContext } from 'formik';
 import { useVendorCreditNoteFormContext } from './VendorCreditNoteFormProvider';
 import { useCurrentOrganization } from '@/hooks/state';
 import { getEntriesTotal } from '@/containers/Entries/utils';
+import { ACCOUNT_TYPE } from '@/constants/accountTypes';
 import {
   transformAttachmentsToForm,
   transformAttachmentsToRequest,
@@ -42,6 +43,7 @@ export const defaultCreditNoteEntry = {
 // Default Vendors Credit Note.
 export const defaultVendorsCreditNote = {
   vendor_id: '',
+  payable_account_id: '',
   vendor_credit_number: '',
   vendor_credit_no_manually: false,
   open: '',
@@ -132,6 +134,13 @@ export const vendorsFieldShouldUpdate = (newProps, oldProps) => {
   );
 };
 
+export const accountsFieldShouldUpdate = (newProps, oldProps) => {
+  return (
+    newProps.items !== oldProps.items ||
+    defaultFastFieldShouldUpdate(newProps, oldProps)
+  );
+};
+
 /**
  * Detarmines entries fast field should update.
  */
@@ -183,6 +192,34 @@ export const useSetPrimaryWarehouseToForm = () => {
       }
     }
   }, [isWarehousesSuccess, setFieldValue, warehouses, isNewMode]);
+};
+
+export const useSetDefaultPayableAccountToForm = () => {
+  const { values, setFieldValue } = useFormikContext();
+  const { accounts, isNewMode } = useVendorCreditNoteFormContext();
+
+  React.useEffect(() => {
+    if (!isNewMode || values.payable_account_id) {
+      return;
+    }
+    const payableAccounts = accounts.filter(
+      (account) => account.account_type === ACCOUNT_TYPE.ACCOUNTS_PAYABLE,
+    );
+    const defaultPayableAccount =
+      payableAccounts.find(
+        (account) => account.currency_code === values.currency_code,
+      ) || first(payableAccounts);
+
+    if (defaultPayableAccount) {
+      setFieldValue('payable_account_id', defaultPayableAccount.id);
+    }
+  }, [
+    accounts,
+    isNewMode,
+    setFieldValue,
+    values.currency_code,
+    values.payable_account_id,
+  ]);
 };
 
 /**

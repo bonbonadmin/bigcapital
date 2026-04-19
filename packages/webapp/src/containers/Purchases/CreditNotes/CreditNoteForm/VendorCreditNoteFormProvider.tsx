@@ -7,6 +7,7 @@ import { transformToEditForm } from './utils';
 import { Features } from '@/constants';
 import { useFeatureCan } from '@/hooks/state';
 import {
+  useAccounts,
   useCreateVendorCredit,
   useEditVendorCredit,
   useVendorCredit,
@@ -26,6 +27,11 @@ const VendorCreditNoteFormContext = React.createContext();
 function VendorCreditNoteFormProvider({ vendorCreditId, ...props }) {
   const { state } = useLocation();
   const billId = state?.billId;
+
+  const {
+    data: accounts,
+    isLoading: isAccountsLoading,
+  } = useAccounts();
 
   // Features guard.
   const { featureCan } = useFeatureCan();
@@ -89,13 +95,19 @@ function VendorCreditNoteFormProvider({ vendorCreditId, ...props }) {
 
   const newVendorCredit = !isEmpty(bill)
     ? transformToEditForm({
-        ...pick(bill, ['vendor_id', 'currency_code', 'entries']),
+        ...pick(bill, [
+          'vendor_id',
+          'payable_account_id',
+          'currency_code',
+          'entries',
+        ]),
       })
     : [];
 
   // Provider payload.
   const provider = {
     items,
+    accounts,
     vendors,
     vendorCredit,
     warehouses,
@@ -119,6 +131,7 @@ function VendorCreditNoteFormProvider({ vendorCreditId, ...props }) {
       loading={
         isVendorCreditLoading ||
         isItemsLoading ||
+        isAccountsLoading ||
         isVendorsLoading ||
         isVendorCreditLoading ||
         isBillLoading

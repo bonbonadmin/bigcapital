@@ -133,6 +133,35 @@ export class BillPaymentValidators {
     return storedBills;
   }
 
+  public async getPayableAccountIdFromBillsOrThrowError(bills: Bill[]) {
+    const payableAccountIds = await Promise.all(
+      bills.map(async (bill) => {
+        if (bill.payableAccountId) {
+          return bill.payableAccountId;
+        }
+        const payableAccount = await this.accountModel()
+          .query()
+          .where('accountType', ACCOUNT_TYPE.ACCOUNTS_PAYABLE)
+          .modify((query) => {
+            if (bill.currencyCode) {
+              query.where('currencyCode', bill.currencyCode);
+            }
+          })
+          .first();
+
+        return payableAccount?.id || null;
+      }),
+    );
+    const uniquePayableAccountIds = [
+      ...new Set(payableAccountIds.filter((id) => id)),
+    ];
+
+    if (uniquePayableAccountIds.length > 1) {
+      throw new ServiceError(ERRORS.BILLS_HAVE_DIFFERENT_PAYABLE_ACCOUNTS);
+    }
+    return uniquePayableAccountIds[0] || null;
+  }
+
   /**
    * Validate wether the payment amount bigger than the payable amount.
    * @param {Request} req

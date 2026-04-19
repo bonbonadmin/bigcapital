@@ -145,6 +145,14 @@ export const transformErrors = (errors, { setFieldError }) => {
       intent: Intent.DANGER,
     });
   }
+  if (getError(PAYMENT_MADE_ERRORS.BILLS_HAVE_DIFFERENT_PAYABLE_ACCOUNTS)) {
+    AppToaster.show({
+      message: intl.get(
+        'payment_made.error.bills_have_different_payable_accounts',
+      ),
+      intent: Intent.DANGER,
+    });
+  }
 };
 
 export const usePaymentMadeTotals = () => {

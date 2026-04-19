@@ -57,6 +57,7 @@ import { VendorCreditApplyBillsModule } from '../VendorCreditsApplyBills/VendorC
 import { VendorCreditsRefundModule } from '../VendorCreditsRefund/VendorCreditsRefund.module';
 import { CreditNoteRefundsModule } from '../CreditNoteRefunds/CreditNoteRefunds.module';
 import { BillPaymentsModule } from '../BillPayments/BillPayments.module';
+import { ExpensePaymentsModule } from '../ExpensePayments/ExpensePayments.module';
 import { PaymentsReceivedModule } from '../PaymentReceived/PaymentsReceived.module';
 import { LedgerModule } from '../Ledger/Ledger.module';
 import { BankRulesModule } from '../BankRules/BankRules.module';
@@ -219,6 +220,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     CreditNoteRefundsModule,
     CreditNotesApplyInvoiceModule,
     BillPaymentsModule,
+    ExpensePaymentsModule,
     PaymentsReceivedModule,
     LedgerModule,
     BankAccountsModule,

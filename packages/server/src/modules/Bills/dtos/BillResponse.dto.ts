@@ -44,6 +44,13 @@ export class BillResponseDto {
   vendorId: number;
 
   @ApiProperty({
+    description: 'The ID of the accounts payable account',
+    example: 401,
+    required: false,
+  })
+  payableAccountId?: number;
+
+  @ApiProperty({
     description: 'The exchange rate for currency conversion',
     example: 1.25,
     required: false,

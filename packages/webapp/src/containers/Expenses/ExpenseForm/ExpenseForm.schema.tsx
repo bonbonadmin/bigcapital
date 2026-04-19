@@ -5,10 +5,21 @@ import { DATATYPES_LENGTH } from '@/constants/dataTypes';
 import { isBlank } from '@/utils';
 
 const Schema = Yup.object().shape({
-  beneficiary: Yup.string().label(intl.get('beneficiary')),
-  payment_account_id: Yup.number()
-    .required()
-    .label(intl.get('payment_account_')),
+  expense_mode: Yup.string().nullable(),
+  payee_id: Yup.number()
+    .nullable()
+    .when('expense_mode', {
+      is: 'payable',
+      then: Yup.number().required().label(intl.get('vendor_name_')),
+    }),
+  payment_account_id: Yup.number().nullable().when('expense_mode', {
+    is: 'payable',
+    otherwise: Yup.number().required().label(intl.get('payment_account_')),
+  }),
+  payable_account_id: Yup.number().nullable().when('expense_mode', {
+    is: 'payable',
+    then: Yup.number().required().label(intl.get('payable_account_')),
+  }),
   payment_date: Yup.date().required().label(intl.get('payment_date_')),
   reference_no: Yup.string().min(1).max(DATATYPES_LENGTH.STRING).nullable(),
   currency_code: Yup.string()

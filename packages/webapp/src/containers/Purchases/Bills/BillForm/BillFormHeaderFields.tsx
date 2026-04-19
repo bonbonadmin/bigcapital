@@ -12,6 +12,7 @@ import {
   FFormGroup,
   FieldRequiredHint,
   Icon,
+  AccountsSelect,
   VendorDrawerLink,
   VendorsSelect,
   FDateInput,
@@ -19,7 +20,11 @@ import {
 } from '@/components';
 
 import { useBillFormContext } from './BillFormProvider';
-import { vendorsFieldShouldUpdate } from './utils';
+import {
+  accountsFieldShouldUpdate,
+  useSetDefaultPayableAccountToForm,
+  vendorsFieldShouldUpdate,
+} from './utils';
 import {
   BillExchangeRateInputField,
   BillProjectSelectButton,
@@ -31,6 +36,7 @@ import {
   compose,
 } from '@/utils';
 import { Features } from '@/constants';
+import { ACCOUNT_TYPE } from '@/constants/accountTypes';
 import { useTheme } from '@emotion/react';
 
 const getBillFieldsStyle = (theme: Theme) => css`
@@ -55,15 +61,38 @@ const getBillFieldsStyle = (theme: Theme) => css`
  */
 function BillFormHeader() {
   // Bill form context.
-  const { vendors, projects } = useBillFormContext();
+  const { accounts, projects } = useBillFormContext();
 
   const theme = useTheme();
   const billFieldsClassName = getBillFieldsStyle(theme);
+
+  useSetDefaultPayableAccountToForm();
 
   return (
     <Stack spacing={18} flex={1} className={billFieldsClassName}>
       {/* ------- Vendor name ------ */}
       <BillFormVendorField />
+
+      {/* ------- Payable account ------ */}
+      <FFormGroup
+        name={'payable_account_id'}
+        label={<T id={'payable_account'} />}
+        inline
+        labelInfo={<FieldRequiredHint />}
+        items={accounts}
+        shouldUpdate={accountsFieldShouldUpdate}
+        fastField
+      >
+        <AccountsSelect
+          name={'payable_account_id'}
+          items={accounts}
+          placeholder={<T id={'select_payable_account'} />}
+          filterByTypes={[ACCOUNT_TYPE.ACCOUNTS_PAYABLE]}
+          shouldUpdate={accountsFieldShouldUpdate}
+          fastField
+          fill
+        />
+      </FFormGroup>
 
       {/* ----------- Exchange rate ----------- */}
       <BillExchangeRateInputField

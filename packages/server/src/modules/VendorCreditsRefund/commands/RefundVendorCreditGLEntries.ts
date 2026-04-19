@@ -136,17 +136,20 @@ export class RefundVendorCreditGLEntries {
       .findById(refundVendorCreditId)
       .withGraphFetched('vendorCredit');
 
-    // Retrieve the payable account (A/P) account based on the given currency.
-    const APAccount = await this.accountRepository.findOrCreateAccountsPayable(
-      refundVendorCredit.currencyCode,
-      {},
-      trx,
-    );
+    const payableAccountId =
+      refundVendorCredit.vendorCredit?.payableAccountId ||
+      (
+        await this.accountRepository.findOrCreateAccountsPayable(
+          refundVendorCredit.currencyCode,
+          {},
+          trx,
+        )
+      ).id;
 
     // Retrieve refund vendor credit GL entries.
     const refundGLEntries = this.getRefundVendorCreditGLEntries(
       refundVendorCredit,
-      APAccount.id,
+      payableAccountId,
     );
     const ledger = new Ledger(refundGLEntries);
 

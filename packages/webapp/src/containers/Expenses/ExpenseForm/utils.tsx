@@ -40,8 +40,10 @@ export const defaultExpenseEntry = {
 };
 
 export const defaultExpense = {
+  expense_mode: 'paid',
   payment_account_id: '',
-  beneficiary: '',
+  payable_account_id: '',
+  payee_id: '',
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
   description: '',
   reference_no: '',
@@ -108,9 +110,9 @@ export const transformToEditForm = (
 };
 
 /**
- * Detarmine cusotmers fast-field should update.
+ * Detarmine vendors fast-field should update.
  */
-export const customersFieldShouldUpdate = (newProps, oldProps) => {
+export const vendorsFieldShouldUpdate = (newProps, oldProps) => {
   return (
     newProps.shouldUpdateDeps.items !== oldProps.shouldUpdateDeps.items ||
     defaultFastFieldShouldUpdate(newProps, oldProps)
@@ -142,9 +144,13 @@ export const filterNonZeroEntries = (categories) => {
 export const transformFormValuesToRequest = (values) => {
   const categories = filterNonZeroEntries(values.categories);
   const attachments = transformAttachmentsToRequest(values);
+  const isPayableExpense = values.expense_mode === 'payable';
 
   return {
-    ...values,
+    ...R.omit(['expense_mode'], values),
+    payment_account_id: isPayableExpense ? null : values.payment_account_id,
+    payable_account_id: isPayableExpense ? values.payable_account_id : null,
+    payee_id: isPayableExpense ? values.payee_id : null,
     categories: R.compose(orderingLinesIndexes)(categories),
     attachments,
   };

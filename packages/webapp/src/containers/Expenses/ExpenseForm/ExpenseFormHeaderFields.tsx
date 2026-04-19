@@ -2,25 +2,27 @@
 import React from 'react';
 import { FormGroup, Position, Classes } from '@blueprintjs/core';
 import { DateInput } from '@blueprintjs/datetime';
+import { useFormikContext } from 'formik';
 import { FastField, ErrorMessage } from 'formik';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import { useTheme } from '@emotion/react';
+import styled from 'styled-components';
 
 import {
-  CustomersSelect,
   FInputGroup,
   Stack,
   FormattedMessage as T,
+  VendorDrawerLink,
+  VendorsSelect,
 } from '@/components';
-import { CLASSES } from '@/constants/classes';
 import {
   momentFormatter,
   tansformDateValue,
   inputIntent,
   handleDateChange,
 } from '@/utils';
-import { customersFieldShouldUpdate, accountsFieldShouldUpdate } from './utils';
+import { vendorsFieldShouldUpdate, accountsFieldShouldUpdate } from './utils';
 import {
   FFormGroup,
   FSelect,
@@ -30,7 +32,11 @@ import {
 } from '@/components';
 import { ExpensesExchangeRateInputField } from './components';
 import { useExpenseFormContext } from './ExpenseFormPageProvider';
-import { SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES } from './constants';
+import {
+  EXPENSE_FORM_MODE,
+  SUPPORTED_EXPENSE_PAYABLE_ACCOUNT_TYPES,
+  SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES,
+} from './constants';
 
 const getFieldsStyle = (theme: Theme) => css`
   .${theme.bpPrefix}-form-group {
@@ -53,7 +59,7 @@ const getFieldsStyle = (theme: Theme) => css`
  * Expense form header.
  */
 export default function ExpenseFormHeader() {
-  const { currencies, accounts, customers } = useExpenseFormContext();
+  const { currencies, accounts, expenseMode } = useExpenseFormContext();
   const theme = useTheme();
   const fieldsClassName = getFieldsStyle(theme);
 
@@ -81,26 +87,49 @@ export default function ExpenseFormHeader() {
         )}
       </FastField>
 
-      <FFormGroup
-        name={'payment_account_id'}
-        items={accounts}
-        label={<T id={'payment_account'} />}
-        labelInfo={<FieldRequiredHint />}
-        inline={true}
-        fastField={true}
-        shouldUpdate={accountsFieldShouldUpdate}
-      >
-        <AccountsSelect
+      {expenseMode === EXPENSE_FORM_MODE.PAID ? (
+        <FFormGroup
           name={'payment_account_id'}
           items={accounts}
-          placeholder={<T id={'select_payment_account'} />}
-          filterByTypes={SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES}
-          allowCreate={true}
+          label={<T id={'payment_account'} />}
+          labelInfo={<FieldRequiredHint />}
+          inline={true}
           fastField={true}
           shouldUpdate={accountsFieldShouldUpdate}
-          fill={true}
-        />
-      </FFormGroup>
+        >
+          <AccountsSelect
+            name={'payment_account_id'}
+            items={accounts}
+            placeholder={<T id={'select_payment_account'} />}
+            filterByTypes={SUPPORTED_EXPENSE_PAYMENT_ACCOUNT_TYPES}
+            allowCreate={true}
+            fastField={true}
+            shouldUpdate={accountsFieldShouldUpdate}
+            fill={true}
+          />
+        </FFormGroup>
+      ) : (
+        <FFormGroup
+          name={'payable_account_id'}
+          items={accounts}
+          label={<T id={'payable_account'} />}
+          labelInfo={<FieldRequiredHint />}
+          inline={true}
+          fastField={true}
+          shouldUpdate={accountsFieldShouldUpdate}
+        >
+          <AccountsSelect
+            name={'payable_account_id'}
+            items={accounts}
+            placeholder={<T id={'select_payable_account'} />}
+            filterByTypes={SUPPORTED_EXPENSE_PAYABLE_ACCOUNT_TYPES}
+            allowCreate={true}
+            fastField={true}
+            shouldUpdate={accountsFieldShouldUpdate}
+            fill={true}
+          />
+        </FFormGroup>
+      )}
 
       <FFormGroup
         name={'currency_code'}
@@ -137,39 +166,53 @@ export default function ExpenseFormHeader() {
         <FInputGroup minimal={true} name={'reference_no'} fastField />
       </FFormGroup>
 
-      {/* ----------- Customer ----------- */}
-      <ExpenseFormCustomerSelect />
+      {/* ----------- Vendor ----------- */}
+      {expenseMode === EXPENSE_FORM_MODE.PAYABLE && <ExpenseFormVendorSelect />}
     </Stack>
   );
 }
 
 /**
- * Customer select field of expense form.
+ * Vendor select field of expense form.
  * @returns {React.ReactNode}
  */
-function ExpenseFormCustomerSelect() {
-  const { customers } = useExpenseFormContext();
+function ExpenseFormVendorSelect() {
+  const { values, setFieldValue } = useFormikContext();
+  const { vendors } = useExpenseFormContext();
 
   return (
-    <FormGroup
-      label={<T id={'customer'} />}
+    <FFormGroup
+      name={'payee_id'}
+      label={<T id={'vendor_name'} />}
       labelInfo={<Hint />}
-      inline={true}
-      name={'customer_id'}
+      inline
       fastField={true}
-      shouldUpdateDeps={{ items: customers }}
-      shouldUpdate={customersFieldShouldUpdate}
+      shouldUpdateDeps={{ items: vendors }}
+      shouldUpdate={vendorsFieldShouldUpdate}
     >
-      <CustomersSelect
-        name={'customer_id'}
-        items={customers}
-        placeholder={<T id={'select_customer_account'} />}
+      <VendorsSelect
+        name={'payee_id'}
+        items={vendors}
+        placeholder={<T id={'select_vender_account'} />}
+        onItemChange={(vendor) => {
+          setFieldValue('payee_id', vendor.id);
+        }}
         allowCreate={true}
         popoverFill={true}
         fastField={true}
-        shouldUpdateDeps={{ items: customers }}
-        shouldUpdate={customersFieldShouldUpdate}
+        shouldUpdateDeps={{ items: vendors }}
+        shouldUpdate={vendorsFieldShouldUpdate}
       />
-    </FormGroup>
+      {values.payee_id && (
+        <VendorButtonLink vendorId={values.payee_id}>
+          <T id={'view_vendor_details'} />
+        </VendorButtonLink>
+      )}
+    </FFormGroup>
   );
 }
+
+const VendorButtonLink = styled(VendorDrawerLink)`
+  font-size: 11px;
+  margin-top: 6px;
+`;

@@ -44,6 +44,7 @@ function tranformNewChildAccountPayload(account, payload) {
   return {
     parent_account_id: payload.parentAccountId || '',
     account_type: payload.accountType || '',
+    name: payload.name || '',
     subaccount: true,
   };
 }
@@ -54,6 +55,7 @@ function tranformNewChildAccountPayload(account, payload) {
 function transformNewDefinedTypePayload(account, payload) {
   return {
     account_type: payload.accountType || '',
+    name: payload.name || '',
   };
 }
 
@@ -71,6 +73,7 @@ const mergeWithAccount = R.curry((transformed, account) => {
  * Default account payload transformer.
  */
 const defaultPayloadTransform = (account, payload) => ({
+  name: payload?.name || '',
   subaccount: !!account.parent_account_id,
 });
 

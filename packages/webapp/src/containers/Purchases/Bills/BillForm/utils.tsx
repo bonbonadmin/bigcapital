@@ -32,6 +32,7 @@ import {
   transformAttachmentsToForm,
   transformAttachmentsToRequest,
 } from '@/containers/Attachments/utils';
+import { ACCOUNT_TYPE } from '@/constants/accountTypes';
 
 export const MIN_LINES_NUMBER = 1;
 
@@ -53,6 +54,7 @@ export const defaultBillEntry = {
 // Default bill.
 export const defaultBill = {
   vendor_id: '',
+  payable_account_id: '',
   bill_number: '',
   bill_date: moment(new Date()).format('YYYY-MM-DD'),
   due_date: moment(new Date()).format('YYYY-MM-DD'),
@@ -190,6 +192,13 @@ export const vendorsFieldShouldUpdate = (newProps, oldProps) => {
   );
 };
 
+export const accountsFieldShouldUpdate = (newProps, oldProps) => {
+  return (
+    newProps.items !== oldProps.items ||
+    defaultFastFieldShouldUpdate(newProps, oldProps)
+  );
+};
+
 /**
  * Detarmines entries fast field should update.
  */
@@ -258,6 +267,34 @@ export const useSetPrimaryWarehouseToForm = () => {
       }
     }
   }, [isWarehousesSuccess, setFieldValue, warehouses, isNewMode]);
+};
+
+export const useSetDefaultPayableAccountToForm = () => {
+  const { values, setFieldValue } = useFormikContext();
+  const { accounts, isNewMode } = useBillFormContext();
+
+  React.useEffect(() => {
+    if (!isNewMode || values.payable_account_id) {
+      return;
+    }
+    const payableAccounts = accounts.filter(
+      (account) => account.account_type === ACCOUNT_TYPE.ACCOUNTS_PAYABLE,
+    );
+    const defaultPayableAccount =
+      payableAccounts.find(
+        (account) => account.currency_code === values.currency_code,
+      ) || first(payableAccounts);
+
+    if (defaultPayableAccount) {
+      setFieldValue('payable_account_id', defaultPayableAccount.id);
+    }
+  }, [
+    accounts,
+    isNewMode,
+    setFieldValue,
+    values.currency_code,
+    values.payable_account_id,
+  ]);
 };
 
 /**

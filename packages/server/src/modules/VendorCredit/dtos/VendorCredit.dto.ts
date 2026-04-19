@@ -39,6 +39,15 @@ export class CommandVendorCreditDto {
   vendorId: number;
 
   @ToNumber()
+  @IsInt()
+  @IsOptional()
+  @ApiProperty({
+    description: 'The id of the accounts payable account',
+    example: 401,
+  })
+  payableAccountId?: number;
+
+  @ToNumber()
   @IsNumber()
   @IsOptional()
   @ApiProperty({

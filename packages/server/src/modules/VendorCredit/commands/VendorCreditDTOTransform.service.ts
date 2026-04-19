@@ -7,11 +7,15 @@ import { ItemsEntriesService } from '@/modules/Items/ItemsEntries.service';
 import { BranchTransactionDTOTransformer } from '@/modules/Branches/integrations/BranchTransactionDTOTransform';
 import { WarehouseTransactionDTOTransform } from '@/modules/Warehouses/Integrations/WarehouseTransactionDTOTransform';
 import { VendorCredit } from '../models/VendorCredit';
+import { Account } from '@/modules/Accounts/models/Account.model';
+import { ACCOUNT_TYPE } from '@/constants/accounts';
+import { AccountRepository } from '@/modules/Accounts/repositories/Account.repository';
 import { assocItemEntriesDefaultIndex } from '@/utils/associate-item-entries-index';
 import { formatDateFields } from '@/utils/format-date-fields';
 import { VendorCreditAutoIncrementService } from './VendorCreditAutoIncrement.service';
 import { ServiceError } from '@/modules/Items/ServiceError';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import {
   CreateVendorCreditDto,
   EditVendorCreditDto,
@@ -31,7 +35,42 @@ export class VendorCreditDTOTransformService {
     private branchDTOTransform: BranchTransactionDTOTransformer,
     private warehouseDTOTransform: WarehouseTransactionDTOTransform,
     private vendorCreditAutoIncrement: VendorCreditAutoIncrementService,
+    private accountRepository: AccountRepository,
+
+    @Inject(Account.name)
+    private readonly accountModel: TenantModelProxy<typeof Account>,
   ) { }
+
+  private async resolvePayableAccountId(
+    payableAccountId: number | undefined,
+    vendorCurrencyCode: string,
+    oldVendorCredit?: VendorCredit,
+  ): Promise<number> {
+    if (payableAccountId) {
+      const payableAccount = await this.accountModel()
+        .query()
+        .findById(payableAccountId);
+
+      if (!payableAccount) {
+        throw new ServiceError(ERRORS.PAYABLE_ACCOUNT_NOT_FOUND);
+      }
+      if (!payableAccount.isAccountType(ACCOUNT_TYPE.ACCOUNTS_PAYABLE)) {
+        throw new ServiceError(
+          ERRORS.PAYABLE_ACCOUNT_NOT_ACCOUNTS_PAYABLE_TYPE,
+        );
+      }
+      return payableAccount.id;
+    }
+    if (oldVendorCredit?.payableAccountId) {
+      return oldVendorCredit.payableAccountId;
+    }
+    const payableAccount =
+      await this.accountRepository.findOrCreateAccountsPayable(
+        vendorCurrencyCode,
+      );
+
+    return payableAccount.id;
+  }
 
   /**
    * Transforms the credit/edit vendor credit DTO to model.
@@ -48,6 +87,11 @@ export class VendorCreditDTOTransformService {
     // Calculates the total amount of items entries.
     const amount = this.itemsEntriesService.getTotalItemsEntries(
       vendorCreditDTO.entries,
+    );
+    const payableAccountId = await this.resolvePayableAccountId(
+      vendorCreditDTO.payableAccountId,
+      vendorCurrencyCode,
+      oldVendorCredit,
     );
     const entries = R.compose(
       // Associate the default index to each item entry.
@@ -79,6 +123,7 @@ export class VendorCreditDTOTransformService {
       currencyCode: vendorCurrencyCode,
       exchangeRate: vendorCreditDTO.exchangeRate || 1,
       vendorCreditNumber,
+      payableAccountId,
       entries,
       ...(vendorCreditDTO.open &&
         !oldVendorCredit?.openedAt && {

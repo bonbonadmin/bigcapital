@@ -54,6 +54,7 @@ export class ExpenseDTOTransformer {
   ): Promise<Expense> {
     const landedCostAmount = this.getExpenseLandedCostAmount(expenseDTO);
     const totalAmount = this.getExpenseCategoriesTotal(expenseDTO.categories);
+    const isPayableExpense = Boolean(expenseDTO.payableAccountId);
 
     const categories = R.compose(
       // Associate the default index to categories lines.
@@ -65,6 +66,11 @@ export class ExpenseDTOTransformer {
       categories,
       totalAmount,
       landedCostAmount,
+      paymentAmount: isPayableExpense ? 0 : totalAmount,
+      openedAt:
+        isPayableExpense && expenseDTO.publish
+          ? moment().toMySqlDateTime()
+          : null,
       paymentDate: moment(expenseDTO.paymentDate).toMySqlDateTime(),
       ...(expenseDTO.publish
         ? {

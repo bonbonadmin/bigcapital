@@ -31,12 +31,15 @@ export class VendorCreditGLEntries {
       .findById(vendorCreditId)
       .withGraphFetched('entries.item');
 
-    // Retrieve the payable account (A/P) account.
-    const APAccount = await this.accountRepository.findOrCreateAccountsPayable(
-      vendorCredit.currencyCode,
-      {},
-      trx,
-    );
+    const payableAccountId =
+      vendorCredit.payableAccountId ||
+      (
+        await this.accountRepository.findOrCreateAccountsPayable(
+          vendorCredit.currencyCode,
+          {},
+          trx,
+        )
+      ).id;
     // Retrieve the purchase discount account.
     const purchaseDiscountAccount =
       await this.accountRepository.findOrCreatePurchaseDiscountAccount({}, trx);
@@ -46,7 +49,7 @@ export class VendorCreditGLEntries {
       await this.accountRepository.findOrCreateOtherExpensesAccount({}, trx);
 
     const vendorCreditLedger = new VendorCreditGL(vendorCredit)
-      .setAPAccountId(APAccount.id)
+      .setAPAccountId(payableAccountId)
       .setPurchaseDiscountAccountId(purchaseDiscountAccount.id)
       .setOtherExpensesAccountId(otherExpensesAccount.id)
       .getVendorCreditLedger();

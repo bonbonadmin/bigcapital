@@ -1,4 +1,43 @@
 import { Features } from "@/common/types/Features";
+import { COMPARATOR_TYPE } from "@/modules/DynamicListing/DynamicFilter/constants";
+
+const PayableAccountFieldFilterQuery = (query, role) => {
+  query.whereExists(function() {
+    this.select(1)
+      .from('accounts')
+      .whereRaw('accounts.id = bills_payments.payable_account_id');
+
+    switch (role.comparator) {
+      case COMPARATOR_TYPE.NOT_EQUALS:
+      case COMPARATOR_TYPE.NOT_EQUAL:
+      case COMPARATOR_TYPE.IS_NOT:
+        this.whereNot('accounts.name', role.value);
+        break;
+      case COMPARATOR_TYPE.CONTAIN:
+      case COMPARATOR_TYPE.CONTAINS:
+        this.where('accounts.name', 'LIKE', `%${role.value}%`);
+        break;
+      case COMPARATOR_TYPE.NOT_CONTAIN:
+      case COMPARATOR_TYPE.NOT_CONTAINS:
+        this.whereNot('accounts.name', 'LIKE', `%${role.value}%`);
+        break;
+      case COMPARATOR_TYPE.STARTS_WITH:
+      case COMPARATOR_TYPE.START_WITH:
+        this.where('accounts.name', 'LIKE', `${role.value}%`);
+        break;
+      case COMPARATOR_TYPE.ENDS_WITH:
+      case COMPARATOR_TYPE.END_WITH:
+        this.where('accounts.name', 'LIKE', `%${role.value}`);
+        break;
+      case COMPARATOR_TYPE.EQUAL:
+      case COMPARATOR_TYPE.EQUALS:
+      case COMPARATOR_TYPE.IS:
+      default:
+        this.where('accounts.name', role.value);
+        break;
+    }
+  });
+};
 
 export const BillPaymentMeta = {
   defaultFilterField: 'vendor',
@@ -45,6 +84,12 @@ export const BillPaymentMeta = {
 
       relationEntityLabel: 'name',
       relationEntityKey: 'slug',
+    },
+    payable_account: {
+      name: 'bill_payment.field.payable_account',
+      column: 'payable_account_id',
+      fieldType: 'text',
+      filterCustomQuery: PayableAccountFieldFilterQuery,
     },
     payment_number: {
       name: 'bill_payment.field.payment_number',

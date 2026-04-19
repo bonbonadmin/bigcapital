@@ -5,6 +5,7 @@ import { ILedgerEntry } from '@/modules/Ledger/types/Ledger.types';
 import { ExpenseCategory } from '../models/ExpenseCategory.model';
 import { Ledger } from '@/modules/Ledger/Ledger';
 import { Expense } from '../models/Expense.model';
+import { ACCOUNT_TYPE } from '@/constants/accounts';
 
 export class ExpenseGL {
   private expense: Expense;
@@ -44,13 +45,25 @@ export class ExpenseGL {
    */
   private getExpenseGLPaymentEntry = (): ILedgerEntry => {
     const commonEntry = this.getExpenseGLCommonEntry();
+    const settlementAccount = this.expense.payableAccountId
+      ? this.expense.payableAccount
+      : this.expense.paymentAccount;
+    const accountId = this.expense.payableAccountId
+      ? this.expense.payableAccountId
+      : this.expense.paymentAccountId;
 
     return {
       ...commonEntry,
       credit: this.expense.localAmount,
-      accountId: this.expense.paymentAccountId,
+      accountId,
+      ...(this.expense.payeeId &&
+      settlementAccount?.isAccountType(ACCOUNT_TYPE.ACCOUNTS_PAYABLE)
+        ? {
+            contactId: this.expense.payeeId,
+          }
+        : {}),
       accountNormal:
-        this.expense?.paymentAccount?.accountNormal === 'debit'
+        settlementAccount?.accountNormal === 'debit'
           ? AccountNormal.DEBIT
           : AccountNormal.CREDIT,
       index: 1,

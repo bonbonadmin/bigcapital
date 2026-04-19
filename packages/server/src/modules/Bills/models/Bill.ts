@@ -14,6 +14,7 @@ import { BillMeta } from './Bill.meta';
 import { InjectModelDefaultViews } from '@/modules/Views/decorators/InjectModelDefaultViews.decorator';
 import { BillDefaultViews } from '../Bills.constants';
 import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttachable.decorator';
+import type { Account } from '@/modules/Accounts/models/Account.model';
 
 @InjectAttachable()
 @ExportableModel()
@@ -28,6 +29,7 @@ export class Bill extends TenantBaseModel {
   public taxAmountWithheld: number;
   public exchangeRate: number;
   public vendorId: number;
+  public payableAccountId: number | null;
   public billNumber: string;
   public billDate: Date;
   public dueDate: Date;
@@ -55,6 +57,7 @@ export class Bill extends TenantBaseModel {
   public entries?: ItemEntry[];
   public attachments!: Document[];
   public locatedLandedCosts?: BillLandedCost[];
+  public payableAccount?: Account;
   /**
    * Timestamps columns.
    */
@@ -495,6 +498,7 @@ export class Bill extends TenantBaseModel {
     const {
       MatchedBankTransaction,
     } = require('../../BankingMatching/models/MatchedBankTransaction');
+    const { Account } = require('../../Accounts/models/Account.model');
 
     return {
       vendor: {
@@ -506,6 +510,15 @@ export class Bill extends TenantBaseModel {
         },
         filter(query) {
           query.where('contact_service', 'vendor');
+        },
+      },
+
+      payableAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'bills.payableAccountId',
+          to: 'accounts.id',
         },
       },
 

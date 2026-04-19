@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import { Model, raw } from 'objection';
 import * as moment from 'moment';
 import { ExpenseCategory } from './ExpenseCategory.model';
@@ -18,13 +19,16 @@ import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttacha
 @InjectModelDefaultViews(ExpenseDefaultViews)
 export class Expense extends TenantBaseModel {
   totalAmount!: number;
+  paymentAmount!: number;
   currencyCode!: string;
   exchangeRate!: number;
   description?: string;
-  paymentAccountId!: number;
+  paymentAccountId!: number | null;
+  payableAccountId!: number | null;
   peyeeId!: number;
   referenceNo!: string;
   publishedAt!: Date | null;
+  openedAt!: Date | null;
   userId!: number;
   paymentDate!: Date;
   payeeId!: number;
@@ -36,6 +40,7 @@ export class Expense extends TenantBaseModel {
 
   categories!: ExpenseCategory[];
   paymentAccount!: Account;
+  payableAccount!: Account;
   attachments!: Document[];
 
   /**
@@ -71,6 +76,11 @@ export class Expense extends TenantBaseModel {
       'localUnallocatedCostAmount',
       'localAllocatedCostAmount',
       'billableAmount',
+      'dueAmount',
+      'isOpen',
+      'isPartiallyPaid',
+      'isFullyPaid',
+      'isPaid',
     ];
   }
 
@@ -130,6 +140,46 @@ export class Expense extends TenantBaseModel {
   }
 
   /**
+   * Retrieves the amount due for the expense.
+   * @returns {number}
+   */
+  get dueAmount() {
+    return Math.max(this.totalAmount - this.paymentAmount, 0);
+  }
+
+  /**
+   * Determines whether the expense is opened as payable.
+   * @returns {boolean}
+   */
+  get isOpen() {
+    return Boolean(this.openedAt);
+  }
+
+  /**
+   * Determines whether the expense is partially paid.
+   * @returns {boolean}
+   */
+  get isPartiallyPaid() {
+    return this.paymentAmount > 0 && this.dueAmount > 0;
+  }
+
+  /**
+   * Determines whether the expense is fully paid.
+   * @returns {boolean}
+   */
+  get isFullyPaid() {
+    return this.paymentAmount >= this.totalAmount;
+  }
+
+  /**
+   * Determines whether the expense has any payment applied.
+   * @returns {boolean}
+   */
+  get isPaid() {
+    return this.paymentAmount > 0;
+  }
+
+  /**
    * Model modifiers.
    */
   static get modifiers() {
@@ -160,6 +210,11 @@ export class Expense extends TenantBaseModel {
           query.where('payment_account_id', accountId);
         }
       },
+      filterByPayableAccount(query, accountId) {
+        if (accountId) {
+          query.where('payable_account_id', accountId);
+        }
+      },
       // viewRolesBuilder(query, conditionals, expression) {
       //   viewRolesBuilder(conditionals, expression)(query);
       // },
@@ -187,7 +242,41 @@ export class Expense extends TenantBaseModel {
       publish(query) {
         query.update({
           publishedAt: moment().toMySqlDateTime(),
+          openedAt: raw(
+            'CASE WHEN payable_account_id IS NOT NULL THEN ? ELSE opened_at END',
+            [moment().toMySqlDateTime()],
+          ),
+          paymentAmount: raw(
+            'CASE WHEN payable_account_id IS NULL THEN total_amount ELSE payment_amount END',
+          ),
         });
+      },
+
+      opened(query) {
+        query.whereNotNull('opened_at');
+      },
+
+      dueExpenses(query) {
+        query.where(
+          raw('COALESCE(TOTAL_AMOUNT, 0) - COALESCE(PAYMENT_AMOUNT, 0) > 0'),
+        );
+      },
+
+      unpaid(query) {
+        query.where('payment_amount', 0);
+      },
+
+      partiallyPaid(query) {
+        query.whereNot('payment_amount', 0);
+        query.where(
+          raw('COALESCE(PAYMENT_AMOUNT, 0) < COALESCE(TOTAL_AMOUNT, 0)'),
+        );
+      },
+
+      paid(query) {
+        query.where(
+          raw('COALESCE(PAYMENT_AMOUNT, 0) >= COALESCE(TOTAL_AMOUNT, 0)'),
+        );
       },
 
       /**
@@ -220,6 +309,15 @@ export class Expense extends TenantBaseModel {
         modelClass: Account,
         join: {
           from: 'expenses_transactions.paymentAccountId',
+          to: 'accounts.id',
+        },
+      },
+
+      payableAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'expenses_transactions.payableAccountId',
           to: 'accounts.id',
         },
       },
@@ -302,5 +400,17 @@ export class Expense extends TenantBaseModel {
    */
   static get preventMutateBaseCurrency() {
     return true;
+  }
+
+  static changePaymentAmount(
+    expenseId: number,
+    amount: number,
+    trx: Knex.Transaction,
+  ) {
+    const changeMethod = amount > 0 ? 'increment' : 'decrement';
+
+    return this.query(trx)
+      .where('id', expenseId)
+      [changeMethod]('payment_amount', Math.abs(amount));
   }
 }

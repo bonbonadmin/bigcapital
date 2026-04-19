@@ -6,12 +6,12 @@ import { Features } from '@/constants';
 import { useFeatureCan } from '@/hooks/state';
 import {
   useCurrencies,
-  useCustomers,
   useExpense,
   useAccounts,
   useBranches,
   useCreateExpense,
   useEditExpense,
+  useVendors,
 } from '@/hooks/query';
 import { useProjects } from '@/containers/Projects/hooks';
 
@@ -20,7 +20,7 @@ const ExpenseFormPageContext = createContext();
 /**
  * Accounts chart data provider.
  */
-function ExpenseFormPageProvider({ query, expenseId, ...props }) {
+function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
   // Features guard.
   const { featureCan } = useFeatureCan();
   const isBranchFeatureCan = featureCan(Features.Branches);
@@ -28,11 +28,11 @@ function ExpenseFormPageProvider({ query, expenseId, ...props }) {
 
   const { data: currencies, isLoading: isCurrenciesLoading } = useCurrencies();
 
-  // Fetches customers list.
+  // Fetches vendors list.
   const {
-    data: { customers },
-    isLoading: isCustomersLoading,
-  } = useCustomers();
+    data: { vendors },
+    isLoading: isVendorsLoading,
+  } = useVendors({ page_size: 10000 });
 
   // Fetch the expense details.
   const { data: expense, isLoading: isExpenseLoading } = useExpense(expenseId, {
@@ -74,10 +74,14 @@ function ExpenseFormPageProvider({ query, expenseId, ...props }) {
   const provider = {
     isNewMode,
     expenseId,
+    expenseMode:
+      expense?.payable_account_id || expense?.payableAccountId
+        ? 'payable'
+        : expenseMode,
     submitPayloadRef, // Expose ref for synchronous access
 
     currencies,
-    customers,
+    vendors,
     expense,
     accounts,
     branches,
@@ -85,7 +89,7 @@ function ExpenseFormPageProvider({ query, expenseId, ...props }) {
 
     isCurrenciesLoading,
     isExpenseLoading,
-    isCustomersLoading,
+    isVendorsLoading,
     isAccountsLoading,
     isBranchesSuccess,
 
@@ -99,7 +103,7 @@ function ExpenseFormPageProvider({ query, expenseId, ...props }) {
       loading={
         isCurrenciesLoading ||
         isExpenseLoading ||
-        isCustomersLoading ||
+        isVendorsLoading ||
         isAccountsLoading ||
         isProjectsLoading
       }

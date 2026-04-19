@@ -11,6 +11,8 @@ import {
   IExpenseDeletingPayload,
 } from '../interfaces/Expenses.interface';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { ServiceError } from '@/modules/Items/ServiceError';
+import { ERRORS } from '../constants';
 
 @Injectable()
 export class DeleteExpense {
@@ -52,6 +54,9 @@ export class DeleteExpense {
 
     // Validates the expense has no associated landed cost.
     await this.validator.validateNoAssociatedLandedCost(expenseId);
+    if (oldExpense.payableAccountId && oldExpense.paymentAmount > 0) {
+      throw new ServiceError(ERRORS.EXPENSE_HAS_ASSOCIATED_PAYMENTS);
+    }
 
     // Deletes expense transactions with associated transactions under
     // unit-of-work envirement.

@@ -7,6 +7,10 @@ import {
   NavbarDivider,
   Intent,
   Alignment,
+  Popover,
+  Position,
+  Menu,
+  MenuItem,
 } from '@blueprintjs/core';
 import { useHistory } from 'react-router-dom';
 
@@ -38,6 +42,7 @@ import { withSettings } from '@/containers/Settings/withSettings';
 import { compose } from '@/utils';
 import { isEmpty } from 'lodash';
 import { useBulkDeleteExpensesDialog } from './hooks/use-bulk-delete-expenses-dialog';
+import { EXPENSE_FORM_MODE } from '../ExpenseForm/constants';
 
 /**
  * Expenses actions bar.
@@ -72,8 +77,8 @@ function ExpensesActionsBar({
   const { refresh } = useRefreshExpenses();
 
   // Handles the new expense buttn click.
-  const onClickNewExpense = () => {
-    history.push('/expenses/new');
+  const onClickNewExpense = (mode) => {
+    history.push(`/expenses/new?mode=${mode}`);
   };
   const {
     openBulkDeleteDialog,
@@ -140,12 +145,29 @@ function ExpensesActionsBar({
         />
         <NavbarDivider />
         <Can I={ExpenseAction.Create} a={AbilitySubject.Expense}>
-          <Button
-            className={Classes.MINIMAL}
-            icon={<Icon icon="plus" />}
-            text={<T id={'new_expense'} />}
-            onClick={onClickNewExpense}
-          />
+          <Popover
+            position={Position.BOTTOM_LEFT}
+            content={
+              <Menu>
+                <MenuItem
+                  icon={<Icon icon="tick" />}
+                  text={<T id={'expense.new.fully_paid'} />}
+                  onClick={() => onClickNewExpense(EXPENSE_FORM_MODE.PAID)}
+                />
+                <MenuItem
+                  icon={<Icon icon="time" />}
+                  text={<T id={'expense.new.unpaid_partial'} />}
+                  onClick={() => onClickNewExpense(EXPENSE_FORM_MODE.PAYABLE)}
+                />
+              </Menu>
+            }
+          >
+            <Button
+              className={Classes.MINIMAL}
+              icon={<Icon icon="plus" />}
+              text={<T id={'new_expense'} />}
+            />
+          </Popover>
         </Can>
         <AdvancedFilterPopover
           advancedFilterProps={{
