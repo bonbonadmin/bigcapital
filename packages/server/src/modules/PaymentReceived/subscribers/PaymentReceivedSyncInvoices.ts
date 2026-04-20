@@ -25,10 +25,14 @@ export class PaymentReceivedSyncInvoicesSubscriber {
   @OnEvent(events.paymentReceive.onCreated)
   private async handleInvoiceIncrementPaymentOnceCreated({
     paymentReceive,
+    paymentReceiveDTO,
     trx,
   }: IPaymentReceivedCreatedPayload) {
     await this.paymentSyncInvoice.saveChangeInvoicePaymentAmount(
-      paymentReceive.entries,
+      (paymentReceiveDTO.entries || []).map((entry) => ({
+        invoiceId: entry.invoiceId,
+        paymentAmount: entry.paymentAmount,
+      })),
       null,
       trx
     );
@@ -40,12 +44,18 @@ export class PaymentReceivedSyncInvoicesSubscriber {
   @OnEvent(events.paymentReceive.onEdited)
   private async handleInvoiceIncrementPaymentOnceEdited({
     paymentReceive,
+    paymentReceiveDTO,
     oldPaymentReceive,
     trx,
   }: IPaymentReceivedEditedPayload) {
+    const oldEntries = oldPaymentReceive?.entries || null;
+
     await this.paymentSyncInvoice.saveChangeInvoicePaymentAmount(
-      paymentReceive.entries,
-      oldPaymentReceive?.entries || null,
+      (paymentReceiveDTO.entries || []).map((entry) => ({
+        invoiceId: entry.invoiceId,
+        paymentAmount: entry.paymentAmount,
+      })),
+      oldEntries,
       trx
     );
   }
