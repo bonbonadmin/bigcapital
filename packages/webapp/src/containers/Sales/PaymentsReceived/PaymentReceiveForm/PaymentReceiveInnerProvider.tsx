@@ -15,7 +15,7 @@ function PaymentReceiveInnerProvider({ ...props }) {
 
   // Formik context.
   const {
-    values: { customer_id: customerId },
+    values: { customer_id: customerId, amount },
     setFieldValue,
   } = useFormikContext();
 
@@ -31,9 +31,14 @@ function PaymentReceiveInnerProvider({ ...props }) {
 
   useEffect(() => {
     if (!isDueInvoicesFetching && dueInvoices && isNewMode) {
-      setFieldValue('entries', transformInvoicesNewPageEntries(dueInvoices));
+      const entries = transformInvoicesNewPageEntries(dueInvoices);
+      setFieldValue('entries', entries);
+
+      if (!amount && entries.length === 1) {
+        setFieldValue('amount', entries[0].due_amount || '');
+      }
     }
-  }, [isDueInvoicesFetching, dueInvoices, isNewMode, setFieldValue]);
+  }, [amount, isDueInvoicesFetching, dueInvoices, isNewMode, setFieldValue]);
 
   // Provider payload.
   const provider = {

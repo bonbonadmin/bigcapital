@@ -10,7 +10,6 @@ import { usePaymentReceiveFormContext } from './PaymentReceiveFormProvider';
 import {
   defaultFastFieldShouldUpdate,
   transformToForm,
-  safeSumBy,
   orderingLinesIndexes,
   formattedAmount,
 } from '@/utils';
@@ -20,6 +19,9 @@ import {
   transformAttachmentsToRequest,
 } from '@/containers/Attachments/utils';
 import { convertBrandingTemplatesToOptions } from '@/containers/BrandingTemplates/BrandingTemplatesSelectFields';
+
+const getEntryField = (entry, snakeKey, camelKey = snakeKey) =>
+  entry?.[snakeKey] ?? entry?.[camelKey];
 
 // Default payment receive entry.
 export const defaultPaymentReceiveEntry = {
@@ -76,7 +78,25 @@ export const transformToEditForm = (paymentReceive, paymentReceiveEntries) => ({
   entries: [
     ...paymentReceiveEntries.map((paymentReceiveEntry) => ({
       ...transformToForm(paymentReceiveEntry, defaultPaymentReceiveEntry),
-      payment_amount: paymentReceiveEntry.payment_amount || '',
+      invoice_id: getEntryField(paymentReceiveEntry, 'invoice_id', 'invoiceId'),
+      invoice_no: getEntryField(paymentReceiveEntry, 'invoice_no', 'invoiceNo'),
+      due_amount: getEntryField(paymentReceiveEntry, 'due_amount', 'dueAmount'),
+      date: getEntryField(paymentReceiveEntry, 'date'),
+      amount: getEntryField(paymentReceiveEntry, 'amount'),
+      currency_code: getEntryField(
+        paymentReceiveEntry,
+        'currency_code',
+        'currencyCode',
+      ),
+      payment_amount:
+        getEntryField(paymentReceiveEntry, 'payment_amount', 'paymentAmount') ||
+        '',
+      branch_id: getEntryField(paymentReceiveEntry, 'branch_id', 'branchId'),
+      total_payment_amount: getEntryField(
+        paymentReceiveEntry,
+        'total_payment_amount',
+        'totalPaymentAmount',
+      ),
     })),
   ],
   attachments: transformAttachmentsToForm(paymentReceive),
@@ -88,16 +108,20 @@ export const transformToEditForm = (paymentReceive, paymentReceiveEntries) => ({
 export const transformInvoicesNewPageEntries = (invoices) => [
   ...invoices.map((invoice, index) => ({
     index: index + 1,
-    invoice_id: invoice.id,
+    invoice_id: getEntryField(invoice, 'id'),
     entry_type: 'invoice',
-    due_amount: invoice.due_amount,
-    date: invoice.invoice_date,
-    amount: invoice.balance,
-    currency_code: invoice.currency_code,
+    due_amount: getEntryField(invoice, 'due_amount', 'dueAmount'),
+    date: getEntryField(invoice, 'invoice_date', 'invoiceDate'),
+    amount: getEntryField(invoice, 'balance', 'balanceAmount') ?? getEntryField(invoice, 'amount'),
+    currency_code: getEntryField(invoice, 'currency_code', 'currencyCode'),
     payment_amount: '',
-    invoice_no: invoice.invoice_no,
-    branch_id: invoice.branch_id,
-    total_payment_amount: invoice.payment_amount,
+    invoice_no: getEntryField(invoice, 'invoice_no', 'invoiceNo'),
+    branch_id: getEntryField(invoice, 'branch_id', 'branchId'),
+    total_payment_amount: getEntryField(
+      invoice,
+      'payment_amount',
+      'paymentAmount',
+    ),
   })),
 ];
 

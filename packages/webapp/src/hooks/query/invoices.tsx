@@ -297,7 +297,7 @@ export function useDueInvoices(customerId, props) {
     {
       method: 'get',
       url: `sale-invoices/receivable`,
-      params: { customer_id: customerId },
+      params: { customerId },
     },
     {
       select: (res) => res.data,

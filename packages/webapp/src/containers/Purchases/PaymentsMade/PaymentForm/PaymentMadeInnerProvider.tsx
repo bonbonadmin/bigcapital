@@ -16,7 +16,7 @@ function PaymentMadeInnerProvider({ ...props }) {
 
   // Formik context.
   const {
-    values: { vendor_id: vendorId },
+    values: { vendor_id: vendorId, amount },
     setFieldValue,
   } = useFormikContext();
 
@@ -31,9 +31,14 @@ function PaymentMadeInnerProvider({ ...props }) {
 
   useEffect(() => {
     if (!isNewEntriesFetching && newPageEntries && isNewMode) {
-      setFieldValue('entries', transformToNewPageEntries(newPageEntries));
+      const entries = transformToNewPageEntries(newPageEntries);
+      setFieldValue('entries', entries);
+
+      if (!amount && entries.length === 1) {
+        setFieldValue('amount', entries[0].due_amount || '');
+      }
     }
-  }, [isNewEntriesFetching, newPageEntries, isNewMode, setFieldValue]);
+  }, [amount, isNewEntriesFetching, newPageEntries, isNewMode, setFieldValue]);
 
   // Provider payload.
   const provider = {

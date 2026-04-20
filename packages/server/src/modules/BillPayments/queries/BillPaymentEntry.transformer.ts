@@ -7,7 +7,7 @@ export class BillPaymentEntryTransformer extends Transformer{
    * @returns {Array}
    */
   public includeAttributes = (): string[] => {
-    return ['paymentAmountFormatted', 'bill'];
+    return ['paymentAmountFormatted', 'dueAmount', 'dueAmountFormatted', 'bill'];
   };
 
   /**
@@ -23,5 +23,19 @@ export class BillPaymentEntryTransformer extends Transformer{
    */
   protected paymentAmountFormatted(entry) {
     return this.formatNumber(entry.paymentAmount, { money: false });
+  }
+
+  protected dueAmount(entry) {
+    return (
+      (Number(entry?.bill?.dueAmount) || 0) +
+      (Number(entry?.paymentAmount) || 0)
+    );
+  }
+
+  protected dueAmountFormatted(entry) {
+    return this.formatNumber(this.dueAmount(entry), {
+      currencyCode: entry?.bill?.currencyCode,
+      money: true,
+    });
   }
 }

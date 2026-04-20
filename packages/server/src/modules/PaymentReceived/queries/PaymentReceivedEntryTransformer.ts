@@ -8,7 +8,12 @@ export class PaymentReceivedEntryTransfromer extends Transformer {
    * @returns {Array}
    */
   public includeAttributes = (): string[] => {
-    return ['paymentAmountFormatted', 'invoice'];
+    return [
+      'paymentAmountFormatted',
+      'dueAmount',
+      'dueAmountFormatted',
+      'invoice',
+    ];
   };
 
   /**
@@ -18,6 +23,20 @@ export class PaymentReceivedEntryTransfromer extends Transformer {
    */
   protected paymentAmountFormatted(entry) {
     return this.formatNumber(entry.paymentAmount, { money: false });
+  }
+
+  protected dueAmount(entry) {
+    return (
+      (Number(entry?.invoice?.dueAmount) || 0) +
+      (Number(entry?.paymentAmount) || 0)
+    );
+  }
+
+  protected dueAmountFormatted(entry) {
+    return this.formatNumber(this.dueAmount(entry), {
+      currencyCode: entry?.invoice?.currencyCode,
+      money: true,
+    });
   }
 
   /**

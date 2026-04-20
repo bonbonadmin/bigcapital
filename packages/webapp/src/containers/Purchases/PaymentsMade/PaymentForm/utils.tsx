@@ -2,14 +2,13 @@
 import React from 'react';
 import moment from 'moment';
 import intl from 'react-intl-universal';
-import { pick, first, sumBy } from 'lodash';
+import { first, sumBy } from 'lodash';
 import { useFormikContext } from 'formik';
 import { Intent } from '@blueprintjs/core';
 import { AppToaster } from '@/components';
 import { usePaymentMadeFormContext } from './PaymentMadeFormProvider';
 import {
   defaultFastFieldShouldUpdate,
-  safeSumBy,
   transformToForm,
   orderingLinesIndexes,
   formattedAmount,
@@ -20,6 +19,9 @@ import {
   transformAttachmentsToForm,
   transformAttachmentsToRequest,
 } from '@/containers/Attachments/utils';
+
+const getEntryField = (entry, snakeKey, camelKey = snakeKey) =>
+  entry?.[snakeKey] ?? entry?.[camelKey];
 
 export const ERRORS = {
   PAYMENT_NUMBER_NOT_UNIQUE: 'PAYMENT.NUMBER.NOT.UNIQUE',
@@ -59,7 +61,19 @@ export const transformToEditForm = (paymentMade, paymentMadeEntries) => {
     entries: [
       ...paymentMadeEntries.map((paymentMadeEntry) => ({
         ...transformToForm(paymentMadeEntry, defaultPaymentMadeEntry),
-        payment_amount: paymentMadeEntry.payment_amount || '',
+        bill_id: getEntryField(paymentMadeEntry, 'bill_id', 'billId'),
+        due_amount: getEntryField(paymentMadeEntry, 'due_amount', 'dueAmount'),
+        amount: getEntryField(paymentMadeEntry, 'amount'),
+        currency_code: getEntryField(
+          paymentMadeEntry,
+          'currency_code',
+          'currencyCode',
+        ),
+        payment_amount:
+          getEntryField(paymentMadeEntry, 'payment_amount', 'paymentAmount') ||
+          '',
+        date: getEntryField(paymentMadeEntry, 'date'),
+        bill_no: getEntryField(paymentMadeEntry, 'bill_no', 'billNo'),
       })),
     ],
     attachments,
@@ -72,8 +86,13 @@ export const transformToEditForm = (paymentMade, paymentMadeEntries) => {
 export const transformToNewPageEntries = (entries) => {
   return entries.map((entry) => ({
     ...transformToForm(entry, defaultPaymentMadeEntry),
+    bill_id: getEntryField(entry, 'bill_id', 'billId'),
+    due_amount: getEntryField(entry, 'due_amount', 'dueAmount'),
+    amount: getEntryField(entry, 'amount'),
     payment_amount: '',
-    currency_code: entry.currency_code,
+    currency_code: getEntryField(entry, 'currency_code', 'currencyCode'),
+    date: getEntryField(entry, 'date'),
+    bill_no: getEntryField(entry, 'bill_no', 'billNo'),
   }));
 };
 

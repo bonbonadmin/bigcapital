@@ -2,7 +2,6 @@
 import React from 'react';
 import intl from 'react-intl-universal';
 import { getColumnWidth } from '@/utils';
-import { FormatNumberCell } from '@/components';
 import { usePaymentMadeDetailContext } from './PaymentMadeDetailProvider';
 
 export const usePaymentMadeEntriesColumns = () => {
@@ -39,9 +38,8 @@ export const usePaymentMadeEntriesColumns = () => {
       },
       {
         Header: intl.get('due_amount'),
-        accessor: 'bill.due_amount',
-        Cell: FormatNumberCell,
-        width: getColumnWidth(entries, 'bill.due_amount', {
+        accessor: 'due_amount_formatted',
+        width: getColumnWidth(entries, 'due_amount_formatted', {
           minWidth: 60,
           magicSpacing: 5,
         }),
@@ -60,6 +58,6 @@ export const usePaymentMadeEntriesColumns = () => {
         align: 'right',
       },
     ],
-    [],
+    [entries],
   );
 };

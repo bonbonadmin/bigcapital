@@ -49,9 +49,9 @@ export const usePaymentReceiveEntriesColumns = () => {
       },
       {
         Header: intl.get('amount_due'),
-        accessor: 'invoice.due_amount_formatted',
+        accessor: 'due_amount_formatted',
         align: 'right',
-        width: getColumnWidth(entries, 'invoice.due_amount_formatted', {
+        width: getColumnWidth(entries, 'due_amount_formatted', {
           minWidth: 60,
           magicSpacing: 5,
         }),
@@ -70,7 +70,7 @@ export const usePaymentReceiveEntriesColumns = () => {
         textOverview: true,
       },
     ],
-    [],
+    [entries],
   );
 };
 

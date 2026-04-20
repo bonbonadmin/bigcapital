@@ -142,7 +142,7 @@ export function usePaymentMadeNewPageEntries(vendorId, props) {
     {
       method: 'get',
       url: `bill-payments/new-page/entries`,
-      params: { vendor_id: vendorId },
+      params: { vendorId },
     },
     {
       select: (res) => res.data,
