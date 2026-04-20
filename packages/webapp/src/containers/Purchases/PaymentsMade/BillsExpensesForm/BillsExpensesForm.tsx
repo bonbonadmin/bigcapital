@@ -44,7 +44,14 @@ import {
   useSettings,
   useVendors,
 } from '@/hooks/query';
-import { compose, formattedAmount, orderingLinesIndexes, safeSumBy, updateTableCell } from '@/utils';
+import {
+  compose,
+  formattedAmount,
+  momentFormatter,
+  orderingLinesIndexes,
+  safeSumBy,
+  updateTableCell,
+} from '@/utils';
 
 const defaultValues = {
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
@@ -301,6 +308,7 @@ function BottomFields({ accounts, baseCurrency }) {
             >
               <FDateInput
                 name={'payment_date'}
+                {...momentFormatter('YYYY/MM/DD')}
                 fill
                 fastField
                 popoverProps={{ minimal: true }}
