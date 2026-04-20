@@ -38,6 +38,12 @@ export class EditExpensePaymentService {
       .findById(expensePaymentId)
       .withGraphFetched('entries')
       .throwIfNotFound();
+    const oldExpensePaymentSnapshot = {
+      ...oldExpensePayment,
+      entries: (oldExpensePayment.entries || []).map((entry) => ({
+        ...entry,
+      })),
+    } as ExpensePayment;
 
     const vendor = await this.vendorModel()
       .query()
@@ -71,7 +77,7 @@ export class EditExpensePaymentService {
     );
     await this.validators.validateExpensesDueAmount(
       expensePaymentObj.entries,
-      oldExpensePayment.entries,
+      oldExpensePaymentSnapshot.entries,
     );
     if (expensePaymentObj.paymentNumber) {
       await this.validators.validatePaymentNumber(
@@ -94,11 +100,11 @@ export class EditExpensePaymentService {
         });
 
       await this.expenseSync.saveChangeExpensesPaymentAmount(
-        expensePayment.entries.map((entry) => ({
+        (paymentDTO.entries || []).map((entry) => ({
           expenseId: entry.expenseId,
           paymentAmount: entry.paymentAmount,
         })),
-        oldExpensePayment.entries,
+        oldExpensePaymentSnapshot.entries,
         trx,
       );
       await this.glEntries.rewritePaymentGLEntries(expensePaymentId, trx);
