@@ -411,6 +411,15 @@ export const SidebarMenu = [
                   ability: PaymentMadeAction.Create,
                 },
               },
+              {
+                text: 'Bills & Expenses',
+                href: '/payment-list/bills-expenses',
+                type: ISidebarMenuItemType.Link,
+                permission: {
+                  subject: AbilitySubject.PaymentMade,
+                  ability: PaymentMadeAction.Create,
+                },
+              },
             ],
           },
         ],

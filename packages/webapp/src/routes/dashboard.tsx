@@ -1208,6 +1208,21 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/payment-list/bills-expenses`,
+    component: lazy(
+      () =>
+        import(
+          '@/containers/Purchases/PaymentsMade/BillsExpensesForm/BillsExpensesFormPage'
+        ),
+    ),
+    breadcrumb: 'Bills & Expenses',
+    pageTitle: 'Bills & Expenses',
+    sidebarExpand: false,
+    backLink: true,
+    defaultSearchResource: RESOURCES_TYPES.PAYMENT_MADE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/payments-made`,
     component: lazy(
       () =>
