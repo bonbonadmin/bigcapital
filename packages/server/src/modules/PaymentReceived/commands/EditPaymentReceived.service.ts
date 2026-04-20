@@ -60,6 +60,12 @@ export class EditPaymentReceivedService {
       .withGraphFetched('entries')
       .findById(paymentReceiveId)
       .throwIfNotFound();
+    const oldPaymentReceiveSnapshot = {
+      ...oldPaymentReceive,
+      entries: (oldPaymentReceive.entries || []).map((entry) => ({
+        ...entry,
+      })),
+    } as PaymentReceived;
 
     // Validates the payment existance.
     this.validators.validatePaymentExistance(oldPaymentReceive);
@@ -106,7 +112,7 @@ export class EditPaymentReceivedService {
     // Validate invoice payment amount.
     await this.validators.validateInvoicesPaymentsAmount(
       paymentReceiveDTO.entries,
-      oldPaymentReceive.entries,
+      oldPaymentReceiveSnapshot.entries,
     );
     // Validates the payment account currency code.
     this.validators.validatePaymentAccountCurrency(
@@ -119,22 +125,27 @@ export class EditPaymentReceivedService {
       // Triggers `onPaymentReceiveEditing` event.
       await this.eventPublisher.emitAsync(events.paymentReceive.onEditing, {
         trx,
-        oldPaymentReceive,
+        oldPaymentReceive: oldPaymentReceiveSnapshot,
         paymentReceiveDTO,
       } as IPaymentReceivedEditingPayload);
 
-      // Update the payment receive transaction.
-      const paymentReceive = await this.paymentReceiveModel()
+      // Update the payment receive transaction graph on the storage.
+      await this.paymentReceiveModel()
         .query(trx)
-        .upsertGraphAndFetch({
+        .upsertGraph({
           id: paymentReceiveId,
           ...paymentReceiveObj,
         });
+      const paymentReceive = await this.paymentReceiveModel()
+        .query(trx)
+        .withGraphFetched('entries')
+        .findById(paymentReceiveId)
+        .throwIfNotFound();
       // Triggers `onPaymentReceiveEdited` event.
       await this.eventPublisher.emitAsync(events.paymentReceive.onEdited, {
         paymentReceiveId,
         paymentReceive,
-        oldPaymentReceive,
+        oldPaymentReceive: oldPaymentReceiveSnapshot,
         paymentReceiveDTO,
         trx,
       } as IPaymentReceivedEditedPayload);
