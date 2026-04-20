@@ -25,6 +25,7 @@ const getEntryField = (entry, snakeKey, camelKey = snakeKey) =>
 
 // Default payment receive entry.
 export const defaultPaymentReceiveEntry = {
+  id: null,
   index: '',
   payment_amount: '',
   invoice_id: '',
@@ -78,6 +79,7 @@ export const transformToEditForm = (paymentReceive, paymentReceiveEntries) => ({
   entries: [
     ...paymentReceiveEntries.map((paymentReceiveEntry) => ({
       ...transformToForm(paymentReceiveEntry, defaultPaymentReceiveEntry),
+      id: getEntryField(paymentReceiveEntry, 'id'),
       invoice_id: getEntryField(paymentReceiveEntry, 'invoice_id', 'invoiceId'),
       invoice_no: getEntryField(paymentReceiveEntry, 'invoice_no', 'invoiceNo'),
       due_amount: getEntryField(paymentReceiveEntry, 'due_amount', 'dueAmount'),
