@@ -77,6 +77,8 @@ export class PaymentsReceivedPagesService {
     }
     const paymentEntries = paymentReceive.entries.map((entry) => ({
       ...this.invoiceToPageEntry(entry.invoice),
+      id: entry.id,
+      paymentReceiveId: entry.paymentReceiveId,
       dueAmount: entry.invoice.dueAmount + entry.paymentAmount,
       paymentAmount: entry.paymentAmount,
       index: entry.index,

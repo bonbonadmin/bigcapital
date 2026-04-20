@@ -54,6 +54,8 @@ export interface IPaymentsReceivedFilter extends IDynamicListFilter {
 }
 
 export interface IPaymentReceivePageEntry {
+  id?: number;
+  paymentReceiveId?: number;
   invoiceId: number;
   entryType: string;
   invoiceNo: string;
