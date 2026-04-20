@@ -341,10 +341,6 @@ function ExpensePaymentFormRoot({
 }) {
   const history = useHistory();
   const location = useLocation();
-  const redirectTo =
-    submitPayload.redirectTo ||
-    location.state?.redirectTo ||
-    '/expenses/payments-made';
   const {
     isNewMode,
     expensePaymentId,
@@ -355,6 +351,10 @@ function ExpensePaymentFormRoot({
     createExpensePaymentMutate,
     editExpensePaymentMutate,
   } = useExpensePaymentFormContext();
+  const redirectTo =
+    submitPayload.redirectTo ||
+    location.state?.redirectTo ||
+    '/expenses/payments-made';
 
   const initialValues = React.useMemo(
     () =>

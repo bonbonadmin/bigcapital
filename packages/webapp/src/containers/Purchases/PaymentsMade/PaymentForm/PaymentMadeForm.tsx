@@ -53,8 +53,6 @@ function PaymentMadeForm({
 }) {
   const history = useHistory();
   const location = useLocation();
-  const redirectTo =
-    submitPayload.redirectTo || location.state?.redirectTo || '/payments-made';
 
   // Payment made form context.
   const {
@@ -67,6 +65,8 @@ function PaymentMadeForm({
     editPaymentMadeMutate,
     isExcessConfirmed,
   } = usePaymentMadeFormContext();
+  const redirectTo =
+    submitPayload.redirectTo || location.state?.redirectTo || '/payments-made';
 
   // Form initial values.
   const initialValues = useMemo(
