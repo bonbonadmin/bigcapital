@@ -246,7 +246,11 @@ export class SaleInvoice extends TenantBaseModel {
    * @return {number}
    */
   get balanceAmount() {
-    return this.paymentAmount + this.writtenoffAmount + this.creditedAmount;
+    const paymentAmount = Number(this.paymentAmount) || 0;
+    const writtenoffAmount = Number(this.writtenoffAmount) || 0;
+    const creditedAmount = Number(this.creditedAmount) || 0;
+
+    return paymentAmount + writtenoffAmount + creditedAmount;
   }
 
   /**
@@ -255,7 +259,9 @@ export class SaleInvoice extends TenantBaseModel {
    * @return {boolean}
    */
   get dueAmount() {
-    return Math.max(this.total - this.balanceAmount, 0);
+    const total = Number(this.total) || 0;
+
+    return Math.max(total - this.balanceAmount, 0);
   }
 
   /**
@@ -306,7 +312,10 @@ export class SaleInvoice extends TenantBaseModel {
    * @returns {number}
    */
   get writtenoffAmountLocal() {
-    return this.writtenoffAmount * this.exchangeRate;
+    const writtenoffAmount = Number(this.writtenoffAmount) || 0;
+    const exchangeRate = Number(this.exchangeRate) || 0;
+
+    return writtenoffAmount * exchangeRate;
   }
 
   /**
