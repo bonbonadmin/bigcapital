@@ -187,9 +187,11 @@ export class CustomersMatchaPopSyncService {
     currencyCode: string,
     code?: string,
   ): CreateCustomerDto {
+    const customerType = customer.companyName ? 'business' : 'individual';
+
     return {
       externalId: customer.externalId,
-      customerType: 'individual',
+      customerType,
       currencyCode,
       firstName: customer.firstName,
       lastName: customer.lastName || '',
@@ -241,7 +243,7 @@ export class CustomersMatchaPopSyncService {
         lastName: customer.lastName,
         companyName: customer.companyName || '',
         displayName: customer.displayName,
-        contactType: 'individual',
+        contactType: customer.companyName ? 'business' : 'individual',
         ...(availableCode ? { code: availableCode } : {}),
         workPhone: customer.workPhone || null,
         email: customer.email || null,
