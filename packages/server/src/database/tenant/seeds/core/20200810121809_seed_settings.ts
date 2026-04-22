@@ -5,7 +5,11 @@ export default class SeedSettings extends TenantSeeder {
    *
    * @returns
    */
-  up() {
+  async up() {
+    const receivableAccount = await this.knex('accounts')
+      .where('slug', 'accounts-receivable')
+      .first();
+
     const settings = [
       // Orgnization settings.
       { group: 'organization', key: 'accounting_basis', value: 'accrual' },
@@ -22,6 +26,21 @@ export default class SeedSettings extends TenantSeeder {
       { group: 'sales_invoices', key: 'next_number', value: '00001' },
       { group: 'sales_invoices', key: 'number_prefix', value: 'INV-' },
       { group: 'sales_invoices', key: 'auto_increment', value: true },
+      {
+        group: 'sales_invoices',
+        key: 'erp_sales_types_per_customer',
+        value: '',
+      },
+      {
+        group: 'sales_invoices',
+        key: 'erp_last_sync_at',
+        value: '',
+      },
+      {
+        group: 'sales_invoices',
+        key: 'preferred_receivable_account',
+        value: receivableAccount?.id ?? null,
+      },
 
       // Sale receipts settings.
       { group: 'sales_receipts', key: 'next_number', value: '00001' },

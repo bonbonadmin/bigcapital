@@ -28,6 +28,11 @@ export default class SeedSettings extends TenantSeeder {
         key: 'preferred_inventory_account',
         value: inventoryAccount?.id,
       },
+      {
+        group: 'items',
+        key: 'allow_negative_inventory_assemblies',
+        value: false,
+      },
     ];
     return knex('settings').insert(settings);
   }

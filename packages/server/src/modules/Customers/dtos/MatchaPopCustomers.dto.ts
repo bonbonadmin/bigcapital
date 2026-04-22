@@ -39,6 +39,16 @@ export class ImportMatchaPopCustomerDto {
   @IsString()
   @MaxLength(255)
   @ApiProperty({
+    description: 'Customer company name',
+    required: false,
+    example: 'PT Hegemoni Rasa',
+  })
+  companyName?: string;
+
+  @IsOptionalDecorator()
+  @IsString()
+  @MaxLength(255)
+  @ApiProperty({
     description: 'Customer last name',
     required: false,
     example: 'Rosaline',

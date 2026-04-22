@@ -14,6 +14,7 @@ import { TenancyContext } from '../Tenancy/TenancyContext.service';
 type MatchaPopCustomer = {
   id: number;
   fullName?: string | null;
+  company_name?: string | null;
   firstName?: string | null;
   middleName?: string | null;
   lastName?: string | null;
@@ -61,18 +62,34 @@ export class CustomersMatchaPopSyncService {
       .trim();
   }
 
-  private buildDisplayName(firstName: string, lastName: string, fullName: string) {
-    return [firstName, lastName].filter(Boolean).join(' ').trim() || fullName;
+  private buildDisplayName(
+    companyName: string,
+    firstName: string,
+    lastName: string,
+    fullName: string,
+  ) {
+    return (
+      companyName ||
+      [firstName, lastName].filter(Boolean).join(' ').trim() ||
+      fullName
+    );
   }
 
   private normalizeCustomer(customer: MatchaPopCustomer) {
+    const companyName = this.normalizeText(customer.company_name);
     const firstName = this.normalizeText(customer.firstName);
     const lastName = this.buildLastName(customer);
     const fullName = this.normalizeText(customer.fullName);
-    const displayName = this.buildDisplayName(firstName, lastName, fullName);
+    const displayName = this.buildDisplayName(
+      companyName,
+      firstName,
+      lastName,
+      fullName,
+    );
 
     return {
       externalId: Number(customer.id),
+      companyName,
       firstName,
       lastName,
       displayName,
@@ -176,7 +193,7 @@ export class CustomersMatchaPopSyncService {
       currencyCode,
       firstName: customer.firstName,
       lastName: customer.lastName || '',
-      companyName: '',
+      companyName: customer.companyName || '',
       displayName: customer.displayName,
       code,
       email: customer.email || '',
@@ -222,7 +239,7 @@ export class CustomersMatchaPopSyncService {
       const patch = {
         firstName: customer.firstName,
         lastName: customer.lastName,
-        companyName: '',
+        companyName: customer.companyName || '',
         displayName: customer.displayName,
         contactType: 'individual',
         ...(availableCode ? { code: availableCode } : {}),
