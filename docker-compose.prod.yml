@@ -1,6 +1,6 @@
 # This is a production version of the Bigcapital docker-compose.yml file.
 
-version: '3.3'
+version: "3.3"
 
 services:
   proxy:
@@ -9,8 +9,8 @@ services:
       - server
       - webapp
     ports:
-      - '${PUBLIC_PROXY_PORT:-80}:80'
-      - '${PUBLIC_PROXY_SSL_PORT:-443}:443'
+      - "${PUBLIC_PROXY_PORT:-80}:80"
+      - "${PUBLIC_PROXY_SSL_PORT:-443}:443"
     tty: true
     volumes:
       - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
@@ -29,7 +29,7 @@ services:
     container_name: bigcapital-server
     image: bigcapitalhq/server:latest
     expose:
-      - '3000'
+      - "3000"
     links:
       - mysql
       - redis
@@ -40,7 +40,18 @@ services:
     networks:
       - bigcapital_network
     environment:
-      # Mail
+      # Mail (SMTP2GO preferred)
+      - SMTP2GO_API_KEY=${SMTP2GO_API_KEY}
+      - SMTP2GO_API_BASE_URL=${SMTP2GO_API_BASE_URL}
+      - SMTP2GO_HOST=${SMTP2GO_HOST}
+      - SMTP2GO_USERNAME=${SMTP2GO_USERNAME}
+      - SMTP2GO_PASSWORD=${SMTP2GO_PASSWORD}
+      - SMTP2GO_PORT=${SMTP2GO_PORT}
+      - SMTP2GO_SECURE=${SMTP2GO_SECURE}
+      - SMTP2GO_FROM_NAME=${SMTP2GO_FROM_NAME}
+      - SMTP2GO_FROM_ADDRESS=${SMTP2GO_FROM_ADDRESS}
+
+      # Generic SMTP fallback
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
@@ -159,7 +170,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
     expose:
-      - '3306'
+      - "3306"
     networks:
       - bigcapital_network
 
@@ -169,7 +180,7 @@ services:
     build:
       context: ./docker/redis
     expose:
-      - '6379'
+      - "6379"
     volumes:
       - redis:/data
     networks:
@@ -178,7 +189,7 @@ services:
   gotenberg:
     image: gotenberg/gotenberg:7
     expose:
-      - '9000'
+      - "9000"
     networks:
       - bigcapital_network
 

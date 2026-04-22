@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as Mustache from 'mustache';
 import * as path from 'path';
 import { IMailAttachment } from './Mail.types';
+import { getFirstMailEnv, getMailFromAddress } from '@/common/config/mail';
 
 export class Mail {
   view: string;
@@ -11,7 +12,10 @@ export class Mail {
   cc: string | string[];
   bcc: string | string[];
   replyTo: string | string[];
-  from: string = `${process.env.MAIL_FROM_NAME} ${process.env.MAIL_FROM_ADDRESS}`;
+  from: string = getMailFromAddress({
+    name: getFirstMailEnv('SMTP2GO_FROM_NAME', 'MAIL_FROM_NAME'),
+    address: getFirstMailEnv('SMTP2GO_FROM_ADDRESS', 'MAIL_FROM_ADDRESS'),
+  });
   data: { [key: string]: string | number };
   attachments: IMailAttachment[];
 
