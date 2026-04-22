@@ -1,6 +1,7 @@
 {
   "field.type": "Item Type",
   "field.type.inventory": "Inventory",
+  "field.type.inventory-assembly": "Inventory Assembly",
   "field.type.service": "Service",
   "field.type.non-inventory": "Non Inventory",
   "field.name": "Item Name",
@@ -15,6 +16,7 @@
   "field.inventory_account": "Inventory Account",
   "field.purchase_description": "Purchase Description",
   "field.quantity_on_hand": "Quantity on Hand",
+  "field.unit_of_measure": "Unit of Measure",
   "field.note": "Note",
   "field.category": "Category",
   "field.category_hint": "Matches the category name.",

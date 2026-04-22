@@ -152,8 +152,8 @@ export const transformFormValuesToRequest = (values) => {
     ...R.omit(['expense_mode'], values),
     payment_account_id: isPayableExpense ? null : values.payment_account_id,
     payable_account_id: isPayableExpense ? values.payable_account_id : null,
-    sales_tax_rate_id: isPayableExpense ? values.sales_tax_rate_id || null : null,
-    withholding_tax_id: isPayableExpense ? values.withholding_tax_id || null : null,
+    sales_tax_rate_id: values.sales_tax_rate_id || null,
+    withholding_tax_id: values.withholding_tax_id || null,
     payee_id: isPayableExpense ? values.payee_id : null,
     categories: R.compose(orderingLinesIndexes)(categories),
     attachments,
@@ -221,7 +221,7 @@ export const useExpenseSalesTaxAmount = () => {
   const { taxRates } = useExpenseFormContext();
 
   return React.useMemo(() => {
-    if (values.expense_mode !== 'payable' || !values.sales_tax_rate_id) {
+    if (!values.sales_tax_rate_id) {
       return 0;
     }
     const salesTaxRate = taxRates.find(
@@ -232,7 +232,7 @@ export const useExpenseSalesTaxAmount = () => {
       return 0;
     }
     return (subtotal * (Number(salesTaxRate.rate) || 0)) / 100;
-  }, [subtotal, values.expense_mode, values.sales_tax_rate_id, taxRates]);
+  }, [subtotal, values.sales_tax_rate_id, taxRates]);
 };
 
 export const useExpenseSalesTaxAmountFormatted = () => {
@@ -250,7 +250,7 @@ export const useExpenseWithholdingTaxAmount = () => {
   const { withholdingTaxes } = useExpenseFormContext();
 
   return React.useMemo(() => {
-    if (values.expense_mode !== 'payable' || !values.withholding_tax_id) {
+    if (!values.withholding_tax_id) {
       return 0;
     }
     const withholdingTax = withholdingTaxes.find(
@@ -263,7 +263,6 @@ export const useExpenseWithholdingTaxAmount = () => {
     return (subtotal * (Number(withholdingTax.rate) || 0)) / 100;
   }, [
     subtotal,
-    values.expense_mode,
     values.withholding_tax_id,
     withholdingTaxes,
   ]);

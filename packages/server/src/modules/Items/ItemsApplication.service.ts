@@ -15,6 +15,8 @@ import { EditItemDto, CreateItemDto } from './dtos/Item.dto';
 import { GetItemsQueryDto } from './dtos/GetItemsQuery.dto';
 import { BulkDeleteItemsService } from './BulkDeleteItems.service';
 import { ValidateBulkDeleteItemsService } from './ValidateBulkDeleteItems.service';
+import { ItemsMatchaPopSyncService } from './ItemsMatchaPopSync.service';
+import { ImportMatchaPopItemsDto } from './dtos/MatchaPopItems.dto';
 
 @Injectable()
 export class ItemsApplicationService {
@@ -29,6 +31,7 @@ export class ItemsApplicationService {
     private readonly itemTransactionsService: ItemTransactionsService,
     private readonly bulkDeleteItemsService: BulkDeleteItemsService,
     private readonly validateBulkDeleteItemsService: ValidateBulkDeleteItemsService,
+    private readonly itemsMatchaPopSyncService: ItemsMatchaPopSyncService,
   ) { }
 
   /**
@@ -163,5 +166,13 @@ export class ItemsApplicationService {
     options?: { skipUndeletable?: boolean },
   ): Promise<void> {
     return this.bulkDeleteItemsService.bulkDeleteItems(itemIds, options);
+  }
+
+  async syncMatchaPopItems() {
+    return this.itemsMatchaPopSyncService.syncExistingItems();
+  }
+
+  async importMatchaPopItems(dto: ImportMatchaPopItemsDto) {
+    return this.itemsMatchaPopSyncService.importProducts(dto);
   }
 }

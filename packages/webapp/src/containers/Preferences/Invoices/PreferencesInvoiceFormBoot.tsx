@@ -6,20 +6,26 @@ import { CLASSES } from '@/constants/classes';
 import { useSettings } from '@/hooks/query';
 import PreferencesPageLoader from '../PreferencesPageLoader';
 import { Card } from '@/components';
+import { useAccounts } from '@/hooks/query/accounts';
 
 const PreferencesInvoiceFormContext = React.createContext();
 
 function PreferencesInvoicesBoot({ ...props }) {
   // Fetches organization settings.
   const { isLoading: isSettingsLoading } = useSettings();
+  const { data: accounts, isLoading: isAccountsLoading } = useAccounts(
+    {},
+    { staleTime: 0 },
+  );
 
   // Provider state.
   const provider = {
-    isSettingsLoading
+    isSettingsLoading,
+    accounts: accounts || [],
   };
 
   // Detarmines whether if any query is loading.
-  const isLoading = isSettingsLoading;
+  const isLoading = isSettingsLoading || isAccountsLoading;
 
   return (
     <div

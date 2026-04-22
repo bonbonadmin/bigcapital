@@ -2,6 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class WarehouseResponseDto {
   @ApiProperty({
+    description: 'External ERP warehouse ID',
+    example: 2,
+    required: false,
+  })
+  externalId?: number;
+
+  @ApiProperty({
     description: 'The name of the warehouse',
     example: 'Main Warehouse',
   })

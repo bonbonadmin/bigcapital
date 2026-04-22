@@ -8,6 +8,7 @@ import { ImportableModel } from '@/modules/Import/decorators/Import.decorator';
 import { PreventMutateBaseCurrency } from '@/common/decorators/LockMutateBaseCurrency.decorator';
 import { InjectModelDefaultViews } from '@/modules/Views/decorators/InjectModelDefaultViews.decorator';
 import { ItemDefaultViews } from '../Items.constants';
+import { ItemAssemblyComponent } from './ItemAssemblyComponent';
 
 @ExportableModel()
 @ImportableModel()
@@ -37,8 +38,12 @@ export class Item extends TenantBaseModel {
   public readonly userId: number;
   public readonly sellTaxRateId: number;
   public readonly purchaseTaxRateId: number;
+  public readonly unitOfMeasure?: string | null;
+  public readonly externalId?: number | null;
 
   public readonly warehouse!: Warehouse;
+  public readonly assemblyComponents?: ItemAssemblyComponent[];
+  public readonly usedInAssemblies?: ItemAssemblyComponent[];
 
   static get tableName() {
     return 'items';
@@ -57,7 +62,7 @@ export class Item extends TenantBaseModel {
   static get modifiers() {
     return {
       updateQuantityOnHand(query, value: number) {
-        const q = query.where('type', 'inventory');
+        const q = query.whereIn('type', ['inventory', 'inventory-assembly']);
 
         if (value > 0) {
           q.increment('quantityOnHand', value);
@@ -107,6 +112,7 @@ export class Item extends TenantBaseModel {
       InventoryAdjustmentEntry,
     } = require('../../InventoryAdjutments/models/InventoryAdjustmentEntry');
     const { TaxRateModel } = require('../../TaxRates/models/TaxRate.model');
+    const { ItemAssemblyComponent } = require('./ItemAssemblyComponent');
 
     return {
       /**
@@ -202,6 +208,22 @@ export class Item extends TenantBaseModel {
         join: {
           from: 'items.id',
           to: 'inventory_adjustments_entries.itemId',
+        },
+      },
+      assemblyComponents: {
+        relation: Model.HasManyRelation,
+        modelClass: ItemAssemblyComponent,
+        join: {
+          from: 'items.id',
+          to: 'item_assembly_components.itemId',
+        },
+      },
+      usedInAssemblies: {
+        relation: Model.HasManyRelation,
+        modelClass: ItemAssemblyComponent,
+        join: {
+          from: 'items.id',
+          to: 'item_assembly_components.componentItemId',
         },
       },
 

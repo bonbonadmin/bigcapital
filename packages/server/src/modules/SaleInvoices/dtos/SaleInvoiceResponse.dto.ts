@@ -71,6 +71,13 @@ export class SaleInvoiceResponseDto {
   termsConditions?: string;
 
   @ApiProperty({
+    description: 'Comma-separated tags for the invoice',
+    example: 'priority,wholesale',
+    required: false,
+  })
+  tags?: string;
+
+  @ApiProperty({
     description: 'Whether tax is inclusive in the item rates',
     example: false,
     required: false,

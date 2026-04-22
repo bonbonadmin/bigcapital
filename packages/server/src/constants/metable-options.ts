@@ -125,6 +125,15 @@ export const SettingsOptions = {
     terms_conditions: {
       type: 'string',
     },
+    erp_sales_types_per_customer: {
+      type: 'string',
+    },
+    erp_last_sync_at: {
+      type: 'string',
+    },
+    preferred_receivable_account: {
+      type: 'number',
+    },
   },
   payment_receives: {
     next_number: {
@@ -152,6 +161,9 @@ export const SettingsOptions = {
     },
     preferred_inventory_account: {
       type: 'number',
+    },
+    allow_negative_inventory_assemblies: {
+      type: 'boolean',
     },
   },
   expenses: {

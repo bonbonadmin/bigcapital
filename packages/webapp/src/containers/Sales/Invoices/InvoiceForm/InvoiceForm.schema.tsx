@@ -35,6 +35,7 @@ const getSchema = () =>
       .min(1)
       .max(DATATYPES_LENGTH.TEXT)
       .label(intl.get('note')),
+    tags: Yup.string().nullable().max(DATATYPES_LENGTH.TEXT),
     exchange_rate: Yup.number(),
     inclusive_exclusive_tax: Yup.string().oneOf([
       TaxType.Inclusive,

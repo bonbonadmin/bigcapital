@@ -5,12 +5,17 @@ import { SaleInvoice } from '../models/SaleInvoice';
 import { AccountRepository } from '../../Accounts/repositories/Account.repository';
 import { InvoiceGL } from './InvoiceGL';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { SETTINGS_PROVIDER } from '@/modules/Settings/Settings.types';
+import { SettingsStore } from '@/modules/Settings/SettingsStore';
 
 @Injectable()
 export class SaleInvoiceGLEntries {
   constructor(
     private readonly ledegrRepository: LedgerStorageService,
     private readonly accountRepository: AccountRepository,
+
+    @Inject(SETTINGS_PROVIDER)
+    private readonly settingsStore: () => SettingsStore,
 
     @Inject(SaleInvoice.name)
     private readonly saleInvoiceModel: TenantModelProxy<typeof SaleInvoice>,
@@ -30,13 +35,29 @@ export class SaleInvoiceGLEntries {
       .findById(saleInvoiceId)
       .withGraphFetched('entries.item');
 
+    const settings = await this.settingsStore();
+    const preferredReceivableAccountId = settings.get(
+      {
+        group: 'sales_invoices',
+        key: 'preferred_receivable_account',
+      },
+      null,
+    );
+
+    const preferredReceivableAccount = preferredReceivableAccountId
+      ? await this.accountRepository.model.query(trx).findById(
+          preferredReceivableAccountId,
+        )
+      : null;
+
     // Find or create the A/R account.
     const ARAccount =
-      await this.accountRepository.findOrCreateAccountReceivable(
+      preferredReceivableAccount ||
+      (await this.accountRepository.findOrCreateAccountReceivable(
         saleInvoice.currencyCode,
         {},
         trx,
-      );
+      ));
     // Find or create tax payable account.
     const taxPayableAccount =
       await this.accountRepository.findOrCreateTaxPayable({}, trx);

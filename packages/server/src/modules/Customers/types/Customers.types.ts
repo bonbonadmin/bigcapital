@@ -10,6 +10,7 @@ import { EditCustomerDto } from '../dtos/EditCustomer.dto';
 // Customer Interfaces.
 // ----------------------------------
 export interface ICustomerNewDTO extends IContactAddressDTO {
+  externalId?: number;
   customerType: string;
 
   currencyCode: string;
@@ -36,6 +37,7 @@ export interface ICustomerNewDTO extends IContactAddressDTO {
 }
 
 export interface ICustomerEditDTO extends IContactAddressDTO {
+  externalId?: number;
   customerType: string;
 
   salutation?: string;

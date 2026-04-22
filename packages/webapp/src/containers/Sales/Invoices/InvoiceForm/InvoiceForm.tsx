@@ -32,6 +32,7 @@ import {
   transformErrors,
   transformValueToRequest,
   resetFormState,
+  filterSubmittedEntries,
 } from './utils';
 import {
   InvoiceExchangeRateSync,
@@ -95,15 +96,25 @@ function InvoiceFormRoot({
   const handleSubmit = (values, { setSubmitting, setErrors, resetForm }) => {
     setSubmitting(true);
 
-    const entries = values.entries.filter(
-      (item) => item.item_id && item.quantity,
-    );
-    const totalQuantity = sumBy(entries, (entry) => parseInt(entry.quantity));
+    const entries = filterSubmittedEntries(values.entries);
+    const totalQuantity = sumBy(entries, (entry) => Number(entry.quantity) || 0);
+    const hasPaymentReceived =
+      !isNewMode &&
+      (Number(invoice?.payment_amount ?? invoice?.paymentAmount) || 0) > 0;
 
-    // Throw danger toaster in case total quantity equals zero.
-    if (totalQuantity === 0) {
+    // At least one line is still required.
+    if (entries.length === 0) {
       AppToaster.show({
         message: intl.get('quantity_cannot_be_zero_or_empty'),
+        intent: Intent.DANGER,
+      });
+      setSubmitting(false);
+      return;
+    }
+    // Zero-total invoices are allowed only before any payment is received.
+    if (hasPaymentReceived && totalQuantity === 0) {
+      AppToaster.show({
+        message: intl.get('sale_invoice.total_smaller_than_paid_amount'),
         intent: Intent.DANGER,
       });
       setSubmitting(false);

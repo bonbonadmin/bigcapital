@@ -26,6 +26,7 @@ import {
   BulkDeleteCustomersDto,
   ValidateBulkDeleteCustomersResponseDto,
 } from './dtos/BulkDeleteCustomers.dto';
+import { ImportMatchaPopCustomersDto } from './dtos/MatchaPopCustomers.dto';
 import { ApiCommonHeaders } from '@/common/decorators/ApiCommonHeaders';
 import { RequirePermission } from '@/modules/Roles/RequirePermission.decorator';
 import { PermissionGuard } from '@/modules/Roles/Permission.guard';
@@ -158,5 +159,28 @@ export class CustomersController {
     return this.customersApplication.bulkDeleteCustomers(bulkDeleteDto.ids, {
       skipUndeletable: bulkDeleteDto.skipUndeletable ?? false,
     });
+  }
+
+  @Post('external/matchapop/sync')
+  @RequirePermission(CustomerAction.Edit, AbilitySubject.Customer)
+  @ApiOperation({
+    summary:
+      'Syncs existing customers by external ID with ERP data and returns missing customers for optional import.',
+  })
+  async syncMatchaPopCustomers(): Promise<any> {
+    return this.customersApplication.syncMatchaPopCustomers();
+  }
+
+  @Post('external/matchapop/import')
+  @RequirePermission(CustomerAction.Edit, AbilitySubject.Customer)
+  @ApiOperation({
+    summary: 'Imports ERP customers as new customers.',
+  })
+  async importMatchaPopCustomers(
+    @Body() importMatchaPopCustomersDto: ImportMatchaPopCustomersDto,
+  ): Promise<any> {
+    return this.customersApplication.importMatchaPopCustomers(
+      importMatchaPopCustomersDto,
+    );
   }
 }

@@ -11,6 +11,7 @@ import { VendorOpeningBalanceEditDto } from '../dtos/VendorOpeningBalanceEdit.dt
 
 // ----------------------------------
 export interface IVendorNewDTO extends IContactAddressDTO {
+  externalId?: number;
   currencyCode: string;
 
   openingBalance?: number;
@@ -34,6 +35,7 @@ export interface IVendorNewDTO extends IContactAddressDTO {
   code?: string;
 }
 export interface IVendorEditDTO extends IContactAddressDTO {
+  externalId?: number;
   salutation?: string;
   firstName?: string;
   lastName?: string;

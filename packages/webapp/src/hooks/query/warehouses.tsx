@@ -55,6 +55,36 @@ export function useEditWarehouse(props) {
   );
 }
 
+export function useSyncMatchaPopWarehouses(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    () => apiRequest.post('warehouses/external/matchapop/sync'),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
+export function useImportMatchaPopWarehouses(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    (values) => apiRequest.post('warehouses/external/matchapop/import', values),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
 /**
  * Deletes the given warehouse.
  */

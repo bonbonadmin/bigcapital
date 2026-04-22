@@ -51,6 +51,7 @@ export const defaultCreditNote = {
   reference_no: '',
   note: '',
   terms_conditions: '',
+  tags: '',
   branch_id: '',
   warehouse_id: '',
   exchange_rate: 1,

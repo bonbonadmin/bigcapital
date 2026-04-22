@@ -9,7 +9,7 @@ import { ItemEntry } from '@/modules/TransactionItemEntry/models/ItemEntry';
 import { Document } from '@/modules/ChromiumlyTenancy/models/Document';
 import { DiscountType } from '@/common/types/Discount';
 import { Account } from '@/modules/Accounts/models/Account.model';
-import { ISearchRole } from '@/modules/DynamicListing/DynamicFilter/DynamicFilter.types';
+import { PaymentReceivedEntry } from '@/modules/PaymentReceived/models/PaymentReceivedEntry';
 import { TenantBaseModel } from '@/modules/System/models/TenantBaseModel';
 import { TransactionPaymentServiceEntry } from '@/modules/PaymentServices/models/TransactionPaymentServiceEntry.model';
 import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttachable.decorator';
@@ -51,6 +51,8 @@ export class SaleInvoice extends TenantBaseModel {
   public customerId: number;
   public invoiceNo: string;
   public referenceNo: string;
+  public tags?: string | null;
+  public externalId?: number | null;
 
   public pdfTemplateId: number;
   public userId: number;
@@ -60,6 +62,7 @@ export class SaleInvoice extends TenantBaseModel {
 
   public taxes!: TaxRateTransaction[];
   public entries!: ItemEntry[];
+  public paymentEntries?: PaymentReceivedEntry[];
   public attachments!: Document[];
   public writtenoffExpenseAccount!: Account;
   public paymentMethods!: TransactionPaymentServiceEntry[];
@@ -752,10 +755,11 @@ export class SaleInvoice extends TenantBaseModel {
   /**
    * Model search attributes.
    */
-  static get searchRoles(): ISearchRole[] {
+  static get searchRoles() {
     return [
       { fieldKey: 'invoice_no', comparator: 'contains' },
-      // { condition: 'or', fieldKey: 'reference_no', comparator: 'contains' },
+      { condition: 'or', fieldKey: 'reference_no', comparator: 'contains' },
+      { condition: 'or', fieldKey: 'tags', comparator: 'contains' },
       // { condition: 'or', fieldKey: 'amount', comparator: 'equals' },
     ];
   }

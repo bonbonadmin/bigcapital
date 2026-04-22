@@ -17,6 +17,8 @@ export interface IBillDTO {
   paymentAmount: number;
   exchangeRate?: number;
   open: boolean;
+  salesTaxRateId?: number;
+  withholdingTaxId?: number;
   entries: IItemEntryDTO[];
   branchId?: number;
   warehouseId?: number;
@@ -36,6 +38,8 @@ export interface IBillEditDTO {
   amount: number;
   paymentAmount: number;
   open: boolean;
+  salesTaxRateId?: number;
+  withholdingTaxId?: number;
   entries: IItemEntryDTO[];
 
   branchId?: number;

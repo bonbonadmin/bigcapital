@@ -8,6 +8,8 @@ import { Item } from './models/Item';
 import { UnitOfWork } from '../Tenancy/TenancyDB/UnitOfWork.service';
 import { TenantModelProxy } from '../System/models/TenantBaseModel';
 import { EditItemDto } from './dtos/Item.dto';
+import { isInventoryTrackedItemType } from './Items.constants';
+import { ItemAssemblyComponentsService } from './ItemAssemblyComponents.service';
 
 @Injectable()
 export class EditItemService {
@@ -22,6 +24,7 @@ export class EditItemService {
     private readonly eventEmitter: EventEmitter2,
     private readonly uow: UnitOfWork,
     private readonly validators: ItemsValidators,
+    private readonly itemAssemblyComponents: ItemAssemblyComponentsService,
 
     @Inject(Item.name)
     private readonly itemModel: TenantModelProxy<typeof Item>,
@@ -64,12 +67,17 @@ export class EditItemService {
     this.validators.validateCostAccountExistance(
       itemDTO.purchasable,
       itemDTO.costAccountId,
+      itemDTO.type,
     );
     if (itemDTO.inventoryAccountId) {
       await this.validators.validateItemInventoryAccountExistance(
         itemDTO.inventoryAccountId,
       );
     }
+    this.validators.validateInventoryAccountRequired(
+      itemDTO.type,
+      itemDTO.inventoryAccountId,
+    );
     if (itemDTO.purchaseTaxRateId) {
       await this.validators.validatePurchaseTaxRateExistance(
         itemDTO.purchaseTaxRateId,
@@ -78,6 +86,11 @@ export class EditItemService {
     if (itemDTO.sellTaxRateId) {
       await this.validators.validateSellTaxRateExistance(itemDTO.sellTaxRateId);
     }
+    await this.itemAssemblyComponents.validateAssemblyComponents(
+      oldItem.id,
+      itemDTO.type,
+      itemDTO.assemblyComponents,
+    );
   }
 
   /**
@@ -90,9 +103,14 @@ export class EditItemService {
     itemDTO: EditItemDto,
     oldItem: Item,
   ): Partial<Item> {
+    const { assemblyComponents, ...itemAttributes } = itemDTO;
+
     return {
-      ...itemDTO,
-      ...(itemDTO.type === 'inventory' && oldItem.type !== 'inventory'
+      ...itemAttributes,
+      purchasable:
+        itemDTO.type === 'inventory-assembly' ? false : itemDTO.purchasable,
+      ...(isInventoryTrackedItemType(itemDTO.type) &&
+      !isInventoryTrackedItemType(oldItem.type)
         ? {
             quantityOnHand: 0,
           }
@@ -129,6 +147,12 @@ export class EditItemService {
       const newItem = await this.itemModel()
         .query(trx)
         .patchAndFetchById(itemId, itemModel);
+      await this.itemAssemblyComponents.syncAssemblyComponents(
+        itemId,
+        itemDTO.type,
+        itemDTO.assemblyComponents,
+        trx,
+      );
 
       // Edit event payload.
       const eventPayload: IItemEventEditedPayload = {

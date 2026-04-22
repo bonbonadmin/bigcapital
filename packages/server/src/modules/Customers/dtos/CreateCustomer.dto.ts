@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsInt,
   IsNumber,
   IsString,
   ValidateIf,
@@ -11,6 +12,16 @@ import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 import { ContactAddressDto } from './ContactAddress.dto';
 
 export class CreateCustomerDto extends ContactAddressDto {
+  @ApiProperty({
+    required: false,
+    description: 'External ERP customer ID',
+    example: 54,
+  })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  externalId?: number;
+
   @ApiProperty({
     required: true,
     description: 'Customer type',

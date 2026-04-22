@@ -71,6 +71,7 @@ export class Customer extends TenantBaseModel {
   active: boolean;
 
   code?: string;
+  externalId?: number | null;
 
   /**
    * Query builder.

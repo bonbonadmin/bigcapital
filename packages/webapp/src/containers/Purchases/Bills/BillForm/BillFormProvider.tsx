@@ -14,6 +14,7 @@ import {
   useSettings,
   useCreateBill,
   useEditBill,
+  useWithholdingTaxes,
 } from '@/hooks/query';
 import { useTaxRates } from '@/hooks/query/taxRates';
 
@@ -86,6 +87,10 @@ function BillFormProvider({ billId, ...props }) {
 
   // Fetch tax rates.
   const { data: taxRates, isLoading: isTaxRatesLoading } = useTaxRates();
+  const {
+    data: withholdingTaxes,
+    isLoading: isWithholdingTaxesLoading,
+  } = useWithholdingTaxes();
 
   // Fetches the projects list.
   const {
@@ -110,7 +115,8 @@ function BillFormProvider({ billId, ...props }) {
     isWarehouesLoading ||
     isBranchesLoading ||
     isProjectsLoading ||
-    isTaxRatesLoading;
+    isTaxRatesLoading ||
+    isWithholdingTaxesLoading;
 
   const provider = {
     accounts,
@@ -121,6 +127,7 @@ function BillFormProvider({ billId, ...props }) {
     branches,
     projects,
     taxRates,
+    withholdingTaxes,
     submitPayload,
     isNewMode,
 
@@ -133,6 +140,7 @@ function BillFormProvider({ billId, ...props }) {
     isBranchesSuccess,
     isWarehousesSuccess,
     isTaxRatesLoading,
+    isWithholdingTaxesLoading,
 
     createBillMutate,
     editBillMutate,

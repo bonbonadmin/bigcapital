@@ -10,6 +10,8 @@ const BillFormSchema = Yup.object().shape({
   payable_account_id: Yup.number()
     .required()
     .label(intl.get('payable_account_')),
+  sales_tax_rate_id: Yup.number().nullable(),
+  withholding_tax_id: Yup.number().nullable(),
   bill_date: Yup.date().required().label(intl.get('bill_date_')),
   due_date: Yup.date()
     .min(Yup.ref('bill_date'), ({ path, min }) =>

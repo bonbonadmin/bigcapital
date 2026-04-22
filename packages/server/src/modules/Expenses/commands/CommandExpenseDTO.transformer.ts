@@ -132,7 +132,9 @@ export class ExpenseDTOTransformer {
       landedCostAmount,
       paymentAmount: isPayableExpense
         ? 0
-        : totalAmount + (resolvedSalesTaxSnapshot?.salesTaxAmount || 0),
+        : totalAmount +
+          (resolvedSalesTaxSnapshot?.salesTaxAmount || 0) -
+          (resolvedWithholdingTaxSnapshot?.withholdingTaxAmount || 0),
       ...(resolvedSalesTaxSnapshot || {
         salesTaxRateId: null,
         salesTaxName: null,

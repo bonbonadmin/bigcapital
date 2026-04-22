@@ -10,6 +10,7 @@ import {
   CreateWarehouseTransferDto,
   EditWarehouseTransferDto,
 } from '../dtos/WarehouseTransfer.dto';
+import { isInventoryTrackedItemType } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class CommandWarehouseTransfer {
@@ -70,7 +71,9 @@ export class CommandWarehouseTransfer {
    * @returns {void}
    */
   validateItemsShouldBeInventory = (items: ModelObject<Item>[]): void => {
-    const nonInventoryItems = items.filter((item) => item.type !== 'inventory');
+    const nonInventoryItems = items.filter(
+      (item) => !isInventoryTrackedItemType(item.type),
+    );
 
     if (nonInventoryItems.length > 0) {
       throw new ServiceError(

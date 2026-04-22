@@ -5,6 +5,7 @@ import { InventoryTransaction } from '../models/InventoryTransaction';
 import { InventoryCostLotTracker } from '../models/InventoryCostLotTracker';
 import { Item } from '../../Items/models/Item';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { INVENTORY_TRACKED_ITEM_TYPES } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class InventoryItemCostService {
@@ -107,7 +108,7 @@ export class InventoryItemCostService {
     const items = await this.itemModel()
       .query()
       .whereIn('id', itemsId)
-      .where('type', 'inventory');
+      .whereIn('type', INVENTORY_TRACKED_ITEM_TYPES);
 
     // Retrieves the inventory items ids.
     const inventoryItemsIds: number[] = items.map((item) => item.id);

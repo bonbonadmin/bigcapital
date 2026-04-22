@@ -63,6 +63,7 @@ export const defaultInvoice = {
   reference_no: '',
   invoice_message: '',
   terms_conditions: '',
+  tags: '',
   exchange_rate: '1',
   currency_code: '',
   branch_id: '',
@@ -148,6 +149,16 @@ export const transformErrors = (errors, { setErrors }) => {
     });
   }
   if (
+    errors.some(
+      ({ type }) => type === 'INVOICE_HAS_ASSOCIATED_PAYMENT_ENTRIES',
+    )
+  ) {
+    AppToaster.show({
+      message: intl.get('the_invoice_cannot_be_deleted'),
+      intent: Intent.DANGER,
+    });
+  }
+  if (
     errors.some((error) => error.type === ERROR.SALE_INVOICE_NO_IS_REQUIRED)
   ) {
     setErrors({
@@ -200,15 +211,17 @@ export const ITEMS_FILTER_ROLES_QUERY = JSON.stringify([
 const transformEntriesToRequest = (entries) => {
   return R.compose(
     R.map(R.compose(R.curry(transformToForm)(R.__, defaultReqInvoiceEntry))),
-    filterNonZeroEntries,
+    filterSubmittedEntries,
   )(entries);
 };
 
 /**
- * Filters the givne non-zero entries.
+ * Filters the submitted invoice entries.
  */
-const filterNonZeroEntries = (entries) => {
-  return entries.filter((item) => item.item_id && item.quantity);
+export const filterSubmittedEntries = (entries) => {
+  return entries.filter(
+    (item) => item.item_id && !isBlank(item.quantity) && !isBlank(item.rate),
+  );
 };
 
 /**

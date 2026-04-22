@@ -132,6 +132,14 @@ export class CommandSaleReceiptDto {
   statement?: string;
 
   @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Comma-separated tags of the sale receipt',
+    example: 'priority,walk-in',
+  })
+  tags?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => AttachmentDto)

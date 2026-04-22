@@ -94,6 +94,7 @@ function FilterCompatatorFilter() {
 
   const comparatorFieldPath = getConditionFieldPath('comparator');
   const fieldType = get(fieldMeta, 'fieldType');
+  const isDisabled = !fieldMeta;
 
   return (
     <FFormGroup
@@ -105,6 +106,7 @@ function FilterCompatatorFilter() {
         name={comparatorFieldPath}
         dataType={fieldType}
         className={Classes.FILL}
+        disabled={isDisabled}
         fastField
       />
     </FFormGroup>
@@ -121,18 +123,30 @@ function useDefaultComparatorFieldValue({
   fieldMeta,
 }) {
   const fieldKeyValue = getConditionValue('fieldKey');
+  const comparatorValue = getConditionValue('comparator');
+  const fieldType = get(fieldMeta, 'fieldType');
 
   const comparatorsOptions = React.useMemo(
-    () => getConditionTypeCompatators(fieldMeta.fieldType),
-    [fieldMeta.fieldType],
+    () => (fieldType ? getConditionTypeCompatators(fieldType) : []),
+    [fieldType],
   );
 
   useUpdateEffect(() => {
-    if (fieldKeyValue) {
+    if (fieldKeyValue && fieldType && !isEmpty(comparatorsOptions)) {
       const defaultValue = get(first(comparatorsOptions), 'value');
+
+      if (defaultValue === comparatorValue) {
+        return;
+      }
       setConditionValue('comparator', defaultValue);
     }
-  }, [fieldKeyValue, setConditionValue, comparatorsOptions]);
+  }, [
+    comparatorValue,
+    fieldKeyValue,
+    fieldType,
+    setConditionValue,
+    comparatorsOptions,
+  ]);
 }
 
 /**
@@ -280,6 +294,7 @@ function AdvancedFilterDropdownConditions({ push, remove, replace, form }) {
       <div className={'filter-dropdown__conditions'}>
         {form.values.conditions.map((condition, index) => (
           <AdvancedFilterDropdownCondition
+            key={index}
             conditionIndex={index}
             onRemoveClick={handleClickRemoveCondition}
           />

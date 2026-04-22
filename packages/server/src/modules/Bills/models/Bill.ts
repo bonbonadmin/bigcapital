@@ -15,6 +15,7 @@ import { InjectModelDefaultViews } from '@/modules/Views/decorators/InjectModelD
 import { BillDefaultViews } from '../Bills.constants';
 import { InjectAttachable } from '@/modules/Attachments/decorators/InjectAttachable.decorator';
 import type { Account } from '@/modules/Accounts/models/Account.model';
+import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 
 @InjectAttachable()
 @ExportableModel()
@@ -30,6 +31,16 @@ export class Bill extends TenantBaseModel {
   public exchangeRate: number;
   public vendorId: number;
   public payableAccountId: number | null;
+  public salesTaxRateId: number | null;
+  public salesTaxName: string | null;
+  public salesTaxRate: number | null;
+  public salesTaxAccountId: number | null;
+  public salesTaxAmount: number | null;
+  public withholdingTaxId: number | null;
+  public withholdingTaxName: string | null;
+  public withholdingTaxRate: number | null;
+  public withholdingTaxAccountId: number | null;
+  public withholdingTaxAmount: number | null;
   public billNumber: string;
   public billDate: Date;
   public dueDate: Date;
@@ -58,6 +69,9 @@ export class Bill extends TenantBaseModel {
   public attachments!: Document[];
   public locatedLandedCosts?: BillLandedCost[];
   public payableAccount?: Account;
+  public salesTaxAccount?: Account;
+  public salesTaxRateModel?: TaxRateModel;
+  public withholdingTaxAccount?: Account;
   /**
    * Timestamps columns.
    */
@@ -97,6 +111,9 @@ export class Bill extends TenantBaseModel {
       'subtotalLocal',
       'subtotalExludingTax',
       'taxAmountWithheldLocal',
+      'salesTaxAmountLocal',
+      'withholdingTaxAmountLocal',
+      'settledAmount',
       'total',
       'totalLocal',
     ];
@@ -144,6 +161,14 @@ export class Bill extends TenantBaseModel {
     return this.taxAmountWithheld * this.exchangeRate;
   }
 
+  get salesTaxAmountLocal(): number {
+    return (Number(this.salesTaxAmount) || 0) * this.exchangeRate;
+  }
+
+  get withholdingTaxAmountLocal(): number {
+    return (Number(this.withholdingTaxAmount) || 0) * this.exchangeRate;
+  }
+
   /**
    * Discount amount.
    * @returns {number}
@@ -187,6 +212,7 @@ export class Bill extends TenantBaseModel {
     const adjustmentAmount = defaultTo(this.adjustment, 0);
 
     return R.compose(
+      R.add(Number(this.salesTaxAmount) || 0),
       R.add(adjustmentAmount),
       R.subtract(R.__, this.discountAmount),
       R.when(R.always(this.isInclusiveTax), R.add(this.taxAmountWithheld)),
@@ -199,6 +225,14 @@ export class Bill extends TenantBaseModel {
    */
   get totalLocal(): number {
     return this.total * this.exchangeRate;
+  }
+
+  get settledAmount(): number {
+    return (
+      (Number(this.paymentAmount) || 0) +
+      (Number(this.creditedAmount) || 0) +
+      (Number(this.withholdingTaxAmount) || 0)
+    );
   }
 
   /**
@@ -239,10 +273,7 @@ export class Bill extends TenantBaseModel {
    * @return {number}
    */
   get balance(): number {
-    const paymentAmount = Number(this.paymentAmount) || 0;
-    const creditedAmount = Number(this.creditedAmount) || 0;
-
-    return paymentAmount + creditedAmount;
+    return this.settledAmount;
   }
 
   /**
@@ -386,7 +417,11 @@ export class Bill extends TenantBaseModel {
        * Filters the unpaid bills.
        */
       unpaid(query) {
-        query.where('payment_amount', 0);
+        query.where(
+          raw(
+            'COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(CREDITED_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) = 0',
+          ),
+        );
       },
       /**
        * Filters the due bills.
@@ -394,8 +429,21 @@ export class Bill extends TenantBaseModel {
       dueBills(query) {
         query.where(
           raw(`COALESCE(AMOUNT, 0) -
+            CASE
+              WHEN COALESCE(DISCOUNT_TYPE, 'amount') = 'percentage'
+                THEN (COALESCE(AMOUNT, 0) * COALESCE(DISCOUNT, 0) / 100)
+              ELSE COALESCE(DISCOUNT, 0)
+            END +
+            COALESCE(ADJUSTMENT, 0) +
+            CASE
+              WHEN COALESCE(IS_INCLUSIVE_TAX, 0) = 1
+                THEN COALESCE(TAX_AMOUNT_WITHHELD, 0)
+              ELSE 0
+            END +
+            COALESCE(SALES_TAX_AMOUNT, 0) -
             COALESCE(PAYMENT_AMOUNT, 0) -
-            COALESCE(CREDITED_AMOUNT, 0) > 0
+            COALESCE(CREDITED_AMOUNT, 0) -
+            COALESCE(WITHHOLDING_TAX_AMOUNT, 0) > 0
           `),
         );
       },
@@ -415,14 +463,48 @@ export class Bill extends TenantBaseModel {
        * Filters the partially paid bills.
        */
       partiallyPaid(query) {
-        query.whereNot('payment_amount', 0);
-        query.whereNot(raw('`PAYMENT_AMOUNT` = `AMOUNT`'));
+        query.where(
+          raw(
+            'COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(CREDITED_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) > 0',
+          ),
+        );
+        query.whereNot(
+          raw(`COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(CREDITED_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) >=
+            COALESCE(AMOUNT, 0) -
+            CASE
+              WHEN COALESCE(DISCOUNT_TYPE, 'amount') = 'percentage'
+                THEN (COALESCE(AMOUNT, 0) * COALESCE(DISCOUNT, 0) / 100)
+              ELSE COALESCE(DISCOUNT, 0)
+            END +
+            COALESCE(ADJUSTMENT, 0) +
+            CASE
+              WHEN COALESCE(IS_INCLUSIVE_TAX, 0) = 1
+                THEN COALESCE(TAX_AMOUNT_WITHHELD, 0)
+              ELSE 0
+            END +
+            COALESCE(SALES_TAX_AMOUNT, 0)`),
+        );
       },
       /**
        * Filters the paid bills.
        */
       paid(query) {
-        query.where(raw('`PAYMENT_AMOUNT` = `AMOUNT`'));
+        query.where(
+          raw(`COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(CREDITED_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) >=
+            COALESCE(AMOUNT, 0) -
+            CASE
+              WHEN COALESCE(DISCOUNT_TYPE, 'amount') = 'percentage'
+                THEN (COALESCE(AMOUNT, 0) * COALESCE(DISCOUNT, 0) / 100)
+              ELSE COALESCE(DISCOUNT, 0)
+            END +
+            COALESCE(ADJUSTMENT, 0) +
+            CASE
+              WHEN COALESCE(IS_INCLUSIVE_TAX, 0) = 1
+                THEN COALESCE(TAX_AMOUNT_WITHHELD, 0)
+              ELSE 0
+            END +
+            COALESCE(SALES_TAX_AMOUNT, 0)`),
+        );
       },
       /**
        * Filters the bills from the given date.
@@ -435,7 +517,22 @@ export class Bill extends TenantBaseModel {
        * Sort the bills by full-payment bills.
        */
       sortByStatus(query, order) {
-        query.orderByRaw(`PAYMENT_AMOUNT = AMOUNT ${order}`);
+        query.orderByRaw(
+          `COALESCE(PAYMENT_AMOUNT, 0) + COALESCE(CREDITED_AMOUNT, 0) + COALESCE(WITHHOLDING_TAX_AMOUNT, 0) >=
+          COALESCE(AMOUNT, 0) -
+          CASE
+            WHEN COALESCE(DISCOUNT_TYPE, 'amount') = 'percentage'
+              THEN (COALESCE(AMOUNT, 0) * COALESCE(DISCOUNT, 0) / 100)
+            ELSE COALESCE(DISCOUNT, 0)
+          END +
+          COALESCE(ADJUSTMENT, 0) +
+          CASE
+            WHEN COALESCE(IS_INCLUSIVE_TAX, 0) = 1
+              THEN COALESCE(TAX_AMOUNT_WITHHELD, 0)
+            ELSE 0
+          END +
+          COALESCE(SALES_TAX_AMOUNT, 0) ${order}`,
+        );
       },
 
       /**
@@ -543,6 +640,33 @@ export class Bill extends TenantBaseModel {
         modelClass: Account,
         join: {
           from: 'bills.payableAccountId',
+          to: 'accounts.id',
+        },
+      },
+
+      salesTaxRateModel: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: TaxRateModel,
+        join: {
+          from: 'bills.salesTaxRateId',
+          to: 'tax_rates.id',
+        },
+      },
+
+      salesTaxAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'bills.salesTaxAccountId',
+          to: 'accounts.id',
+        },
+      },
+
+      withholdingTaxAccount: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Account,
+        join: {
+          from: 'bills.withholdingTaxAccountId',
           to: 'accounts.id',
         },
       },

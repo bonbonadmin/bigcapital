@@ -55,6 +55,8 @@ export const defaultBillEntry = {
 export const defaultBill = {
   vendor_id: '',
   payable_account_id: '',
+  sales_tax_rate_id: '',
+  withholding_tax_id: '',
   bill_number: '',
   bill_date: moment(new Date()).format('YYYY-MM-DD'),
   due_date: moment(new Date()).format('YYYY-MM-DD'),
@@ -142,6 +144,8 @@ export const transformFormValuesToRequest = (values) => {
 
   return {
     ...values,
+    sales_tax_rate_id: values.sales_tax_rate_id || null,
+    withholding_tax_id: values.withholding_tax_id || null,
     entries: transformEntriesToSubmit(entries),
     open: false,
     attachments,
@@ -428,6 +432,72 @@ export const useBillTotalTaxAmount = () => {
   }, [values.entries]);
 };
 
+export const useBillSalesTaxBaseAmount = () => {
+  const subtotal = useBillSubtotal();
+  const discountAmount = useBillDiscountAmount();
+  const adjustmentAmount = useBillAdjustmentAmount();
+
+  return Math.max(subtotal - discountAmount + adjustmentAmount, 0);
+};
+
+export const useBillSalesTaxAmount = () => {
+  const { values } = useFormikContext();
+  const { taxRates } = useBillFormContext();
+  const salesTaxBaseAmount = useBillSalesTaxBaseAmount();
+
+  return React.useMemo(() => {
+    if (!values.sales_tax_rate_id) {
+      return 0;
+    }
+    const salesTaxRate = taxRates.find(
+      (taxRate) => String(taxRate.id) === String(values.sales_tax_rate_id),
+    );
+
+    if (!salesTaxRate) {
+      return 0;
+    }
+    return (salesTaxBaseAmount * (Number(salesTaxRate.rate) || 0)) / 100;
+  }, [salesTaxBaseAmount, taxRates, values.sales_tax_rate_id]);
+};
+
+export const useBillSalesTaxAmountFormatted = () => {
+  const salesTaxAmount = useBillSalesTaxAmount();
+  const { values } = useFormikContext();
+
+  return formattedAmount(salesTaxAmount, values.currency_code);
+};
+
+export const useBillWithholdingTaxBaseAmount = () => {
+  return useBillSalesTaxBaseAmount();
+};
+
+export const useBillWithholdingTaxAmount = () => {
+  const { values } = useFormikContext();
+  const { withholdingTaxes } = useBillFormContext();
+  const withholdingTaxBaseAmount = useBillWithholdingTaxBaseAmount();
+
+  return React.useMemo(() => {
+    if (!values.withholding_tax_id) {
+      return 0;
+    }
+    const withholdingTax = withholdingTaxes.find(
+      (tax) => String(tax.id) === String(values.withholding_tax_id),
+    );
+
+    if (!withholdingTax) {
+      return 0;
+    }
+    return (withholdingTaxBaseAmount * (Number(withholdingTax.rate) || 0)) / 100;
+  }, [withholdingTaxBaseAmount, withholdingTaxes, values.withholding_tax_id]);
+};
+
+export const useBillWithholdingTaxAmountFormatted = () => {
+  const withholdingTaxAmount = useBillWithholdingTaxAmount();
+  const { values } = useFormikContext();
+
+  return formattedAmount(withholdingTaxAmount, values.currency_code);
+};
+
 /**
  * Detarmines whether the tax is exclusive.
  * @returns {boolean}
@@ -448,8 +518,10 @@ export const useBillTotal = () => {
   const isExclusiveTax = useIsBillTaxExclusive();
   const discountAmount = useBillDiscountAmount();
   const adjustmentAmount = useBillAdjustmentAmount();
+  const salesTaxAmount = useBillSalesTaxAmount();
 
   return R.compose(
+    R.add(salesTaxAmount),
     R.when(R.always(isExclusiveTax), R.add(totalTaxAmount)),
     R.subtract(R.__, discountAmount),
     R.add(R.__, adjustmentAmount),
@@ -472,8 +544,6 @@ export const useBillTotalFormatted = () => {
  * @returns {number}
  */
 export const useBillPaidAmount = () => {
-  const { values } = useFormikContext();
-
   return toSafeNumber(0);
 };
 
@@ -495,8 +565,9 @@ export const useBillPaidAmountFormatted = () => {
 export const useBillDueAmount = () => {
   const total = useBillTotal();
   const paidAmount = useBillPaidAmount();
+  const withholdingTaxAmount = useBillWithholdingTaxAmount();
 
-  return total - paidAmount;
+  return total - paidAmount - withholdingTaxAmount;
 };
 
 /**

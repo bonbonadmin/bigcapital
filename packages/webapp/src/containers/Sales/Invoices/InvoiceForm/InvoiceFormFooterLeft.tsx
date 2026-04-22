@@ -56,6 +56,14 @@ export function InvoiceFormFooterLeft() {
         />
       </TermsConditsFormGroup>
 
+      <TermsConditsFormGroup label={<T id={'tags'} />} name={'tags'}>
+        <FEditableText
+          name={'tags'}
+          placeholder={intl.get('tags.placeholder')}
+          fastField
+        />
+      </TermsConditsFormGroup>
+
       {/* --------- Payment Options --------- */}
       <PaymentOptionsFormGroup
         label={'Payment Options'}

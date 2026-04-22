@@ -14,6 +14,17 @@ import { ContactAddressDto } from '@/modules/Customers/dtos/ContactAddress.dto';
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 
 export class CreateVendorDto extends ContactAddressDto {
+  @ApiProperty({
+    required: false,
+    description: 'External ERP vendor ID',
+    example: 23,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @ToNumber()
+  externalId?: number;
+
   @ApiProperty({ required: false, description: 'Vendor opening balance' })
   @IsOptional()
   @IsInt()

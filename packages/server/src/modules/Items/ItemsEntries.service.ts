@@ -8,6 +8,7 @@ import { IItemEntryDTO } from '../TransactionItemEntry/ItemEntry.types';
 import { TenantModelProxy } from '../System/models/TenantBaseModel';
 import { entriesAmountDiff } from '@/utils/entries-amount-diff';
 import { ItemEntryDto } from '../TransactionItemEntry/dto/ItemEntry.dto';
+import { isInventoryTrackedItemType } from './Items.constants';
 
 const ERRORS = {
   ITEMS_NOT_FOUND: 'ITEMS_NOT_FOUND',
@@ -48,7 +49,7 @@ export class ItemsEntriesService {
     const inventoryItems = await this.itemModel()
       .query()
       .whereIn('id', map(itemsEntries, 'itemId'))
-      .where('type', 'inventory');
+      .whereIn('type', ['inventory', 'inventory-assembly']);
 
     const inventoryItemsIds = map(inventoryItems, 'id');
 
@@ -72,7 +73,7 @@ export class ItemsEntriesService {
     const inventoryItems = await this.itemModel()
       .query(trx)
       .whereIn('id', entriesItemsIds)
-      .where('type', 'inventory');
+      .whereIn('type', ['inventory', 'inventory-assembly']);
 
     return entries.filter((entry) =>
       inventoryItems.some((item) => item.id === entry.itemId),
@@ -187,7 +188,8 @@ export class ItemsEntriesService {
     diffEntries.forEach((entry: ItemEntry) => {
       const changeQuantityOper = this.itemModel()
         .query()
-        .where({ id: entry.itemId, type: 'inventory' })
+        .where('id', entry.itemId)
+        .whereIn('type', ['inventory', 'inventory-assembly'])
         .modify('quantityOnHand', entry.quantity);
 
       opers.push(changeQuantityOper);
@@ -233,7 +235,7 @@ export class ItemsEntriesService {
       return {
         ...entry,
         sellAccountId: entry.sellAccountId || item.sellAccountId,
-        ...(item.type === 'inventory' && {
+        ...(isInventoryTrackedItemType(item.type) && {
           costAccountId: entry.costAccountId || item.costAccountId,
         }),
       };

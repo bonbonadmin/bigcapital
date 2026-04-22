@@ -3,12 +3,18 @@ import { SaleInvoice } from '../models/SaleInvoice';
 import { ServiceError } from '@/modules/Items/ServiceError';
 import { ERRORS } from '../constants';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { PaymentReceivedEntry } from '@/modules/PaymentReceived/models/PaymentReceivedEntry';
 
 @Injectable()
 export class CommandSaleInvoiceValidators {
   constructor(
     @Inject(SaleInvoice.name)
     private readonly saleInvoiceModel: TenantModelProxy<typeof SaleInvoice>,
+
+    @Inject(PaymentReceivedEntry.name)
+    private readonly paymentReceivedEntryModel: TenantModelProxy<
+      typeof PaymentReceivedEntry
+    >,
   ) {}
 
   /**
@@ -54,6 +60,26 @@ export class CommandSaleInvoiceValidators {
   ) {
     if (saleInvoiceAmount < paymentAmount) {
       throw new ServiceError(ERRORS.INVOICE_AMOUNT_SMALLER_THAN_PAYMENT_AMOUNT);
+    }
+  }
+
+  /**
+   * Zero-total invoices are allowed only when no payment received exists.
+   * @param {number} saleInvoiceId
+   * @param {number} saleInvoiceAmount
+   */
+  public async validateZeroInvoiceHasNoPaymentEntries(
+    saleInvoiceId: number,
+    saleInvoiceAmount: number,
+  ) {
+    if (saleInvoiceAmount !== 0) return;
+
+    const entries = await this.paymentReceivedEntryModel()
+      .query()
+      .where('invoice_id', saleInvoiceId);
+
+    if (entries.length > 0) {
+      throw new ServiceError(ERRORS.INVOICE_HAS_ASSOCIATED_PAYMENT_ENTRIES);
     }
   }
 

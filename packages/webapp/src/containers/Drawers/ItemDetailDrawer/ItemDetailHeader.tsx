@@ -6,6 +6,7 @@ import { defaultTo } from 'lodash';
 
 import { If, DetailsMenu, DetailItem, Card } from '@/components';
 import { useItemDetailDrawerContext } from './ItemDetailDrawerProvider';
+import { isInventoryTrackedType } from '@/containers/Items/utils';
 
 /**
  * Item header drawer of readonly details.
@@ -43,7 +44,7 @@ export default function ItemDetailHeader() {
             label={intl.get('item_code')}
             children={defaultTo(item.code, '-')}
           />
-          <If condition={item.type === 'inventory'}>
+          <If condition={isInventoryTrackedType(item.type)}>
             <DetailItem name={'quantity'} label={intl.get('quantity_on_hand')}>
               <span
                 className={classNames({
@@ -67,6 +68,12 @@ export default function ItemDetailHeader() {
             label={intl.get('cost_account_id')}
             children={defaultTo(item.cost_account?.name, '-')}
           />
+          <If condition={isInventoryTrackedType(item.type)}>
+            <DetailItem
+              label={intl.get('unit_of_measure')}
+              children={defaultTo(item.unit_of_measure, '-')}
+            />
+          </If>
           <DetailItem
             label={intl.get('item.details.sell_tax_rate')}
             children={item?.sell_tax_rate?.name}
@@ -75,10 +82,25 @@ export default function ItemDetailHeader() {
             label={intl.get('item.details.purchase_tax_rate')}
             children={item?.purchase_tax_rate?.name}
           />
-          <If condition={item.type === 'inventory'}>
+          <If condition={isInventoryTrackedType(item.type)}>
             <DetailItem
               label={intl.get('inventory_account')}
               children={defaultTo(item?.inventory_account?.name, '-')}
+            />
+          </If>
+          <If condition={item.type === 'inventory-assembly'}>
+            <DetailItem
+              label={intl.get('assembly_components')}
+              children={
+                item.assembly_components?.length
+                  ? item.assembly_components
+                      .map(
+                        (component) =>
+                          `${component.component_item?.name || '-'} x ${component.quantity}`,
+                      )
+                      .join(', ')
+                  : '-'
+              }
             />
           </If>
           <DetailItem

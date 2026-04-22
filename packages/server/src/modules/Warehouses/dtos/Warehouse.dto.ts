@@ -1,11 +1,18 @@
-import { IsOptional } from "@/common/decorators/Validators";
+import { IsOptional, ToNumber } from "@/common/decorators/Validators";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsEmail, IsUrl } from "class-validator";
+import { IsBoolean, IsEmail, IsInt, IsUrl, Min } from "class-validator";
 import { IsNotEmpty } from "class-validator";
 import { IsString } from "class-validator";
 
 
 export class CommandWarehouseDto {
+  @ToNumber()
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  @ApiProperty({ description: 'External ERP warehouse ID', required: false })
+  externalId?: number;
+
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ description: 'The name of the warehouse' })

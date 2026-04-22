@@ -24,6 +24,7 @@ const defaultFormValues = {
   preferred_sell_account: '',
   preferred_cost_account: '',
   preferred_inventory_account: '',
+  allow_negative_inventory_assemblies: false,
 };
 
 // item form page preferences.

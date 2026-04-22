@@ -107,6 +107,7 @@ import { BillLandedCostsModule } from '../BillLandedCosts/BillLandedCosts.module
 import { SocketModule } from '../Socket/Socket.module';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { AppThrottleModule } from './AppThrottle.module';
+import { InventoryAssembliesModule } from '../InventoryAssemblies/InventoryAssemblies.module';
 
 @Module({
   imports: [
@@ -237,6 +238,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     SettingsModule,
     FeaturesModule,
     InventoryAdjustmentsModule,
+    InventoryAssembliesModule,
     InventoryCostModule,
     PostHogModule,
     EventTrackerModule,

@@ -35,6 +35,14 @@ export function ReceiptFormFooterLeft() {
           fastField
         />
       </TermsConditsFormGroup>
+
+      <TermsConditsFormGroup label={<T id={'tags'} />} name={'tags'}>
+        <FEditableText
+          name={'tags'}
+          placeholder={intl.get('tags.placeholder')}
+          fastField
+        />
+      </TermsConditsFormGroup>
     </React.Fragment>
   );
 }

@@ -9,11 +9,46 @@ import {
   MaxLength,
   Min,
   IsNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
+import { Type } from 'class-transformer';
+
+export class ItemAssemblyComponentDto {
+  @ToNumber()
+  @IsInt()
+  @Min(1)
+  @ApiProperty({
+    description: 'Component inventory item ID',
+    minimum: 1,
+    example: 101,
+  })
+  itemId: number;
+
+  @ToNumber()
+  @IsNumber({ maxDecimalPlaces: 3 })
+  @Min(0.001)
+  @ApiProperty({
+    description: 'Quantity of the component needed to build one unit',
+    minimum: 0.001,
+    example: 2,
+  })
+  quantity: number;
+}
 
 export class CommandItemDto {
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  @Min(1)
+  @ApiProperty({
+    description: 'External system item ID',
+    required: false,
+    example: 11,
+  })
+  externalId?: number;
+
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
@@ -25,13 +60,13 @@ export class CommandItemDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsIn(['service', 'non-inventory', 'inventory'])
+  @IsIn(['service', 'non-inventory', 'inventory', 'inventory-assembly'])
   @ApiProperty({
     description: 'Item type',
-    enum: ['service', 'non-inventory', 'inventory'],
+    enum: ['service', 'non-inventory', 'inventory', 'inventory-assembly'],
     example: 'inventory',
   })
-  type: 'service' | 'non-inventory' | 'inventory';
+  type: 'service' | 'non-inventory' | 'inventory' | 'inventory-assembly';
 
   @IsOptional()
   @IsString()
@@ -70,7 +105,7 @@ export class CommandItemDto {
   @ToNumber()
   @IsInt()
   @Min(0)
-  @ValidateIf((o) => o.purchasable === true)
+  @ValidateIf((o) => o.purchasable === true || o.type === 'inventory-assembly')
   @ApiProperty({
     description: 'ID of the cost account',
     required: false,
@@ -119,7 +154,7 @@ export class CommandItemDto {
   @ToNumber()
   @IsInt()
   @Min(0)
-  @ValidateIf((o) => o.type === 'inventory')
+  @ValidateIf((o) => ['inventory', 'inventory-assembly'].includes(o.type))
   @ApiProperty({
     description: 'ID of the inventory account (required for inventory items)',
     required: false,
@@ -209,6 +244,29 @@ export class CommandItemDto {
     example: [1, 2, 3],
   })
   mediaIds?: number[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  @ValidateIf((o) => ['inventory', 'inventory-assembly'].includes(o.type))
+  @ApiProperty({
+    description: 'Unit of measure for inventory tracked items',
+    required: false,
+    example: 'each',
+  })
+  unitOfMeasure?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ItemAssemblyComponentDto)
+  @ValidateIf((o) => o.type === 'inventory-assembly')
+  @ApiProperty({
+    description: 'Bill of materials for inventory assembly items',
+    required: false,
+    type: [ItemAssemblyComponentDto],
+  })
+  assemblyComponents?: ItemAssemblyComponentDto[];
 }
 
 export class CreateItemDto extends CommandItemDto {}

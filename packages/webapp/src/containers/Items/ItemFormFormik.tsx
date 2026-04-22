@@ -13,6 +13,7 @@ import ItemFormBody from './ItemFormBody';
 import ItemFormPrimarySection from './ItemFormPrimarySection';
 import ItemFormFloatingActions from './ItemFormFloatingActions';
 import ItemFormInventorySection from './ItemFormInventorySection';
+import ItemFormAssemblySection from './ItemFormAssemblySection';
 
 import {
   transformSubmitRequestErrors,
@@ -104,6 +105,7 @@ export default function ItemFormFormik({
             <ItemFormPrimarySection />
             <ItemFormBody accounts={accounts} />
             <ItemFormInventorySection accounts={accounts} />
+            <ItemFormAssemblySection />
           </div>
 
           <ItemFormFloatingActions onCancel={onCancel} />

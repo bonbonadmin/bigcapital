@@ -2,6 +2,10 @@ import { BaseModel } from '@/models/Model';
 import { Model } from 'objection';
 
 export class ItemWarehouseQuantity extends BaseModel{
+  public itemId!: number;
+  public warehouseId!: number;
+  public quantityOnHand?: number | null;
+
   /**
    * Table name.
    */

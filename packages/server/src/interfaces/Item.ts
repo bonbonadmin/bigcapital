@@ -26,6 +26,8 @@ export interface IItem {
 
   sellTaxRateId: number;
   purchaseTaxRateId: number;
+  unitOfMeasure?: string | null;
+  externalId?: number | null;
 
   quantityOnHand: number;
 
@@ -84,6 +86,12 @@ export class IItemDTO {
 
   @ApiProperty()
   purchaseTaxRateId: number;
+
+  @ApiProperty()
+  unitOfMeasure?: string | null;
+
+  @ApiProperty()
+  externalId?: number | null;
 
   @ApiProperty()
   quantityOnHand: number;

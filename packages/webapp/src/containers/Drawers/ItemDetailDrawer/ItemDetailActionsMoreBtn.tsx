@@ -16,6 +16,7 @@ import {
 } from '@/constants/abilityOption';
 import { useItemDetailDrawerContext } from './ItemDetailDrawerProvider';
 import { withDialogActions } from '@/containers/Dialog/withDialogActions';
+import { isInventoryTrackedType } from '@/containers/Items/utils';
 
 /**
  * Invoice details more actions menu.
@@ -29,7 +30,7 @@ export const ItemDetailActionsMoreBtn = R.compose(withDialogActions)(
     const { itemId, item } = useItemDetailDrawerContext();
 
     // Cannot continue if the item type is not inventory.
-    if (item.type !== 'inventory') return null;
+    if (!isInventoryTrackedType(item.type)) return null;
 
     const handleInventoryAdjustment = () => {
       openDialog('inventory-adjustment', { itemId });

@@ -56,6 +56,7 @@ export const defaultReceipt = {
   reference_no: '',
   receipt_message: '',
   terms_conditions: '',
+  tags: '',
   closed: '',
   branch_id: '',
   warehouse_id: '',

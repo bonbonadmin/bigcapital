@@ -105,6 +105,15 @@ class CommandSaleInvoiceDto {
   termsConditions?: string;
 
   @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Comma-separated tags',
+    required: false,
+    example: 'priority,wholesale',
+  })
+  tags?: string;
+
+  @IsOptional()
   @ToNumber()
   @IsNumber()
   @Min(0)

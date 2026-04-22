@@ -101,6 +101,26 @@ export class CommandBillDto {
   payableAccountId?: number;
 
   @ApiProperty({
+    description: 'Sales tax rate identifier applied to the bill',
+    example: 10,
+    required: false,
+  })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  salesTaxRateId?: number;
+
+  @ApiProperty({
+    description: 'Withholding tax identifier applied to the bill',
+    example: 5,
+    required: false,
+  })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  withholdingTaxId?: number;
+
+  @ApiProperty({
     description: 'Exchange rate applied to bill amounts',
     example: 1.25,
     required: false,

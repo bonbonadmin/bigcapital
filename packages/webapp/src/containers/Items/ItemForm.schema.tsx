@@ -39,8 +39,9 @@ const Schema = Yup.object().shape({
       otherwise: Yup.number().nullable(true),
     }),
   cost_account_id: Yup.number()
-    .when(['purchasable'], {
-      is: true,
+    .when(['purchasable', 'type'], {
+      is: (purchasable, type) =>
+        purchasable === true || type === 'inventory-assembly',
       then: Yup.number().required(),
       otherwise: Yup.number().nullable(true),
     })
@@ -54,11 +55,28 @@ const Schema = Yup.object().shape({
     .label(intl.get('sell_account_id')),
   inventory_account_id: Yup.number()
     .when(['type'], {
-      is: (value) => value === 'inventory',
+      is: (value) => ['inventory', 'inventory-assembly'].includes(value),
       then: Yup.number().required(),
       otherwise: Yup.number().nullable(),
     })
     .label(intl.get('inventory_account')),
+  unit_of_measure: Yup.string().when(['type'], {
+    is: (value) => ['inventory', 'inventory-assembly'].includes(value),
+    then: Yup.string().required().label(intl.get('unit_of_measure')),
+    otherwise: Yup.string().nullable(),
+  }),
+  assembly_components: Yup.array().when(['type'], {
+    is: (value) => value === 'inventory-assembly',
+    then: Yup.array()
+      .of(
+        Yup.object().shape({
+          item_id: Yup.number().required(),
+          quantity: Yup.number().min(0.001).required(),
+        }),
+      )
+      .label(intl.get('assembly_components')),
+    otherwise: Yup.array().nullable(),
+  }),
   category_id: Yup.number().positive().nullable(),
   stock: Yup.string() || Yup.boolean(),
   sellable: Yup.boolean().required(),
@@ -71,6 +89,8 @@ export const transformItemFormData = (item, defaultValue) => {
     sellable: !!defaultTo(item?.sellable, defaultValue.sellable),
     purchasable: !!defaultTo(item?.purchasable, defaultValue.purchasable),
     active: !!defaultTo(item?.active, defaultValue.active),
+    assembly_components:
+      item?.assembly_components || defaultValue.assembly_components,
   };
 };
 

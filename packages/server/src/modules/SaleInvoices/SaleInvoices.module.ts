@@ -64,6 +64,9 @@ import { SaleInvoicesImportable } from './commands/SaleInvoicesImportable';
 import { PaymentLinksModule } from '../PaymentLinks/PaymentLinks.module';
 import { BulkDeleteSaleInvoicesService } from './BulkDeleteSaleInvoices.service';
 import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleInvoices.service';
+import { SaleInvoicesMatchaPopSyncService } from './SaleInvoicesMatchaPopSync.service';
+import { SettingsModule } from '../Settings/Settings.module';
+import { CustomersModule } from '../Customers/Customers.module';
 
 @Module({
   imports: [
@@ -81,6 +84,8 @@ import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleI
     MailNotificationModule,
     forwardRef(() => InventoryCostModule),
     forwardRef(() => PaymentLinksModule),
+    SettingsModule,
+    CustomersModule,
     DynamicListModule,
     BullModule.registerQueue({ name: SendSaleInvoiceQueue }),
     BullBoardModule.forFeature({
@@ -136,6 +141,7 @@ import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleI
     SaleInvoicesImportable,
     BulkDeleteSaleInvoicesService,
     ValidateBulkDeleteSaleInvoicesService,
+    SaleInvoicesMatchaPopSyncService,
   ],
   exports: [
     GetSaleInvoice,

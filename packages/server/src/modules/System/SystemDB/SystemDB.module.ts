@@ -23,7 +23,7 @@ const providers = [
       },
       migrations: {
         directory: configService.get('systemDatabase.migrationDir'),
-        loadExtensions: ['.js'],
+        loadExtensions: ['.ts', '.js'],
       },
       seeds: {
         directory: configService.get('systemDatabase.seedsDir'),

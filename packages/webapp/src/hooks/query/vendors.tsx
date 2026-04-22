@@ -147,6 +147,33 @@ export function useCreateVendor(props) {
   });
 }
 
+export function useSyncMatchaPopVendors(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(() => apiRequest.post('vendors/external/matchapop/sync'), {
+    onSuccess: () => {
+      commonInvalidateQueries(queryClient);
+    },
+    ...props,
+  });
+}
+
+export function useImportMatchaPopVendors(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    (values) => apiRequest.post('vendors/external/matchapop/import', values),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
 /**
  * Retrieve vendor details.
  */

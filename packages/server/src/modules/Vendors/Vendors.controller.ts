@@ -21,6 +21,7 @@ import {
 import { CreateVendorDto } from './dtos/CreateVendor.dto';
 import { EditVendorDto } from './dtos/EditVendor.dto';
 import { GetVendorsQueryDto } from './dtos/GetVendorsQuery.dto';
+import { ImportMatchaPopVendorsDto } from './dtos/MatchaPopVendors.dto';
 import { ApiCommonHeaders } from '@/common/decorators/ApiCommonHeaders';
 import {
   BulkDeleteVendorsDto,
@@ -121,5 +122,28 @@ export class VendorsController {
     return this.vendorsApplication.bulkDeleteVendors(bulkDeleteDto.ids, {
       skipUndeletable: bulkDeleteDto.skipUndeletable ?? false,
     });
+  }
+
+  @Post('external/matchapop/sync')
+  @RequirePermission(VendorAction.Edit, AbilitySubject.Vendor)
+  @ApiOperation({
+    summary:
+      'Syncs existing vendors by external ID with ERP data and returns missing vendors for optional import.',
+  })
+  async syncMatchaPopVendors(): Promise<any> {
+    return this.vendorsApplication.syncMatchaPopVendors();
+  }
+
+  @Post('external/matchapop/import')
+  @RequirePermission(VendorAction.Edit, AbilitySubject.Vendor)
+  @ApiOperation({
+    summary: 'Imports ERP vendors as new vendors.',
+  })
+  async importMatchaPopVendors(
+    @Body() importMatchaPopVendorsDto: ImportMatchaPopVendorsDto,
+  ): Promise<any> {
+    return this.vendorsApplication.importMatchaPopVendors(
+      importMatchaPopVendorsDto,
+    );
   }
 }

@@ -70,6 +70,11 @@ export const SaleReceiptMeta = {
       column: 'statement',
       fieldType: 'text',
     },
+    tags: {
+      name: 'tags',
+      column: 'tags',
+      fieldType: 'text',
+    },
     created_at: {
       name: 'receipt.field.created_at',
       column: 'created_at',
@@ -125,6 +130,11 @@ export const SaleReceiptMeta = {
     },
     statement: {
       name: 'receipt.field.statement',
+      type: 'text',
+      printable: false,
+    },
+    tags: {
+      name: 'tags',
       type: 'text',
       printable: false,
     },
@@ -253,6 +263,10 @@ export const SaleReceiptMeta = {
     },
     statement: {
       name: 'receipt.field.statement',
+      fieldType: 'text',
+    },
+    tags: {
+      name: 'tags',
       fieldType: 'text',
     },
     receiptMessage: {

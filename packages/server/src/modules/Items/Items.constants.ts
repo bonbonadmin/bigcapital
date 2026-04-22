@@ -31,7 +31,24 @@ export const ERRORS = {
     'INCOME_ACCOUNT_REQUIRED_WITH_SELLABLE_ITEM',
   COST_ACCOUNT_REQUIRED_WITH_PURCHASABLE_ITEM:
     'COST_ACCOUNT_REQUIRED_WITH_PURCHASABLE_ITEM',
+  COST_ACCOUNT_REQUIRED_WITH_INVENTORY_ITEM:
+    'COST_ACCOUNT_REQUIRED_WITH_INVENTORY_ITEM',
+  INVENTORY_ACCOUNT_REQUIRED_WITH_INVENTORY_ITEM:
+    'INVENTORY_ACCOUNT_REQUIRED_WITH_INVENTORY_ITEM',
+  ASSEMBLY_COMPONENTS_REQUIRED: 'ASSEMBLY_COMPONENTS_REQUIRED',
+  ASSEMBLY_COMPONENT_SELF_REFERENCE: 'ASSEMBLY_COMPONENT_SELF_REFERENCE',
+  ASSEMBLY_COMPONENT_DUPLICATED: 'ASSEMBLY_COMPONENT_DUPLICATED',
+  ASSEMBLY_COMPONENT_NOT_FOUND: 'ASSEMBLY_COMPONENT_NOT_FOUND',
+  ASSEMBLY_COMPONENT_NOT_INVENTORY: 'ASSEMBLY_COMPONENT_NOT_INVENTORY',
 };
+
+export const INVENTORY_TRACKED_ITEM_TYPES = ['inventory', 'inventory-assembly'];
+
+export const isInventoryTrackedItemType = (type?: string | null): boolean =>
+  INVENTORY_TRACKED_ITEM_TYPES.includes(type);
+
+export const isInventoryAssemblyType = (type?: string | null): boolean =>
+  type === 'inventory-assembly';
 
 export const DEFAULT_VIEW_COLUMNS = [];
 export const ItemDefaultViews = [
@@ -50,6 +67,20 @@ export const ItemDefaultViews = [
     rolesLogicExpression: '1',
     roles: [
       { index: 1, fieldKey: 'type', comparator: 'equals', value: 'inventory' },
+    ],
+    columns: DEFAULT_VIEW_COLUMNS,
+  },
+  {
+    name: 'Inventory Assembly',
+    slug: 'inventory-assembly',
+    rolesLogicExpression: '1',
+    roles: [
+      {
+        index: 1,
+        fieldKey: 'type',
+        comparator: 'equals',
+        value: 'inventory-assembly',
+      },
     ],
     columns: DEFAULT_VIEW_COLUMNS,
   },

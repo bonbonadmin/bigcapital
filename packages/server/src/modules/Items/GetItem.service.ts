@@ -31,6 +31,7 @@ export class GetItemService {
       .withGraphFetched('category')
       .withGraphFetched('costAccount')
       .withGraphFetched('itemWarehouses.warehouse')
+      .withGraphFetched('assemblyComponents.componentItem')
       .withGraphFetched('sellTaxRate')
       .withGraphFetched('purchaseTaxRate')
       .throwIfNotFound();

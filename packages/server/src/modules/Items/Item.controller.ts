@@ -25,6 +25,7 @@ import {
 import { CreateItemDto, EditItemDto } from './dtos/Item.dto';
 import { GetItemsQueryDto } from './dtos/GetItemsQuery.dto';
 import { ItemResponseDto } from './dtos/itemResponse.dto';
+import { ImportMatchaPopItemsDto } from './dtos/MatchaPopItems.dto';
 import { PaginatedResponseDto } from '@/common/dtos/PaginatedResults.dto';
 import { ItemInvoiceResponseDto } from './dtos/ItemInvoiceResponse.dto';
 import { ItemEstimatesResponseDto } from './dtos/ItemEstimatesResponse.dto';
@@ -143,6 +144,27 @@ export class ItemsController extends TenantController {
   })
   async getItems(@Query() filterDTO: GetItemsQueryDto): Promise<any> {
     return this.itemsApplication.getItems(filterDTO);
+  }
+
+  @Post('external/matchapop/sync')
+  @RequirePermission(ItemAction.EDIT, AbilitySubject.Item)
+  @ApiOperation({
+    summary:
+      'Syncs existing items by external ID with MatchaPop and returns missing products for optional import.',
+  })
+  async syncMatchaPopItems(): Promise<any> {
+    return this.itemsApplication.syncMatchaPopItems();
+  }
+
+  @Post('external/matchapop/import')
+  @RequirePermission(ItemAction.EDIT, AbilitySubject.Item)
+  @ApiOperation({
+    summary: 'Imports selected MatchaPop products as new items.',
+  })
+  async importMatchaPopItems(
+    @Body() importMatchaPopItemsDto: ImportMatchaPopItemsDto,
+  ): Promise<any> {
+    return this.itemsApplication.importMatchaPopItems(importMatchaPopItemsDto);
   }
 
   /**

@@ -33,6 +33,10 @@ import {
   CreateSaleInvoiceDto,
   EditSaleInvoiceDto,
 } from './dtos/SaleInvoice.dto';
+import {
+  ImportMatchaPopSaleInvoicesDto,
+  SyncMatchaPopSaleInvoicesDto,
+} from './dtos/MatchaPopOrders.dto';
 import { GetSaleInvoicesQueryDto } from './dtos/GetSaleInvoicesQuery.dto';
 import { AcceptType } from '@/constants/accept-type';
 import { SaleInvoiceResponseDto } from './dtos/SaleInvoiceResponse.dto';
@@ -107,6 +111,33 @@ export class SaleInvoicesController {
   })
   createSaleInvoice(@Body() saleInvoiceDTO: CreateSaleInvoiceDto) {
     return this.saleInvoiceApplication.createSaleInvoice(saleInvoiceDTO);
+  }
+
+  @Post('external/matchapop/sync')
+  @RequirePermission(SaleInvoiceAction.Create, AbilitySubject.SaleInvoice)
+  @ApiOperation({
+    summary:
+      'Syncs existing ERP sale invoices and returns missing orders available for import.',
+  })
+  syncMatchaPopOrders(
+    @Body() syncMatchaPopSaleInvoicesDto: SyncMatchaPopSaleInvoicesDto,
+  ): Promise<any> {
+    return this.saleInvoiceApplication.syncMatchaPopOrders(
+      syncMatchaPopSaleInvoicesDto,
+    );
+  }
+
+  @Post('external/matchapop/import')
+  @RequirePermission(SaleInvoiceAction.Create, AbilitySubject.SaleInvoice)
+  @ApiOperation({
+    summary: 'Imports ERP orders as sale invoices.',
+  })
+  importMatchaPopOrders(
+    @Body() importMatchaPopSaleInvoicesDto: ImportMatchaPopSaleInvoicesDto,
+  ): Promise<any> {
+    return this.saleInvoiceApplication.importMatchaPopOrders(
+      importMatchaPopSaleInvoicesDto,
+    );
   }
 
   @Post(':id/mail')

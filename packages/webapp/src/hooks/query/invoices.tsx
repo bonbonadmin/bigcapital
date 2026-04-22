@@ -77,6 +77,39 @@ export function useCreateInvoice(props) {
   });
 }
 
+export function useSyncMatchaPopSaleInvoices(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    (values) =>
+      apiRequest
+        .post('sale-invoices/external/matchapop/sync', values)
+        .then((res) => transformToCamelCase(res.data)),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
+export function useImportMatchaPopSaleInvoices(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    (values) => apiRequest.post('sale-invoices/external/matchapop/import', values),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
 /**
  * Edits the given sale invoice.
  */

@@ -17,6 +17,10 @@ export const ItemMeta = {
       fieldType: 'enumeration',
       options: [
         { key: 'inventory', label: 'item.field.type.inventory' },
+        {
+          key: 'inventory-assembly',
+          label: 'item.field.type.inventory-assembly',
+        },
         { key: 'service', label: 'item.field.type.service' },
         { key: 'non-inventory', label: 'item.field.type.non-inventory' },
       ],
@@ -97,6 +101,11 @@ export const ItemMeta = {
       name: 'item.field.quantity_on_hand',
       column: 'quantity_on_hand',
       fieldType: 'number',
+    },
+    unit_of_measure: {
+      name: 'item.field.unit_of_measure',
+      column: 'unit_of_measure',
+      fieldType: 'text',
     },
     note: {
       name: 'item.field.note',
@@ -202,6 +211,11 @@ export const ItemMeta = {
       type: 'number',
       exportable: true,
     },
+    unitOfMeasure: {
+      name: 'item.field.unit_of_measure',
+      type: 'text',
+      exportable: true,
+    },
     note: {
       name: 'item.field.note',
       type: 'text',
@@ -232,6 +246,10 @@ export const ItemMeta = {
       fieldType: 'enumeration',
       options: [
         { key: 'inventory', label: 'item.field.type.inventory' },
+        {
+          key: 'inventory-assembly',
+          label: 'item.field.type.inventory-assembly',
+        },
         { key: 'service', label: 'item.field.type.service' },
         { key: 'non-inventory', label: 'item.field.type.non-inventory' },
       ],
@@ -293,6 +311,10 @@ export const ItemMeta = {
     },
     note: {
       name: 'item.field.note',
+      fieldType: 'text',
+    },
+    unitOfMeasure: {
+      name: 'item.field.unit_of_measure',
       fieldType: 'text',
     },
     categoryId: {

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { Form, useFormikContext } from 'formik';
-import { Button, Intent } from '@blueprintjs/core';
+import { Button, Checkbox, FormGroup, Intent } from '@blueprintjs/core';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -22,7 +22,7 @@ export default function ItemForm() {
   const history = useHistory();
   const { accounts } = useItemPreferencesFormContext();
 
-  const { isSubmitting } = useFormikContext();
+  const { isSubmitting, values, setFieldValue } = useFormikContext();
 
   const handleCloseClick = () => {
     history.go(-1);
@@ -107,6 +107,27 @@ export default function ItemForm() {
           filterByTypes={[ACCOUNT_TYPE.INVENTORY]}
         />
       </ItemFormGroup>
+
+      <FormGroup
+        inline={true}
+        label={
+          <strong>
+            <T id={'allow_negative_inventory_assemblies'} />
+          </strong>
+        }
+        helperText={<T id={'allow_negative_inventory_assemblies_hint'} />}
+      >
+        <Checkbox
+          checked={!!values.allow_negative_inventory_assemblies}
+          onChange={(event) =>
+            setFieldValue(
+              'allow_negative_inventory_assemblies',
+              event.currentTarget.checked,
+            )
+          }
+          label={<T id={'allow_negative_inventory_assemblies_checkbox'} />}
+        />
+      </FormGroup>
 
       <CardFooterActions>
         <Button intent={Intent.PRIMARY} loading={isSubmitting} type="submit">

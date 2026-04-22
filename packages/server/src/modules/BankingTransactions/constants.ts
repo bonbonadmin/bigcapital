@@ -143,5 +143,6 @@ export const TransactionTypes = {
   RefundCreditNote: 'transaction_type.refund_credit_note',
   RefundVendorCredit: 'transaction_type.refund_vendor_credit',
   LandedCost: 'transaction_type.landed_cost',
+  InventoryAssembly: 'transaction_type.inventory_assembly',
   CashflowTransaction: CashflowTransactionTypes,
 };

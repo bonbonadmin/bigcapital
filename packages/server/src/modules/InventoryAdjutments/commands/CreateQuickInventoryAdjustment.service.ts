@@ -21,6 +21,7 @@ import { CreateQuickInventoryAdjustmentDto } from '../dtos/CreateQuickInventoryA
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { ERRORS } from '../constants/InventoryAdjustments.constants';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { isInventoryTrackedItemType } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class CreateQuickInventoryAdjustmentService {
@@ -146,7 +147,7 @@ export class CreateQuickInventoryAdjustmentService {
    * @param {IItem} item
    */
   validateItemInventoryType(item) {
-    if (item.type !== 'inventory') {
+    if (!isInventoryTrackedItemType(item.type)) {
       throw new ServiceError(ERRORS.ITEM_SHOULD_BE_INVENTORY_TYPE);
     }
   }

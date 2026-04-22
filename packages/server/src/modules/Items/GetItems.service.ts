@@ -59,6 +59,7 @@ export class GetItemsService {
         builder.withGraphFetched('sellAccount');
         builder.withGraphFetched('costAccount');
         builder.withGraphFetched('category');
+        builder.withGraphFetched('assemblyComponents');
 
         dynamicFilter.buildQuery()(builder);
       })

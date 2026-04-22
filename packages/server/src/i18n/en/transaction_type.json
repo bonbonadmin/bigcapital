@@ -21,5 +21,6 @@
   "refund_credit_note": "Refund Credit Note",
   "refund_vendor_credit": "Refund Vendor Credit",
   "landed_cost": "Landed Cost",
+  "inventory_assembly": "Inventory Assembly",
   "payment_made": "Payment made"
 }

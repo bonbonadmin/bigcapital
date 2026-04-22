@@ -12,6 +12,7 @@ import { events } from '@/common/events/events';
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { SalesByItemsReport } from './SalesByItems';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { INVENTORY_TRACKED_ITEM_TYPES } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class SalesByItemsReportService {
@@ -47,7 +48,7 @@ export class SalesByItemsReportService {
     const inventoryItems = await this.itemModel()
       .query()
       .onBuild((q) => {
-        q.where('type', 'inventory');
+        q.whereIn('type', INVENTORY_TRACKED_ITEM_TYPES);
 
         if (filter.itemsIds.length > 0) {
           q.whereIn('id', filter.itemsIds);

@@ -43,6 +43,7 @@ export class Contact extends BaseModel {
 
   note: string;
   active: boolean;
+  externalId?: number | null;
 
   /**
    * Table name

@@ -51,6 +51,76 @@ export class BillResponseDto {
   payableAccountId?: number;
 
   @ApiProperty({
+    description: 'The sales tax rate ID applied to this bill',
+    example: 10,
+    required: false,
+  })
+  salesTaxRateId?: number;
+
+  @ApiProperty({
+    description: 'The sales tax name snapshot applied to this bill',
+    example: 'PPN Masukan',
+    required: false,
+  })
+  salesTaxName?: string;
+
+  @ApiProperty({
+    description: 'The sales tax rate snapshot applied to this bill',
+    example: 11,
+    required: false,
+  })
+  salesTaxRate?: number;
+
+  @ApiProperty({
+    description: 'The sales tax account snapshot applied to this bill',
+    example: 1201,
+    required: false,
+  })
+  salesTaxAccountId?: number;
+
+  @ApiProperty({
+    description: 'The sales tax amount applied to this bill',
+    example: 14.3,
+    required: false,
+  })
+  salesTaxAmount?: number;
+
+  @ApiProperty({
+    description: 'The withholding tax ID applied to this bill',
+    example: 5,
+    required: false,
+  })
+  withholdingTaxId?: number;
+
+  @ApiProperty({
+    description: 'The withholding tax name snapshot applied to this bill',
+    example: 'PPh 23',
+    required: false,
+  })
+  withholdingTaxName?: string;
+
+  @ApiProperty({
+    description: 'The withholding tax rate snapshot applied to this bill',
+    example: 2,
+    required: false,
+  })
+  withholdingTaxRate?: number;
+
+  @ApiProperty({
+    description: 'The withholding tax account snapshot applied to this bill',
+    example: 2201,
+    required: false,
+  })
+  withholdingTaxAccountId?: number;
+
+  @ApiProperty({
+    description: 'The withholding tax amount applied to this bill',
+    example: 2,
+    required: false,
+  })
+  withholdingTaxAmount?: number;
+
+  @ApiProperty({
     description: 'The exchange rate for currency conversion',
     example: 1.25,
     required: false,

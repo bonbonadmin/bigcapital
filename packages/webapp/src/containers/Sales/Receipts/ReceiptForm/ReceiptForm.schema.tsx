@@ -25,6 +25,7 @@ const Schema = Yup.object().shape({
     .min(1)
     .max(DATATYPES_LENGTH.TEXT)
     .label(intl.get('note')),
+  tags: Yup.string().nullable().max(DATATYPES_LENGTH.TEXT),
   closed: Yup.boolean(),
   branch_id: Yup.string(),
   warehouse_id: Yup.string(),

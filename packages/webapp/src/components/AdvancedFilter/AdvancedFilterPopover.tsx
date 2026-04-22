@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from 'react';
-import { Popover, PopoverInteractionKind, Position } from '@blueprintjs/core';
+import { PopoverInteractionKind, Position } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 import { AdvancedFilterDropdown } from './AdvancedFilterDropdown';
 
 /**
@@ -12,7 +13,7 @@ export function AdvancedFilterPopover({
   children,
 }) {
   return (
-    <Popover
+    <Popover2
       minimal={true}
       content={
         <AdvancedFilterDropdown
@@ -28,6 +29,6 @@ export function AdvancedFilterPopover({
       {...popoverProps}
     >
       {children}
-    </Popover>
+    </Popover2>
   );
 }

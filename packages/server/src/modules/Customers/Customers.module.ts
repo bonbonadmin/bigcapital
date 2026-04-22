@@ -23,6 +23,7 @@ import { AccountsModule } from '../Accounts/Accounts.module';
 import { CustomerGLEntries } from './CustomerGLEntries';
 import { CustomerGLEntriesStorage } from './CustomerGLEntriesStorage';
 import { CustomerWriteGLOpeningBalanceSubscriber } from './subscribers/CustomerGLEntriesSubscriber';
+import { CustomersMatchaPopSyncService } from './CustomersMatchaPopSync.service';
 
 @Module({
   imports: [
@@ -51,9 +52,11 @@ import { CustomerWriteGLOpeningBalanceSubscriber } from './subscribers/CustomerG
     GetCustomers,
     BulkDeleteCustomersService,
     ValidateBulkDeleteCustomersService,
+    CustomersMatchaPopSyncService,
     CustomerGLEntries,
     CustomerGLEntriesStorage,
     CustomerWriteGLOpeningBalanceSubscriber,
   ],
+  exports: [CreateCustomer],
 })
 export class CustomersModule {}

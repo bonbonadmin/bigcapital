@@ -31,12 +31,14 @@ const defaultInitialValues = {
   name: '',
   type: 'service',
   code: '',
+  unit_of_measure: 'each',
   cost_price: '',
   sell_price: '',
   cost_account_id: '',
   sell_account_id: '',
   sell_tax_rate_id: '',
   inventory_account_id: '',
+  assembly_components: [],
   category_id: '',
   sellable: 1,
   purchasable: true,
@@ -79,9 +81,19 @@ export const transitionItemTypeKeyToLabel = (itemTypeKey) => {
   const table = {
     service: intl.get('service'),
     inventory: intl.get('inventory'),
+    'inventory-assembly': intl.get('inventory-assembly'),
   };
   return typeof table[itemTypeKey] === 'string' ? table[itemTypeKey] : '';
 };
+
+export const isInventoryTrackedType = (type) =>
+  ['inventory', 'inventory-assembly'].includes(type);
+
+export const itemUnitOfMeasureOptions = [
+  { key: 'each', label: 'each' },
+  { key: 'liter', label: 'liter' },
+  { key: 'kg', label: 'kg' },
+];
 
 // handle delete errors.
 export const handleDeleteErrors = (errors) => {

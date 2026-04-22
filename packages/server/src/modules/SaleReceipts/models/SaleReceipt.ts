@@ -42,6 +42,7 @@ export class SaleReceipt extends ExtendedModel {
   public receiptDate!: Date;
   public receiptNumber!: string;
   public referenceNo!: string;
+  public tags!: string | null;
   public sendToEmail!: string;
   public receiptMessage!: string;
   public statement!: string;
@@ -385,6 +386,7 @@ export class SaleReceipt extends ExtendedModel {
     return [
       { fieldKey: 'receipt_number', comparator: 'contains' },
       { condition: 'or', fieldKey: 'reference_no', comparator: 'contains' },
+      { condition: 'or', fieldKey: 'tags', comparator: 'contains' },
       { condition: 'or', fieldKey: 'amount', comparator: 'equals' },
     ];
   }

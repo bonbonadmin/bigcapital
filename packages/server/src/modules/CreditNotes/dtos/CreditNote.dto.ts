@@ -69,6 +69,14 @@ export class CommandCreditNoteDto {
   @ApiProperty({ example: '123', description: 'The terms and conditions' })
   termsConditions?: string;
 
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    example: 'priority,return',
+    description: 'Comma-separated tags',
+  })
+  tags?: string;
+
   @IsBoolean()
   @ApiProperty({ example: false, description: 'The credit note is open' })
   open: boolean = false;

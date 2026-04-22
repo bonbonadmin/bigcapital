@@ -5,6 +5,7 @@ export * from './views';
 export * from './items';
 export * from './itemsCategories';
 export * from './inventoryAdjustments';
+export * from './inventoryAssemblies';
 export * from './expenses';
 export * from './expensePayments';
 export * from './customers';

@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import {
   Icon,
   Can,
+  AppToaster,
   FormattedMessage as T,
   DashboardActionViewsList,
   AdvancedFilterPopover,
@@ -23,7 +24,10 @@ import {
 } from '@/components';
 
 import { useCustomersListContext } from './CustomersListProvider';
-import { useRefreshCustomers } from '@/hooks/query/customers';
+import {
+  useRefreshCustomers,
+  useSyncMatchaPopCustomers,
+} from '@/hooks/query/customers';
 import { useDownloadExportPdf } from '@/hooks/query/FinancialReports/use-export-pdf';
 
 import { withCustomers } from './withCustomers';
@@ -37,6 +41,7 @@ import { compose } from '@/utils';
 import { DialogsName } from '@/constants/dialogs';
 import { isEmpty } from 'lodash';
 import { useBulkDeleteCustomersDialog } from './hooks/use-bulk-delete-customers-dialog';
+import { CustomersERPImportDialog } from './CustomersERPImportDialog';
 
 /**
  * Customers actions bar.
@@ -61,6 +66,8 @@ function CustomerActionsBar({
 }) {
   const { openBulkDeleteDialog, isValidatingBulkDeleteCustomers } =
     useBulkDeleteCustomersDialog();
+  const [isERPImportDialogOpen, setIsERPImportDialogOpen] = React.useState(false);
+  const [erpImportCandidates, setERPImportCandidates] = React.useState([]);
 
   // History context.
   const history = useHistory();
@@ -70,6 +77,8 @@ function CustomerActionsBar({
 
   // Customers refresh action.
   const { refresh } = useRefreshCustomers();
+  const { mutateAsync: syncMatchaPopCustomersMutate, isLoading: isSyncingERP } =
+    useSyncMatchaPopCustomers();
 
   // Exports pdf document.
   const { downloadAsync: downloadExportPdf } = useDownloadExportPdf();
@@ -107,6 +116,51 @@ function CustomerActionsBar({
   // Handle import button click.
   const handleImportBtnClick = () => {
     history.push('/customers/import');
+  };
+
+  const handleCloseERPImportDialog = () => {
+    setIsERPImportDialogOpen(false);
+    setERPImportCandidates([]);
+  };
+
+  const handleSyncERPClick = async () => {
+    try {
+      const response = await syncMatchaPopCustomersMutate();
+      const result = response?.data || {};
+      const updatedCount = result.updated_count || 0;
+      const importCandidates = result.import_candidates || [];
+
+      if (updatedCount > 0) {
+        AppToaster.show({
+          intent: Intent.SUCCESS,
+          message: `${updatedCount} existing customers were synced from ERP.`,
+        });
+      }
+
+      if (importCandidates.length > 0) {
+        setERPImportCandidates(importCandidates);
+        setIsERPImportDialogOpen(true);
+
+        AppToaster.show({
+          intent: Intent.PRIMARY,
+          message: `${importCandidates.length} ERP customers are ready to import.`,
+        });
+        return;
+      }
+
+      if (updatedCount === 0) {
+        AppToaster.show({
+          intent: Intent.WARNING,
+          message: 'No ERP customer changes were found to sync.',
+        });
+      }
+    } catch (error) {
+      AppToaster.show({
+        intent: Intent.DANGER,
+        message:
+          error?.response?.data?.message || 'Failed to sync ERP customers.',
+      });
+    }
   };
 
   // Handle the export button click.
@@ -182,6 +236,15 @@ function CustomerActionsBar({
           onClick={handleImportBtnClick}
           text={<T id={'import'} />}
         />
+        <Can I={CustomerAction.Edit} a={AbilitySubject.Customer}>
+          <Button
+            className={Classes.MINIMAL}
+            icon={<Icon icon="refresh-16" iconSize={16} />}
+            onClick={handleSyncERPClick}
+            text={'Sync ERP'}
+            loading={isSyncingERP}
+          />
+        </Can>
         <Button
           className={Classes.MINIMAL}
           icon={<Icon icon="file-export-16" iconSize={16} />}
@@ -209,6 +272,12 @@ function CustomerActionsBar({
           onClick={handleRefreshBtnClick}
         />
       </NavbarGroup>
+
+      <CustomersERPImportDialog
+        isOpen={isERPImportDialogOpen}
+        importCandidates={erpImportCandidates}
+        onClose={handleCloseERPImportDialog}
+      />
     </DashboardActionsBar>
   );
 }

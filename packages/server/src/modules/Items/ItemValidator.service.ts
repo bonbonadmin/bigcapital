@@ -15,6 +15,7 @@ import { AccountTransaction } from '../Accounts/models/AccountTransaction.model'
 import { InventoryAdjustment } from '../InventoryAdjutments/models/InventoryAdjustment';
 import { TenantModelProxy } from '../System/models/TenantBaseModel';
 import { CreateItemDto, EditItemDto } from './dtos/Item.dto';
+import { isInventoryTrackedItemType } from './Items.constants';
 
 @Injectable()
 export class ItemsValidators {
@@ -144,11 +145,26 @@ export class ItemsValidators {
   public validateCostAccountExistance(
     purchasable: boolean,
     costAccountId?: number,
+    type?: string,
   ) {
-    if (purchasable && !costAccountId) {
+    if ((purchasable || isInventoryTrackedItemType(type)) && !costAccountId) {
       throw new ServiceError(
-        ERRORS.COST_ACCOUNT_REQUIRED_WITH_PURCHASABLE_ITEM,
-        'The cost account is required with purchasable item.',
+        isInventoryTrackedItemType(type)
+          ? ERRORS.COST_ACCOUNT_REQUIRED_WITH_INVENTORY_ITEM
+          : ERRORS.COST_ACCOUNT_REQUIRED_WITH_PURCHASABLE_ITEM,
+        'The cost account is required for this item.',
+      );
+    }
+  }
+
+  public validateInventoryAccountRequired(
+    type?: string,
+    inventoryAccountId?: number,
+  ) {
+    if (isInventoryTrackedItemType(type) && !inventoryAccountId) {
+      throw new ServiceError(
+        ERRORS.INVENTORY_ACCOUNT_REQUIRED_WITH_INVENTORY_ITEM,
+        'The inventory account is required for inventory tracked items.',
       );
     }
   }
@@ -232,7 +248,10 @@ export class ItemsValidators {
     newItemDTO: CreateItemDto | EditItemDto,
   ) {
     // We have no problem in case the item type not modified.
-    if (newItemDTO.type === oldItem.type || oldItem.type === 'inventory') {
+    if (
+      newItemDTO.type === oldItem.type ||
+      isInventoryTrackedItemType(oldItem.type)
+    ) {
       return;
     }
     // Retrieve all transactions that associated to the given item id.
@@ -262,7 +281,7 @@ export class ItemsValidators {
     newItemDTO: CreateItemDto | EditItemDto,
   ) {
     if (
-      newItemDTO.type !== 'inventory' ||
+      !isInventoryTrackedItemType(newItemDTO.type) ||
       oldItem.inventoryAccountId === newItemDTO.inventoryAccountId
     ) {
       return;
@@ -288,7 +307,7 @@ export class ItemsValidators {
   ) {
     if (
       itemDTO.type &&
-      oldItem.type === 'inventory' &&
+      isInventoryTrackedItemType(oldItem.type) &&
       itemDTO.type !== oldItem.type
     ) {
       throw new ServiceError(ERRORS.ITEM_CANNOT_CHANGE_INVENTORY_TYPE);

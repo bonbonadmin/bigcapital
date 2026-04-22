@@ -34,6 +34,8 @@ export class BillGLEntries {
     const bill = await this.billModel()
       .query(trx)
       .findById(billId)
+      .withGraphFetched('salesTaxAccount')
+      .withGraphFetched('withholdingTaxAccount')
       .withGraphFetched('entries.item')
       .withGraphFetched('entries.allocatedCostEntries')
       .withGraphFetched('locatedLandedCosts.allocateEntries');

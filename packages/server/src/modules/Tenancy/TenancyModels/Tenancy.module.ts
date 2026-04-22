@@ -42,6 +42,9 @@ import { ClsModule } from 'nestjs-cls';
 import { TenantUser } from './models/TenantUser.model';
 import { ExpensePayment } from '@/modules/ExpensePayments/models/ExpensePayment';
 import { ExpensePaymentEntry } from '@/modules/ExpensePayments/models/ExpensePaymentEntry';
+import { ItemAssemblyComponent } from '@/modules/Items/models/ItemAssemblyComponent';
+import { InventoryAssembly } from '@/modules/InventoryAssemblies/models/InventoryAssembly';
+import { InventoryAssemblyEntry } from '@/modules/InventoryAssemblies/models/InventoryAssemblyEntry';
 
 const models = [
   Item,
@@ -83,6 +86,9 @@ const models = [
   PaymentReceivedEntry,
   ExpensePayment,
   ExpensePaymentEntry,
+  ItemAssemblyComponent,
+  InventoryAssembly,
+  InventoryAssemblyEntry,
   TenantUser,
 ];
 

@@ -58,6 +58,13 @@ export class CreditNoteResponseDto {
   termsConditions?: string;
 
   @ApiProperty({
+    description: 'Comma-separated tags for the credit note',
+    example: 'priority,return',
+    required: false,
+  })
+  tags?: string;
+
+  @ApiProperty({
     description: 'Whether the credit note is open',
     example: true,
   })

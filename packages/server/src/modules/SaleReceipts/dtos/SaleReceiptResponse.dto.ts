@@ -79,6 +79,13 @@ export class SaleReceiptResponseDto {
   })
   statement?: string;
 
+  @ApiProperty({
+    description: 'Comma-separated tags for the receipt',
+    example: 'priority,walk-in',
+    required: false,
+  })
+  tags?: string;
+
   @ApiProperty({ description: 'Whether the receipt is closed', example: false })
   closed: boolean;
 

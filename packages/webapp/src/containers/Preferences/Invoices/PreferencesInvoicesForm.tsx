@@ -1,16 +1,25 @@
 // @ts-nocheck
-import styled from 'styled-components';
 import { Form } from 'formik';
 import { Button, Intent } from '@blueprintjs/core';
 import { useHistory } from 'react-router-dom';
 
-import { FormattedMessage as T, FFormGroup, FTextArea } from '@/components';
+import {
+  AccountsSelect,
+  CardFooterActions,
+  FieldRequiredHint,
+  FormattedMessage as T,
+  FFormGroup,
+  FTextArea,
+} from '@/components';
+import { ACCOUNT_TYPE } from '@/constants/accountTypes';
+import { usePreferencesInvoiceFormContext } from './PreferencesInvoiceFormBoot';
 
 /**
  * Invoices preferences form.
  */
 export function PreferencesInvoicesForm({ isSubmitting }) {
   const history = useHistory();
+  const { accounts } = usePreferencesInvoiceFormContext();
 
   // Handle close click.
   const handleCloseClick = () => {
@@ -47,6 +56,38 @@ export function PreferencesInvoicesForm({ isSubmitting }) {
         />
       </FFormGroup>
 
+      <FFormGroup
+        name={'erpSalesTypesPerCustomer'}
+        label={<strong>ERP Sales Types Imported Per Customer</strong>}
+        helperText={
+          'Enter one sales_type per line or separated by commas. Sales types listed here import to the matched ERP customer. Any sales_type not listed will import into an aggregate customer like Agg-shopee.'
+        }
+        fastField={true}
+      >
+        <FTextArea
+          medium={'true'}
+          name={'erpSalesTypesPerCustomer'}
+          fastField={true}
+          fill={true}
+        />
+      </FFormGroup>
+
+      <FFormGroup
+        name={'preferredReceivableAccount'}
+        label={<strong>Preferred Accounts Receivable</strong>}
+        helperText={
+          'Choose the accounts receivable account that ERP-imported sales invoices should post to.'
+        }
+        labelInfo={<FieldRequiredHint />}
+        fastField={true}
+      >
+        <AccountsSelect
+          name={'preferredReceivableAccount'}
+          items={accounts}
+          filterByTypes={[ACCOUNT_TYPE.ACCOUNTS_RECEIVABLE]}
+        />
+      </FFormGroup>
+
       <CardFooterActions>
         <Button loading={isSubmitting} intent={Intent.PRIMARY} type="submit">
           <T id={'save'} />
@@ -58,22 +99,3 @@ export function PreferencesInvoicesForm({ isSubmitting }) {
     </Form>
   );
 }
-
-const CardFooterActions = styled.div`
-  --x-color-border: #e0e7ea;
-
-  .bp4-dark & {
-    --x-color-border: rgba(255, 255, 255, 0.15);
-  }
-  padding-top: 16px;
-  border-top: 1px solid var(--x-color-border);
-  margin-top: 30px;
-
-  .bp4-button {
-    min-width: 70px;
-
-    + .bp4-button {
-      margin-left: 10px;
-    }
-  }
-`;

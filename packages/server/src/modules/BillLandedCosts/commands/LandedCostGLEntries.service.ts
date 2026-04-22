@@ -10,6 +10,7 @@ import { Ledger } from '@/modules/Ledger/Ledger';
 import { LedgerStorageService } from '@/modules/Ledger/LedgerStorage.service';
 import { AccountNormal } from '@/modules/Accounts/Accounts.types';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { isInventoryTrackedItemType } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class LandedCostGLEntriesService extends BaseLandedCostService {
@@ -73,7 +74,7 @@ export class LandedCostGLEntriesService extends BaseLandedCostService {
       }
     ).itemEntry;
     const item = itemEntry?.item;
-    const isInventory = item && ['inventory'].indexOf(item.type) !== -1;
+    const isInventory = item && isInventoryTrackedItemType(item.type);
     const accountId = isInventory
       ? item?.inventoryAccountId
       : itemEntry?.costAccountId;

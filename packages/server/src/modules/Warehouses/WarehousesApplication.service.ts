@@ -11,6 +11,8 @@ import { GetItemWarehouses } from './Items/GetItemWarehouses';
 import { WarehouseMarkPrimary } from './commands/WarehouseMarkPrimary.service';
 import { Injectable } from '@nestjs/common';
 import { CreateWarehouseDto, EditWarehouseDto } from './dtos/Warehouse.dto';
+import { WarehousesMatchaPopSyncService } from './WarehousesMatchaPopSync.service';
+import { ImportMatchaPopWarehousesDto } from './dtos/MatchaPopWarehouses.dto';
 
 @Injectable()
 export class WarehousesApplication {
@@ -23,6 +25,7 @@ export class WarehousesApplication {
     private activateWarehousesService: ActivateWarehousesService,
     private markWarehousePrimaryService: WarehouseMarkPrimary,
     private getItemWarehousesService: GetItemWarehouses,
+    private warehousesMatchaPopSyncService: WarehousesMatchaPopSyncService,
   ) {}
 
   /**
@@ -100,5 +103,13 @@ export class WarehousesApplication {
    */
   public getItemWarehouses = (itemId: number): Promise<any> => {
     return this.getItemWarehousesService.getItemWarehouses(itemId);
+  };
+
+  public syncMatchaPopWarehouses = () => {
+    return this.warehousesMatchaPopSyncService.syncExistingWarehouses();
+  };
+
+  public importMatchaPopWarehouses = (dto: ImportMatchaPopWarehousesDto) => {
+    return this.warehousesMatchaPopSyncService.importWarehouses(dto);
   };
 }

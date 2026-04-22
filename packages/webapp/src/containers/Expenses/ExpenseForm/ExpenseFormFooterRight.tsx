@@ -54,46 +54,42 @@ export function ExpenseFormFooterRight() {
         value={subtotalFormatted}
         borderStyle={TotalLineBorderStyle.None}
       />
-      {expense_mode === 'payable' && (
-        <TotalLine
-          title={
-            <WithholdingTaxLineTitle>
-              <span>Withholding Tax</span>
-              <WithholdingTaxSelect
-                name={'withholding_tax_id'}
-                items={withholdingTaxOptions}
-                valueAccessor={'id'}
-                textAccessor={'name_formatted'}
-                labelAccessor={'name_formatted'}
-                placeholder={'Select withholding tax'}
-                fill={true}
-              />
-            </WithholdingTaxLineTitle>
-          }
-          value={withholdingTaxAmountFormatted}
-          borderStyle={TotalLineBorderStyle.None}
-        />
-      )}
-      {expense_mode === 'payable' && (
-        <TotalLine
-          title={
-            <WithholdingTaxLineTitle>
-              <span>Sales Tax</span>
-              <WithholdingTaxSelect
-                name={'sales_tax_rate_id'}
-                items={salesTaxOptions}
-                valueAccessor={'id'}
-                textAccessor={'name_formatted'}
-                labelAccessor={'name_formatted'}
-                placeholder={'Select sales tax'}
-                fill={true}
-              />
-            </WithholdingTaxLineTitle>
-          }
-          value={salesTaxAmountFormatted}
-          borderStyle={TotalLineBorderStyle.None}
-        />
-      )}
+      <TotalLine
+        title={
+          <WithholdingTaxLineTitle>
+            <span>Withholding Tax</span>
+            <WithholdingTaxSelect
+              name={'withholding_tax_id'}
+              items={withholdingTaxOptions}
+              valueAccessor={'id'}
+              textAccessor={'name_formatted'}
+              labelAccessor={'name_formatted'}
+              placeholder={'Select withholding tax'}
+              fill={true}
+            />
+          </WithholdingTaxLineTitle>
+        }
+        value={withholdingTaxAmountFormatted}
+        borderStyle={TotalLineBorderStyle.None}
+      />
+      <TotalLine
+        title={
+          <WithholdingTaxLineTitle>
+            <span>Sales Tax</span>
+            <WithholdingTaxSelect
+              name={'sales_tax_rate_id'}
+              items={salesTaxOptions}
+              valueAccessor={'id'}
+              textAccessor={'name_formatted'}
+              labelAccessor={'name_formatted'}
+              placeholder={'Select sales tax'}
+              fill={true}
+            />
+          </WithholdingTaxLineTitle>
+        }
+        value={salesTaxAmountFormatted}
+        borderStyle={TotalLineBorderStyle.None}
+      />
       <TotalLine
         title={'Total'}
         value={totalFormatted}

@@ -159,6 +159,36 @@ export function useCreateCustomer(props) {
   });
 }
 
+export function useSyncMatchaPopCustomers(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    () => apiRequest.post('customers/external/matchapop/sync'),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
+export function useImportMatchaPopCustomers(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    (values) => apiRequest.post('customers/external/matchapop/import', values),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
 /**
  * Retrieve the customer details.
  */

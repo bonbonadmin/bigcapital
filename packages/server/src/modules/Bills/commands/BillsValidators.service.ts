@@ -10,6 +10,7 @@ import { transformToMap } from '@/utils/transform-to-key';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { ItemEntryDto } from '@/modules/TransactionItemEntry/dto/ItemEntry.dto';
 import { BillEntryDto } from '../dtos/Bill.dto';
+import { isInventoryTrackedItemType } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class BillsValidators {
@@ -137,7 +138,7 @@ export class BillsValidators {
     const nonInventoryHasCost = newEntriesDTO.filter((entry) => {
       const item = entriesItemsById.get(entry.itemId);
 
-      return entry.landedCost && item.type !== 'inventory';
+      return entry.landedCost && !isInventoryTrackedItemType(item.type);
     });
     if (nonInventoryHasCost.length > 0) {
       throw new ServiceError(

@@ -25,6 +25,7 @@ import classNames from 'classnames';
 
 import { useItemFormContext } from './ItemFormProvider';
 import { handleStringChange, inputIntent } from '@/utils';
+import { isInventoryTrackedType } from './utils';
 // import { categoriesFieldShouldUpdate } from './utils';
 
 /**
@@ -82,10 +83,14 @@ export default function ItemFormPrimarySection() {
                 form.setFieldValue('type', _value);
               })}
               selectedValue={value}
-              disabled={!isNewMode && item.type === 'inventory'}
+              disabled={!isNewMode && isInventoryTrackedType(item.type)}
             >
               <Radio label={<T id={'service'} />} value="service" />
               <Radio label={<T id={'inventory'} />} value="inventory" />
+              <Radio
+                label={<T id={'inventory-assembly'} />}
+                value="inventory-assembly"
+              />
             </RadioGroup>
           </FormGroup>
         )}

@@ -155,6 +155,16 @@ export const getDashboardRoutes = () => [
     defaultSearchResource: RESOURCES_TYPES.ITEM,
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
+  {
+    path: `/inventory-assemblies/build`,
+    component: lazy(
+      () => import('@/containers/InventoryAssemblies/BuildAssembliesPage'),
+    ),
+    breadcrumb: 'Build Assemblies',
+    pageTitle: 'Build Assemblies',
+    defaultSearchResource: RESOURCES_TYPES.ITEM,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
 
   // Warehouse Transfer.
   {

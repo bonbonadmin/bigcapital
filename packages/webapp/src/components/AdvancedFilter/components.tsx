@@ -10,14 +10,18 @@ const DEBOUNCE_MS = 100;
  */
 export function useAdvancedFilterAutoSubmit() {
   const { submitForm, values } = useFormikContext();
-  const [isSubmit, setIsSubmit] = React.useState(false);
 
-  const debouncedSubmit = React.useCallback(
-    debounce(() => {
-      return submitForm().then(() => setIsSubmit(true));
-    }, DEBOUNCE_MS),
+  const debouncedSubmit = React.useMemo(
+    () =>
+      debounce(() => {
+        return submitForm();
+      }, DEBOUNCE_MS),
     [submitForm],
   );
 
-  React.useEffect(() => debouncedSubmit, [debouncedSubmit, values]);
+  React.useEffect(() => {
+    debouncedSubmit();
+
+    return () => debouncedSubmit.cancel();
+  }, [debouncedSubmit, values]);
 }

@@ -59,6 +59,11 @@ export const SaleInvoiceMeta = {
       column: 'terms_conditions',
       fieldType: 'text',
     },
+    tags: {
+      name: 'tags',
+      column: 'tags',
+      fieldType: 'text',
+    },
     amount: {
       name: 'invoice.field.amount',
       column: 'balance',
@@ -153,6 +158,11 @@ export const SaleInvoiceMeta = {
       type: 'text',
       printable: false,
     },
+    tags: {
+      name: 'tags',
+      type: 'text',
+      printable: false,
+    },
     delivered: {
       name: 'invoice.field.delivered',
       type: 'boolean',
@@ -243,6 +253,11 @@ export const SaleInvoiceMeta = {
     },
     termsConditions: {
       name: 'invoice.field.terms_conditions',
+      fieldType: 'text',
+      printable: false,
+    },
+    tags: {
+      name: 'tags',
       fieldType: 'text',
       printable: false,
     },

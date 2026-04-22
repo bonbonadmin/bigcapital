@@ -11,6 +11,7 @@ import {
 } from '@blueprintjs/core';
 
 import {
+  AppToaster,
   Can,
   Icon,
   FormattedMessage as T,
@@ -23,7 +24,10 @@ import {
 
 import { VendorAction, AbilitySubject } from '@/constants/abilityOption';
 
-import { useRefreshVendors } from '@/hooks/query/vendors';
+import {
+  useRefreshVendors,
+  useSyncMatchaPopVendors,
+} from '@/hooks/query/vendors';
 import { useVendorsListContext } from './VendorsListProvider';
 import { useHistory } from 'react-router-dom';
 import { useDownloadExportPdf } from '@/hooks/query/FinancialReports/use-export-pdf';
@@ -38,6 +42,7 @@ import { withDialogActions } from '@/containers/Dialog/withDialogActions';
 
 import { compose } from '@/utils';
 import { DialogsName } from '@/constants/dialogs';
+import { VendorsERPImportDialog } from './VendorsERPImportDialog';
 
 /**
  * Vendors actions bar.
@@ -63,6 +68,8 @@ function VendorActionsBar({
   const history = useHistory();
   const { openBulkDeleteDialog, isValidatingBulkDeleteVendors } =
     useBulkDeleteVendorsDialog();
+  const [isERPImportDialogOpen, setIsERPImportDialogOpen] = React.useState(false);
+  const [erpImportCandidates, setERPImportCandidates] = React.useState([]);
 
 
   // Vendors list context.
@@ -77,6 +84,8 @@ function VendorActionsBar({
   };
   // Vendors refresh action.
   const { refresh } = useRefreshVendors();
+  const { mutateAsync: syncMatchaPopVendorsMutate, isLoading: isSyncingERP } =
+    useSyncMatchaPopVendors();
 
   // Handle the active tab change.
   const handleTabChange = (viewSlug) => {
@@ -97,6 +106,51 @@ function VendorActionsBar({
   // Handle import button success.
   const handleImportBtnSuccess = () => {
     history.push('/vendors/import');
+  };
+
+  const handleCloseERPImportDialog = () => {
+    setIsERPImportDialogOpen(false);
+    setERPImportCandidates([]);
+  };
+
+  const handleSyncERPClick = async () => {
+    try {
+      const response = await syncMatchaPopVendorsMutate();
+      const result = response?.data || {};
+      const updatedCount = result.updated_count || 0;
+      const importCandidates = result.import_candidates || [];
+
+      if (updatedCount > 0) {
+        AppToaster.show({
+          intent: Intent.SUCCESS,
+          message: `${updatedCount} existing vendors were synced from ERP.`,
+        });
+      }
+
+      if (importCandidates.length > 0) {
+        setERPImportCandidates(importCandidates);
+        setIsERPImportDialogOpen(true);
+
+        AppToaster.show({
+          intent: Intent.PRIMARY,
+          message: `${importCandidates.length} ERP vendors are ready to import.`,
+        });
+        return;
+      }
+
+      if (updatedCount === 0) {
+        AppToaster.show({
+          intent: Intent.WARNING,
+          message: 'No ERP vendor changes were found to sync.',
+        });
+      }
+    } catch (error) {
+      AppToaster.show({
+        intent: Intent.DANGER,
+        message:
+          error?.response?.data?.message || 'Failed to sync ERP vendors.',
+      });
+    }
   };
   // Handle the export button click.
   const handleExportBtnClick = () => {
@@ -173,6 +227,15 @@ function VendorActionsBar({
           text={<T id={'import'} />}
           onClick={handleImportBtnSuccess}
         />
+        <Can I={VendorAction.Edit} a={AbilitySubject.Vendor}>
+          <Button
+            className={Classes.MINIMAL}
+            icon={<Icon icon="refresh-16" iconSize={16} />}
+            text={'Sync ERP'}
+            onClick={handleSyncERPClick}
+            loading={isSyncingERP}
+          />
+        </Can>
         <Button
           className={Classes.MINIMAL}
           icon={<Icon icon="file-export-16" iconSize={16} />}
@@ -201,6 +264,12 @@ function VendorActionsBar({
           onClick={handleRefreshBtnClick}
         />
       </NavbarGroup>
+
+      <VendorsERPImportDialog
+        isOpen={isERPImportDialogOpen}
+        importCandidates={erpImportCandidates}
+        onClose={handleCloseERPImportDialog}
+      />
     </DashboardActionsBar>
   );
 }

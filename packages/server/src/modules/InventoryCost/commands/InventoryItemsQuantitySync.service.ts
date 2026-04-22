@@ -6,6 +6,7 @@ import { Item } from '../../Items/models/Item';
 import { Injectable } from '@nestjs/common';
 import { InventoryTransaction } from '../models/InventoryTransaction';
 import { TenantModelProxy } from '../../System/models/TenantBaseModel';
+import { INVENTORY_TRACKED_ITEM_TYPES } from '@/modules/Items/Items.constants';
 
 /**
  * Syncs the inventory transactions with inventory items quantity.
@@ -91,7 +92,8 @@ export class InventoryItemsQuantitySyncService {
     itemsQuantity.forEach((itemQuantity: IItemsQuantityChanges) => {
       const changeQuantityOper = this.itemModel()
         .query(trx)
-        .where({ id: itemQuantity.itemId, type: 'inventory' })
+        .where('id', itemQuantity.itemId)
+        .whereIn('type', INVENTORY_TRACKED_ITEM_TYPES)
         .modify('updateQuantityOnHand', itemQuantity.balanceChange);
 
       opers.push(changeQuantityOper);

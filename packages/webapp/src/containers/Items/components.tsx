@@ -2,7 +2,7 @@
 import React from 'react';
 import intl from 'react-intl-universal';
 import clsx from 'classnames';
-import { isNumber } from 'lodash';
+import { isNumber, toNumber } from 'lodash';
 import {
   Menu,
   MenuDivider,
@@ -21,6 +21,7 @@ import {
   ItemAction,
   InventoryAdjustmentAction,
 } from '@/constants/abilityOption';
+import { isInventoryTrackedType } from './utils';
 
 /**
  * Publish accessor
@@ -57,9 +58,17 @@ export const ItemCodeAccessor = (row) =>
   );
 
 export const QuantityOnHandCell = ({ cell: { value } }) => {
-  return isNumber(value) ? (
-    <span className={value < 0 ? 'quantity_on_hand' : null}>{value}</span>
-  ) : null;
+  const numericValue = isNumber(value) ? value : toNumber(value);
+
+  if (isBlank(value) || Number.isNaN(numericValue)) {
+    return null;
+  }
+
+  return (
+    <span className={numericValue < 0 ? 'quantity_on_hand' : null}>
+      {value}
+    </span>
+  );
 };
 
 export const CostPriceCell = ({ cell: { value } }) => {
@@ -133,7 +142,7 @@ export function ItemsActionMenuList({
         I={InventoryAdjustmentAction.Edit}
         a={AbilitySubject.InventoryAdjustment}
       >
-        <If condition={original.type === 'inventory'}>
+        <If condition={isInventoryTrackedType(original.type)}>
           <MenuItem
             text={intl.get('make_adjustment')}
             icon={<Icon icon={'swap-vert'} iconSize={16} />}
@@ -206,30 +215,20 @@ export const useItemsTableColumns = () => {
         textOverview: true,
       },
       {
-        id: 'sell_price',
-        Header: intl.get('sell_price'),
-        accessor: 'sell_price_formatted',
-        align: 'right',
-        width: 150,
-        clickable: true,
-        money: true,
-      },
-      {
-        id: 'cost_price',
-        Header: intl.get('cost_price'),
-        accessor: 'cost_price_formatted',
-        align: 'right',
-        width: 150,
-        clickable: true,
-        money: true,
-      },
-      {
         id: 'quantity_on_hand',
         Header: intl.get('quantity_on_hand'),
         accessor: 'quantity_on_hand',
         Cell: QuantityOnHandCell,
         align: 'right',
         width: 140,
+        clickable: true,
+      },
+      {
+        id: 'sell_price',
+        Header: intl.get('sell_price'),
+        accessor: 'sell_price_formatted',
+        align: 'right',
+        width: 150,
         clickable: true,
         money: true,
       },

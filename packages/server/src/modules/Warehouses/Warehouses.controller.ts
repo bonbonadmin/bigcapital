@@ -16,6 +16,7 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { CreateWarehouseDto, EditWarehouseDto } from './dtos/Warehouse.dto';
+import { ImportMatchaPopWarehousesDto } from './dtos/MatchaPopWarehouses.dto';
 import { WarehouseResponseDto } from './dtos/WarehouseResponse.dto';
 import { ApiCommonHeaders } from '@/common/decorators/ApiCommonHeaders';
 
@@ -72,6 +73,25 @@ export class WarehousesController {
   })
   getWarehouses() {
     return this.warehousesApplication.getWarehouses();
+  }
+
+  @Post('external/matchapop/sync')
+  @ApiOperation({
+    summary:
+      'Syncs existing warehouses by external ID with ERP data and returns missing warehouses for optional import.',
+  })
+  syncMatchaPopWarehouses(): Promise<any> {
+    return this.warehousesApplication.syncMatchaPopWarehouses();
+  }
+
+  @Post('external/matchapop/import')
+  @ApiOperation({ summary: 'Imports ERP warehouses as new warehouses.' })
+  importMatchaPopWarehouses(
+    @Body() importMatchaPopWarehousesDto: ImportMatchaPopWarehousesDto,
+  ): Promise<any> {
+    return this.warehousesApplication.importMatchaPopWarehouses(
+      importMatchaPopWarehousesDto,
+    );
   }
 
   @Post('activate')

@@ -7,6 +7,7 @@ import { Item } from '@/modules/Items/models/Item';
 import { transformToMap } from '@/utils/transform-to-key';
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { INVENTORY_TRACKED_ITEM_TYPES } from '@/modules/Items/Items.constants';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class InventoryValuationSheetRepository {
@@ -95,7 +96,7 @@ export class InventoryValuationSheetRepository {
     const inventoryItems = await this.itemModel()
       .query()
       .onBuild((q) => {
-        q.where('type', 'inventory');
+        q.whereIn('type', INVENTORY_TRACKED_ITEM_TYPES);
 
       if (this.filter.itemsIds.length > 0) {
         q.whereIn('id', this.filter.itemsIds);

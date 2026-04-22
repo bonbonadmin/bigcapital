@@ -102,6 +102,33 @@ export function useBulkDeleteItems(props) {
   );
 }
 
+export function useSyncMatchaPopItems(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(() => apiRequest.post('items/external/matchapop/sync'), {
+    onSuccess: () => {
+      commonInvalidateQueries(queryClient);
+    },
+    ...props,
+  });
+}
+
+export function useImportMatchaPopItems(props) {
+  const queryClient = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation(
+    (values) => apiRequest.post('items/external/matchapop/import', values),
+    {
+      onSuccess: () => {
+        commonInvalidateQueries(queryClient);
+      },
+      ...props,
+    },
+  );
+}
+
 /**
  * Validates which items can be deleted in bulk.
  */

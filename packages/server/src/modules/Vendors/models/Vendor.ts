@@ -72,6 +72,7 @@ export class Vendor extends TenantBaseModel {
   active: boolean;
 
   code?: string;
+  externalId?: number | null;
 
   /**
    * Query builder.

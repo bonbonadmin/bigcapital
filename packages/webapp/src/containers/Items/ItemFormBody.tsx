@@ -35,7 +35,19 @@ import { TaxRatesSelect } from '@/components/TaxRates/TaxRatesSelect';
  */
 function ItemFormBody({ organization: { base_currency } }) {
   const { accounts, taxRates } = useItemFormContext();
-  const { values } = useFormikContext();
+  const { values, setFieldValue } = useFormikContext();
+  const isAssembly = values.type === 'inventory-assembly';
+
+  React.useEffect(() => {
+    if (isAssembly) {
+      if (values.purchasable) {
+        setFieldValue('purchasable', false);
+      }
+      if (!values.sellable) {
+        setFieldValue('sellable', true);
+      }
+    }
+  }, [isAssembly, values.purchasable, values.sellable, setFieldValue]);
 
   return (
     <div class="page-form__section page-form__section--selling-cost">
@@ -53,6 +65,7 @@ function ItemFormBody({ organization: { base_currency } }) {
                     </h3>
                   }
                   name={'sellable'}
+                  disabled={isAssembly}
                   {...field}
                 />
               </FormGroup>
@@ -148,6 +161,7 @@ function ItemFormBody({ organization: { base_currency } }) {
                       <T id={'i_purchase_this_item'} />
                     </h3>
                   }
+                  disabled={isAssembly}
                   {...field}
                 />
               </FormGroup>
@@ -169,7 +183,7 @@ function ItemFormBody({ organization: { base_currency } }) {
                 shouldUpdate={costPriceFieldShouldUpdate}
                 purchasable={values.purchasable}
                 inputGroupProps={{ medium: true }}
-                disabled={!values.purchasable}
+                disabled={!values.purchasable || isAssembly}
                 fastField
               />
             </ControlGroup>
@@ -178,7 +192,7 @@ function ItemFormBody({ organization: { base_currency } }) {
           {/*------------- Cost account ------------- */}
           <FFormGroup
             name={'cost_account_id'}
-            purchasable={values.purchasable}
+            purchasable={values.purchasable || isAssembly}
             items={accounts}
             shouldUpdate={costAccountFieldShouldUpdate}
             label={<T id={'account'} />}
@@ -196,8 +210,8 @@ function ItemFormBody({ organization: { base_currency } }) {
               popoverFill={true}
               allowCreate={true}
               fastField={true}
-              disabled={!values.purchasable}
-              purchasable={values.purchasable}
+              disabled={!values.purchasable && !isAssembly}
+              purchasable={values.purchasable || isAssembly}
               shouldUpdate={costAccountFieldShouldUpdate}
             />
           </FFormGroup>
@@ -217,6 +231,7 @@ function ItemFormBody({ organization: { base_currency } }) {
               allowCreate={true}
               fastField={true}
               shouldUpdateDeps={{ taxRates }}
+              disabled={isAssembly}
             />
           </FFormGroup>
 
@@ -233,12 +248,18 @@ function ItemFormBody({ organization: { base_currency } }) {
               name={'purchase_description'}
               growVertically={true}
               height={280}
-              disabled={!values.purchasable}
+              disabled={!values.purchasable || isAssembly}
               fill
             />
           </FFormGroup>
         </Col>
       </Row>
+
+      {isAssembly ? (
+        <p className={'bp4-text-muted'} style={{ marginTop: '0.75rem' }}>
+          <T id={'assembly_item_purchase_hint'} />
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -15,17 +15,11 @@ export function camelToSnake<T = any>(value: T): T {
   }
   return mapKeysDeep(
     value,
-    (_value: string, key: any, parent: any, context: any) => {
-      if (Array.isArray(parent)) {
-        // tell mapKeysDeep to skip mapping inside this branch
-        context.skipChildren = true;
-        return key;
-      }
-      return key
+    (_value: string, key: any) =>
+      key
         .split(/(?=[A-Z])/)
         .join('_')
-        .toLowerCase();
-    },
+        .toLowerCase(),
   ) as T;
 }
 
@@ -35,12 +29,7 @@ export function snakeToCamel<T = any>(value: T): T {
   }
   return mapKeysDeep(
     value,
-    (_value: string, key: any, parent: any, context: any) => {
-      if (Array.isArray(parent)) {
-        // tell mapKeysDeep to skip mapping inside this branch
-        context.skipChildren = true;
-        return key;
-      }
+    (_value: string, key: any) => {
       const converted = key.replace(/([-_]\w)/g, (group) =>
         group[1].toUpperCase(),
       );

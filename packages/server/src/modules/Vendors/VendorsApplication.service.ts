@@ -12,6 +12,8 @@ import { EditVendorDto } from './dtos/EditVendor.dto';
 import { GetVendorsQueryDto } from './dtos/GetVendorsQuery.dto';
 import { BulkDeleteVendorsService } from './BulkDeleteVendors.service';
 import { ValidateBulkDeleteVendorsService } from './ValidateBulkDeleteVendors.service';
+import { VendorsMatchaPopSyncService } from './VendorsMatchaPopSync.service';
+import { ImportMatchaPopVendorsDto } from './dtos/MatchaPopVendors.dto';
 
 @Injectable()
 export class VendorsApplication {
@@ -24,6 +26,7 @@ export class VendorsApplication {
     private getVendorsService: GetVendorsService,
     private readonly bulkDeleteVendorsService: BulkDeleteVendorsService,
     private readonly validateBulkDeleteVendorsService: ValidateBulkDeleteVendorsService,
+    private readonly vendorsMatchaPopSyncService: VendorsMatchaPopSyncService,
   ) {}
 
   /**
@@ -99,5 +102,13 @@ export class VendorsApplication {
     return this.validateBulkDeleteVendorsService.validateBulkDeleteVendors(
       vendorIds,
     );
+  }
+
+  public syncMatchaPopVendors() {
+    return this.vendorsMatchaPopSyncService.syncExistingVendors();
+  }
+
+  public importMatchaPopVendors(dto: ImportMatchaPopVendorsDto) {
+    return this.vendorsMatchaPopSyncService.importVendors(dto);
   }
 }

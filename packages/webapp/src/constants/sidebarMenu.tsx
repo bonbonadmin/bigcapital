@@ -74,6 +74,15 @@ export const SidebarMenu = [
                 },
               },
               {
+                text: 'Build Assemblies',
+                href: '/inventory-assemblies/build',
+                type: ISidebarMenuItemType.Link,
+                permission: {
+                  subject: AbilitySubject.Item,
+                  ability: ItemAction.Edit,
+                },
+              },
+              {
                 text: <T id={'categories_list'} />,
                 href: '/items/categories',
                 type: ISidebarMenuItemType.Link,

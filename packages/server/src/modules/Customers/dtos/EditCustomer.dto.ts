@@ -1,9 +1,15 @@
-import { IsBoolean, IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsInt, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ContactAddressDto } from './ContactAddress.dto';
-import { IsOptional } from '@/common/decorators/Validators';
+import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 
 export class EditCustomerDto extends ContactAddressDto {
+  @ApiProperty({ required: false, description: 'External ERP customer ID' })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  externalId?: number;
+
   @ApiProperty({ required: true, description: 'Customer type' })
   @IsString()
   @IsNotEmpty()

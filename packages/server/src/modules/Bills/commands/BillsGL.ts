@@ -6,6 +6,7 @@ import { Bill } from '../models/Bill';
 import { AccountNormal } from '@/modules/Accounts/Accounts.types';
 import { Ledger } from '@/modules/Ledger/Ledger';
 import { BillLandedCost } from '@/modules/BillLandedCosts/models/BillLandedCost';
+import { isInventoryTrackedItemType } from '@/modules/Items/Items.constants';
 
 export class BillGL {
   private bill: Bill;
@@ -80,7 +81,7 @@ export class BillGL {
       ...commonJournalMeta,
       debit: totalLocal + landedCostAmount,
       accountId:
-        ['inventory'].indexOf(entry.item.type) !== -1
+        isInventoryTrackedItemType(entry.item.type)
           ? entry.item.inventoryAccountId
           : entry.costAccountId,
       index: index + 1,
@@ -120,7 +121,8 @@ export class BillGL {
 
     return {
       ...commonJournalMeta,
-      credit: this.bill.totalLocal,
+      credit:
+        this.bill.totalLocal - (this.bill.withholdingTaxAmountLocal || 0),
       accountId: this.payableAccountId,
       contactId: this.bill.vendorId,
       accountNormal: AccountNormal.CREDIT,
@@ -172,6 +174,54 @@ export class BillGL {
   // };
 
   /**
+   * Retrieves the bill-level sales tax GL entry.
+   * @returns {ILedgerEntry | null}
+   */
+  private get billSalesTaxEntry(): ILedgerEntry | null {
+    if (!this.bill.salesTaxAmount || !this.bill.salesTaxAccountId) {
+      return null;
+    }
+    const commonEntry = this.billCommonEntry;
+
+    return {
+      ...commonEntry,
+      debit: this.bill.salesTaxAmountLocal,
+      accountId: this.bill.salesTaxAccountId,
+      accountNormal:
+        this.bill.salesTaxAccount?.accountNormal === 'credit'
+          ? AccountNormal.CREDIT
+          : AccountNormal.DEBIT,
+      index: 1,
+      indexGroup: 35,
+      note: this.bill.salesTaxName || undefined,
+    };
+  }
+
+  /**
+   * Retrieves the bill-level withholding tax GL entry.
+   * @returns {ILedgerEntry | null}
+   */
+  private get billWithholdingTaxEntry(): ILedgerEntry | null {
+    if (!this.bill.withholdingTaxAmount || !this.bill.withholdingTaxAccountId) {
+      return null;
+    }
+    const commonEntry = this.billCommonEntry;
+
+    return {
+      ...commonEntry,
+      credit: this.bill.withholdingTaxAmountLocal,
+      accountId: this.bill.withholdingTaxAccountId,
+      accountNormal:
+        this.bill.withholdingTaxAccount?.accountNormal === 'debit'
+          ? AccountNormal.DEBIT
+          : AccountNormal.CREDIT,
+      index: 1,
+      indexGroup: 36,
+      note: this.bill.withholdingTaxName || undefined,
+    };
+  }
+
+  /**
    * Retrieves the purchase discount GL entry.
    * @returns {ILedgerEntry}
    */
@@ -213,6 +263,8 @@ export class BillGL {
    */
   private getBillGLEntries = (): ILedgerEntry[] => {
     const payableEntry = this.billPayableEntry;
+    const salesTaxEntry = this.billSalesTaxEntry;
+    const withholdingTaxEntry = this.billWithholdingTaxEntry;
 
     const itemsEntries = this.bill.entries.map((entry, index) =>
       this.getBillItemEntry(entry, index),
@@ -226,6 +278,8 @@ export class BillGL {
       payableEntry,
       ...itemsEntries,
       ...landedCostEntries,
+      ...(salesTaxEntry ? [salesTaxEntry] : []),
+      ...(withholdingTaxEntry ? [withholdingTaxEntry] : []),
       this.purchaseDiscountEntry,
       this.adjustmentEntry,
     ];

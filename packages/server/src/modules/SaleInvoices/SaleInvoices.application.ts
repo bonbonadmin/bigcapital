@@ -25,6 +25,11 @@ import {
 import { GenerateShareLink } from './commands/GenerateInvoicePaymentLink.service';
 import { BulkDeleteSaleInvoicesService } from './BulkDeleteSaleInvoices.service';
 import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleInvoices.service';
+import { SaleInvoicesMatchaPopSyncService } from './SaleInvoicesMatchaPopSync.service';
+import {
+  ImportMatchaPopSaleInvoicesDto,
+  SyncMatchaPopSaleInvoicesDto,
+} from './dtos/MatchaPopOrders.dto';
 
 @Injectable()
 export class SaleInvoiceApplication {
@@ -45,6 +50,7 @@ export class SaleInvoiceApplication {
     private generateShareLinkService: GenerateShareLink,
     private bulkDeleteSaleInvoicesService: BulkDeleteSaleInvoicesService,
     private validateBulkDeleteSaleInvoicesService: ValidateBulkDeleteSaleInvoicesService,
+    private saleInvoicesMatchaPopSyncService: SaleInvoicesMatchaPopSyncService,
   ) { }
 
   /**
@@ -252,4 +258,12 @@ export class SaleInvoiceApplication {
       expiryTime,
     );
   }
+
+  public syncMatchaPopOrders = (dto: SyncMatchaPopSaleInvoicesDto) => {
+    return this.saleInvoicesMatchaPopSyncService.syncExistingOrders(dto);
+  };
+
+  public importMatchaPopOrders = (dto: ImportMatchaPopSaleInvoicesDto) => {
+    return this.saleInvoicesMatchaPopSyncService.importOrders(dto);
+  };
 }

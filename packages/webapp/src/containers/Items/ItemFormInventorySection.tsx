@@ -1,28 +1,31 @@
 // @ts-nocheck
 import React from 'react';
+import { useFormikContext } from 'formik';
 import {
   AccountsSelect,
   FFormGroup,
+  FSelect,
   FormattedMessage as T,
   Col,
   Row,
 } from '@/components';
 
-import { withCurrentOrganization } from '@/containers/Organization/withCurrentOrganization';
 import { accountsFieldShouldUpdate } from './utils';
 import { ACCOUNT_TYPE } from '@/constants/accountTypes';
 import { useItemFormContext } from './ItemFormProvider';
-import { compose } from '@/utils';
 import { DialogsName } from '@/constants/dialogs';
 import { AccountDialogAction } from '@/containers/Dialogs/AccountDialog/utils';
 import { useDialogActions } from '@/hooks/state/dashboard';
+import { isInventoryTrackedType } from './utils';
+import { itemUnitOfMeasureOptions } from './utils';
 
 /**
  * Item form inventory sections.
  */
-function ItemFormInventorySection({ organization: { base_currency } }) {
+function ItemFormInventorySection() {
   const { accounts } = useItemFormContext();
   const { openDialog } = useDialogActions();
+  const { values } = useFormikContext();
 
   const handleCreateInventoryAccount = React.useCallback(
     (account) => {
@@ -35,6 +38,10 @@ function ItemFormInventorySection({ organization: { base_currency } }) {
     [openDialog],
   );
 
+  if (!isInventoryTrackedType(values.type)) {
+    return null;
+  }
+
   return (
     <div class="page-form__section page-form__section--inventory">
       <h3>
@@ -43,6 +50,22 @@ function ItemFormInventorySection({ organization: { base_currency } }) {
 
       <Row>
         <Col xs={6}>
+          <FFormGroup
+            label={<T id={'unit_of_measure'} />}
+            name={'unit_of_measure'}
+            inline={true}
+            fastField={true}
+          >
+            <FSelect
+              name={'unit_of_measure'}
+              items={itemUnitOfMeasureOptions}
+              valueAccessor={'key'}
+              textAccessor={'label'}
+              placeholder={<T id={'unit_of_measure'} />}
+              fastField={true}
+            />
+          </FFormGroup>
+
           {/*------------- Inventory Account ------------- */}
           <FFormGroup
             label={<T id={'inventory_account'} />}
@@ -69,4 +92,4 @@ function ItemFormInventorySection({ organization: { base_currency } }) {
   );
 }
 
-export default compose(withCurrentOrganization())(ItemFormInventorySection);
+export default ItemFormInventorySection;

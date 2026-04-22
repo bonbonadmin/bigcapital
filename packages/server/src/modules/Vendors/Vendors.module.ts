@@ -23,6 +23,7 @@ import { AccountsModule } from '../Accounts/Accounts.module';
 import { VendorGLEntries } from './VendorGLEntries';
 import { VendorGLEntriesStorage } from './VendorGLEntriesStorage';
 import { VendorsWriteGLOpeningSubscriber } from './subscribers/VendorGLEntriesSubscriber';
+import { VendorsMatchaPopSyncService } from './VendorsMatchaPopSync.service';
 
 @Module({
   imports: [TenancyDatabaseModule, DynamicListModule, LedgerModule, AccountsModule],
@@ -40,6 +41,7 @@ import { VendorsWriteGLOpeningSubscriber } from './subscribers/VendorGLEntriesSu
     VendorsApplication,
     BulkDeleteVendorsService,
     ValidateBulkDeleteVendorsService,
+    VendorsMatchaPopSyncService,
     TransformerInjectable,
     TenancyContext,
     VendorsExportable,

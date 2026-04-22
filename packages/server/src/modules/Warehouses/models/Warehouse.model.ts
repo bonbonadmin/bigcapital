@@ -6,10 +6,14 @@ import { Model } from 'objection';
 export class Warehouse extends BaseModel {
   name!: string;
   code!: string;
+  externalId?: number | null;
   city!: string;
   country!: string;
   address!: string;
   primary!: boolean;
+  phoneNumber?: string;
+  email?: string;
+  website?: string;
 
   items!: Item[];
 

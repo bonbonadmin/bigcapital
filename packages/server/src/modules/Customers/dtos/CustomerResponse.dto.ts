@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CustomerResponseDto {
+  @ApiProperty({ required: false, example: 54 })
+  externalId?: number;
+
   @ApiProperty({ example: 1500.0 })
   balance: number;
 

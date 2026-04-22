@@ -99,6 +99,11 @@ export class EditSaleInvoice {
       saleInvoiceObj.balance,
       oldSaleInvoice.paymentAmount,
     );
+    // Allow zero-total invoices only when there are no payment received entries.
+    await this.validators.validateZeroInvoiceHasNoPaymentEntries(
+      saleInvoiceId,
+      saleInvoiceObj.balance,
+    );
     // Edit sale invoice transaction in UOW envirment.
     return this.uow.withTransaction(async (trx: Knex.Transaction) => {
       // Triggers `onSaleInvoiceEditing` event.

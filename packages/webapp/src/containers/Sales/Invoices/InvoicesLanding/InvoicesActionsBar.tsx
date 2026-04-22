@@ -15,6 +15,7 @@ import {
 } from '@blueprintjs/core';
 import { useHistory } from 'react-router-dom';
 import {
+  AppToaster,
   Icon,
   FormattedMessage as T,
   AdvancedFilterPopover,
@@ -27,6 +28,7 @@ import { Can, If, DashboardActionViewsList } from '@/components';
 import { SaleInvoiceAction, AbilitySubject } from '@/constants/abilityOption';
 
 import { useRefreshInvoices } from '@/hooks/query/invoices';
+import { useSyncMatchaPopSaleInvoices } from '@/hooks/query';
 import { useInvoicesListContext } from './InvoicesListProvider';
 import { useDownloadExportPdf } from '@/hooks/query/FinancialReports/use-export-pdf';
 import { useBulkDeleteInvoicesDialog } from '../hooks/use-bulk-delete-accounts-dialog';
@@ -41,6 +43,7 @@ import { DialogsName } from '@/constants/dialogs';
 import { withDrawerActions } from '@/containers/Drawer/withDrawerActions';
 import { DRAWERS } from '@/constants/drawers';
 import { isEmpty } from 'lodash';
+import { InvoicesERPImportDialog } from './InvoicesERPImportDialog';
 
 /**
  * Invoices table actions bar.
@@ -85,6 +88,13 @@ function InvoiceActionsBar({
 
   // Invoices refresh action.
   const { refresh } = useRefreshInvoices();
+  const [isERPImportDialogOpen, setIsERPImportDialogOpen] = React.useState(false);
+  const [erpImportCandidates, setERPImportCandidates] = React.useState([]);
+  const [erpSkippedOrders, setERPSkippedOrders] = React.useState([]);
+  const [erpSyncMode, setERPSyncMode] = React.useState('new');
+  const [erpNextSyncAt, setERPNextSyncAt] = React.useState(null);
+  const { mutateAsync: syncMatchaPopInvoicesMutate, isLoading: isSyncingERP } =
+    useSyncMatchaPopSaleInvoices();
 
   // Handle views tab change.
   const handleTabChange = (view) => {
@@ -94,6 +104,38 @@ function InvoiceActionsBar({
   // Handle click a refresh sale invoices
   const handleRefreshBtnClick = () => {
     refresh();
+  };
+
+  const handleSyncERPClick = async (mode) => {
+    try {
+      const result = await syncMatchaPopInvoicesMutate({ mode });
+
+      AppToaster.show({
+        intent: Intent.SUCCESS,
+        message: `${result?.updatedCount || 0} ERP sale invoices synced successfully.`,
+      });
+
+      setERPSyncMode(mode);
+      setERPNextSyncAt(result?.nextSyncAt || null);
+      setERPImportCandidates(result?.importCandidates || []);
+      setERPSkippedOrders(result?.skippedOrders || []);
+      setIsERPImportDialogOpen(true);
+    } catch (error) {
+      AppToaster.show({
+        intent: Intent.DANGER,
+        message:
+          error?.response?.data?.message ||
+          'Failed to sync ERP sale invoices.',
+      });
+    }
+  };
+
+  const handleCloseERPImportDialog = () => {
+    setIsERPImportDialogOpen(false);
+    setERPSyncMode('new');
+    setERPNextSyncAt(null);
+    setERPImportCandidates([]);
+    setERPSkippedOrders([]);
   };
 
   // Handle table row size change.
@@ -186,6 +228,36 @@ function InvoiceActionsBar({
           text={<T id={'import'} />}
           onClick={handleImportBtnClick}
         />
+        <Can I={SaleInvoiceAction.Create} a={AbilitySubject.Invoice}>
+          <Popover
+            minimal={true}
+            interactionKind={PopoverInteractionKind.CLICK}
+            position={Position.BOTTOM_LEFT}
+            content={
+              <Menu>
+                <MenuItem
+                  text="Sync New"
+                  onClick={() => handleSyncERPClick('new')}
+                />
+                <MenuItem
+                  text="Sync New Full"
+                  onClick={() => handleSyncERPClick('new_full')}
+                />
+                <MenuItem
+                  text="Sync All"
+                  onClick={() => handleSyncERPClick('all')}
+                />
+              </Menu>
+            }
+          >
+            <Button
+              className={Classes.MINIMAL}
+              icon={<Icon icon="refresh-16" iconSize={16} />}
+              text={'Sync ERP'}
+              loading={isSyncingERP}
+            />
+          </Popover>
+        </Can>
         <Button
           className={Classes.MINIMAL}
           icon={<Icon icon={'file-export-16'} iconSize={'16'} />}
@@ -225,6 +297,15 @@ function InvoiceActionsBar({
           onClick={handleRefreshBtnClick}
         />
       </NavbarGroup>
+
+      <InvoicesERPImportDialog
+        isOpen={isERPImportDialogOpen}
+        importCandidates={erpImportCandidates}
+        skippedOrders={erpSkippedOrders}
+        syncMode={erpSyncMode}
+        nextSyncAt={erpNextSyncAt}
+        onClose={handleCloseERPImportDialog}
+      />
     </DashboardActionsBar>
   );
 }

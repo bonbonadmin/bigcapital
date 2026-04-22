@@ -11,6 +11,8 @@ import { GetCustomers } from './queries/GetCustomers.service';
 import { GetCustomersQueryDto } from './dtos/GetCustomersQuery.dto';
 import { BulkDeleteCustomersService } from './BulkDeleteCustomers.service';
 import { ValidateBulkDeleteCustomersService } from './ValidateBulkDeleteCustomers.service';
+import { CustomersMatchaPopSyncService } from './CustomersMatchaPopSync.service';
+import { ImportMatchaPopCustomersDto } from './dtos/MatchaPopCustomers.dto';
 
 @Injectable()
 export class CustomersApplication {
@@ -23,6 +25,7 @@ export class CustomersApplication {
     private readonly getCustomersService: GetCustomers,
     private readonly bulkDeleteCustomersService: BulkDeleteCustomersService,
     private readonly validateBulkDeleteCustomersService: ValidateBulkDeleteCustomersService,
+    private readonly customersMatchaPopSyncService: CustomersMatchaPopSyncService,
   ) {}
 
   /**
@@ -99,5 +102,13 @@ export class CustomersApplication {
     return this.validateBulkDeleteCustomersService.validateBulkDeleteCustomers(
       customerIds,
     );
+  };
+
+  public syncMatchaPopCustomers = () => {
+    return this.customersMatchaPopSyncService.syncExistingCustomers();
+  };
+
+  public importMatchaPopCustomers = (dto: ImportMatchaPopCustomersDto) => {
+    return this.customersMatchaPopSyncService.importCustomers(dto);
   };
 }

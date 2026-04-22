@@ -131,29 +131,23 @@ export class CommandExpenseValidator {
   }
 
   /**
-   * Validates withholding tax is only used for payable expenses.
+   * Withholding tax can be used for both paid and payable expenses.
    */
   public validateWithholdingTaxExpense(
     payableAccountId?: number,
     withholdingTaxId?: number,
   ) {
-    if (withholdingTaxId && !payableAccountId) {
-      throw new ServiceError(
-        ERRORS.WITHHOLDING_TAX_ONLY_SUPPORTED_FOR_PAYABLE_EXPENSES,
-      );
-    }
+    return;
   }
 
   /**
-   * Validates sales tax is only used for payable expenses.
+   * Sales tax can be used for both paid and payable expenses.
    */
   public validateSalesTaxExpense(
     payableAccountId?: number,
     salesTaxRateId?: number,
   ) {
-    if (salesTaxRateId && !payableAccountId) {
-      throw new ServiceError(ERRORS.SALES_TAX_ONLY_SUPPORTED_FOR_PAYABLE_EXPENSES);
-    }
+    return;
   }
 
   /**

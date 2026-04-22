@@ -11,6 +11,7 @@ import {
   Alignment,
 } from '@blueprintjs/core';
 import {
+  AppToaster,
   DashboardActionsBar,
   DashboardRowsHeightButton,
   FormattedMessage as T,
@@ -26,7 +27,7 @@ import {
 
 import { ItemAction, AbilitySubject } from '@/constants/abilityOption';
 import { useItemsListContext } from './ItemsListProvider';
-import { useRefreshItems } from '@/hooks/query/items';
+import { useRefreshItems, useSyncMatchaPopItems } from '@/hooks/query/items';
 import { useDownloadExportPdf } from '@/hooks/query/FinancialReports/use-export-pdf';
 
 import { withItems } from './withItems';
@@ -39,6 +40,7 @@ import { DialogsName } from '@/constants/dialogs';
 import { compose } from '@/utils';
 import { isEmpty } from 'lodash';
 import { useBulkDeleteItemsDialog } from './hooks/use-bulk-delete-items-dialog';
+import { MatchaPopImportDialog } from './MatchaPopImportDialog';
 
 /**
  * Items actions bar.
@@ -63,6 +65,9 @@ function ItemsActionsBar({
 }) {
   const { openBulkDeleteDialog, isValidatingBulkDeleteItems } =
     useBulkDeleteItemsDialog();
+  const [isMatchaPopDialogOpen, setIsMatchaPopDialogOpen] = React.useState(false);
+  const [matchaPopImportCandidates, setMatchaPopImportCandidates] =
+    React.useState([]);
 
   // Items list context.
   const { itemsViews, fields } = useItemsListContext();
@@ -72,6 +77,8 @@ function ItemsActionsBar({
 
   // Items refresh action.
   const { refresh } = useRefreshItems();
+  const { mutateAsync: syncMatchaPopItemsMutate, isLoading: isSyncingMatchaPop } =
+    useSyncMatchaPopItems();
 
   // History context.
   const history = useHistory();
@@ -112,6 +119,51 @@ function ItemsActionsBar({
   // Handle the export button click.
   const handleExportBtnClick = () => {
     openDialog(DialogsName.Export, { resource: 'item' });
+  };
+
+  const handleCloseMatchaPopDialog = () => {
+    setIsMatchaPopDialogOpen(false);
+    setMatchaPopImportCandidates([]);
+  };
+
+  const handleSyncMatchaPopClick = async () => {
+    try {
+      const response = await syncMatchaPopItemsMutate();
+      const result = response?.data || {};
+      const updatedCount = result.updated_count || 0;
+      const importCandidates = result.import_candidates || [];
+
+      if (updatedCount > 0) {
+        AppToaster.show({
+          intent: Intent.SUCCESS,
+            message: `${updatedCount} existing items were synced from ERP.`,
+        });
+      }
+
+      if (importCandidates.length > 0) {
+        setMatchaPopImportCandidates(importCandidates);
+        setIsMatchaPopDialogOpen(true);
+
+        AppToaster.show({
+          intent: Intent.PRIMARY,
+          message: `${importCandidates.length} ERP products are ready to import.`,
+        });
+        return;
+      }
+
+      if (updatedCount === 0) {
+        AppToaster.show({
+          intent: Intent.WARNING,
+          message: 'No ERP item changes were found to sync.',
+        });
+      }
+    } catch (error) {
+      AppToaster.show({
+        intent: Intent.DANGER,
+        message:
+          error?.response?.data?.message || 'Failed to sync ERP products.',
+      });
+    }
   };
 
   // Handle the print button click.
@@ -182,6 +234,15 @@ function ItemsActionsBar({
           onClick={handleImportBtnClick}
           text={<T id={'import'} />}
         />
+        <Can I={ItemAction.Edit} a={AbilitySubject.Item}>
+          <Button
+            className={Classes.MINIMAL}
+            icon={<Icon icon="refresh-16" iconSize={16} />}
+            onClick={handleSyncMatchaPopClick}
+            text={'Sync ERP'}
+            loading={isSyncingMatchaPop}
+          />
+        </Can>
         <Button
           className={Classes.MINIMAL}
           icon={<Icon icon="file-export-16" iconSize={16} />}
@@ -210,6 +271,12 @@ function ItemsActionsBar({
           onClick={handleRefreshBtnClick}
         />
       </NavbarGroup>
+
+      <MatchaPopImportDialog
+        isOpen={isMatchaPopDialogOpen}
+        importCandidates={matchaPopImportCandidates}
+        onClose={handleCloseMatchaPopDialog}
+      />
     </DashboardActionsBar>
   );
 }

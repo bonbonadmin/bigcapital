@@ -43,6 +43,7 @@ import { InventoryTransactionsWarehouses } from './AccountsTransactionsWarehouse
 import { RegisterTenancyModel } from '../Tenancy/TenancyModels/Tenancy.module';
 import { Warehouse } from './models/Warehouse.model';
 import { ValidateWarehouseExistance } from './Integrations/ValidateWarehouseExistance';
+import { WarehousesMatchaPopSyncService } from './WarehousesMatchaPopSync.service';
 
 const models = [RegisterTenancyModel(Warehouse)];
 
@@ -89,7 +90,8 @@ const models = [RegisterTenancyModel(Warehouse)];
     WarehousesDTOValidators,
     DeleteItemWarehousesQuantity,
     InventoryTransactionsWarehouses,
-    ValidateWarehouseExistance
+    ValidateWarehouseExistance,
+    WarehousesMatchaPopSyncService,
   ],
   exports: [WarehousesSettings, WarehouseTransactionDTOTransform, WarehousesApplication, ...models],
 })

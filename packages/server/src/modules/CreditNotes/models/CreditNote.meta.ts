@@ -73,6 +73,11 @@ export const CreditNoteMeta = {
       column: 'terms_conditions',
       fieldType: 'text',
     },
+    tags: {
+      name: 'tags',
+      column: 'tags',
+      fieldType: 'text',
+    },
     status: {
       name: 'credit_note.field.status',
       fieldType: 'enumeration',
@@ -112,6 +117,11 @@ export const CreditNoteMeta = {
     },
     termsConditions: {
       name: 'Terms & Conditions',
+      printable: false,
+    },
+    tags: {
+      name: 'tags',
+      type: 'text',
       printable: false,
     },
     creditNoteNumber: {
@@ -189,6 +199,10 @@ export const CreditNoteMeta = {
     },
     termsConditions: {
       name: 'credit_note.field.terms_conditions',
+      fieldType: 'text',
+    },
+    tags: {
+      name: 'tags',
       fieldType: 'text',
     },
     creditNoteNumber: {

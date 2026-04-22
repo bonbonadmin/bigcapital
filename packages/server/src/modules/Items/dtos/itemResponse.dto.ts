@@ -16,7 +16,7 @@ export class ItemResponseDto {
 
   @ApiProperty({
     description: 'The type of the item',
-    enum: ['service', 'non-inventory', 'inventory'],
+    enum: ['service', 'non-inventory', 'inventory', 'inventory-assembly'],
     example: 'inventory',
   })
   type: string;
@@ -33,6 +33,13 @@ export class ItemResponseDto {
     required: false,
   })
   code?: string;
+
+  @ApiProperty({
+    description: 'External system item ID',
+    example: 11,
+    required: false,
+  })
+  externalId?: number;
 
   @ApiProperty({
     description: 'Whether the item can be sold',
@@ -165,6 +172,32 @@ export class ItemResponseDto {
     required: false,
   })
   quantityOnHand?: number;
+
+  @ApiProperty({
+    description: 'The unit of measure for inventory tracked items',
+    example: 'each',
+    required: false,
+  })
+  unitOfMeasure?: string;
+
+  @ApiProperty({
+    description: 'Assembly bill of materials',
+    required: false,
+    type: 'array',
+  })
+  assemblyComponents?: Array<{
+    id: number;
+    itemId: number;
+    componentItemId: number;
+    quantity: number;
+    componentItem?: {
+      id: number;
+      name: string;
+      code?: string;
+      unitOfMeasure?: string;
+      quantityOnHand?: number;
+    };
+  }>;
 
   @ApiProperty({
     description: 'Additional notes about the item',

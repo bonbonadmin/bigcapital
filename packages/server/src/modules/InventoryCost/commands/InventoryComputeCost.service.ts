@@ -15,6 +15,7 @@ import { InventoryAverageCostMethodService } from './InventoryAverageCostMethod.
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { InjectQueue } from '@nestjs/bullmq';
 import { RedisService } from '@liaoliaots/nestjs-redis';
+import { isInventoryTrackedItemType } from '@/modules/Items/Items.constants';
 
 @Injectable()
 export class InventoryComputeCostService {
@@ -76,7 +77,7 @@ export class InventoryComputeCostService {
     const item = await this.itemModel().query().findById(itemId);
 
     // Cannot continue if the given item was not inventory item.
-    if (item.type !== 'inventory') {
+    if (!isInventoryTrackedItemType(item.type)) {
       throw new Error('You could not compute item cost has no inventory type.');
     }
     return this.inventoryAverageCostMethod.computeItemCost(

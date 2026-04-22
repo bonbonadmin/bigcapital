@@ -30,6 +30,7 @@ export class CreditNote extends TenantBaseModel {
   public creditNoteDate: Date;
   public creditNoteNumber: string;
   public referenceNo: string;
+  public tags?: string | null;
   public currencyCode: string;
   public customerId: number;
 
@@ -420,6 +421,7 @@ export class CreditNote extends TenantBaseModel {
     return [
       { fieldKey: 'credit_number', comparator: 'contains' },
       { condition: 'or', fieldKey: 'reference_no', comparator: 'contains' },
+      { condition: 'or', fieldKey: 'tags', comparator: 'contains' },
       { condition: 'or', fieldKey: 'amount', comparator: 'equals' },
     ];
   }

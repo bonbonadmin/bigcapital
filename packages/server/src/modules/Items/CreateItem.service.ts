@@ -9,6 +9,8 @@ import { Item } from './models/Item';
 import { UnitOfWork } from '../Tenancy/TenancyDB/UnitOfWork.service';
 import { TenantModelProxy } from '../System/models/TenantBaseModel';
 import { CreateItemDto } from './dtos/Item.dto';
+import { isInventoryTrackedItemType } from './Items.constants';
+import { ItemAssemblyComponentsService } from './ItemAssemblyComponents.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CreateItemService {
@@ -23,6 +25,7 @@ export class CreateItemService {
     private readonly eventEmitter: EventEmitter2,
     private readonly uow: UnitOfWork,
     private readonly validators: ItemsValidators,
+    private readonly itemAssemblyComponents: ItemAssemblyComponentsService,
 
     @Inject(Item.name)
     private readonly itemModel: TenantModelProxy<typeof Item>,
@@ -59,12 +62,17 @@ export class CreateItemService {
     this.validators.validateCostAccountExistance(
       itemDTO.purchasable,
       itemDTO.costAccountId,
+      itemDTO.type,
     );
     if (itemDTO.inventoryAccountId) {
       await this.validators.validateItemInventoryAccountExistance(
         itemDTO.inventoryAccountId,
       );
     }
+    this.validators.validateInventoryAccountRequired(
+      itemDTO.type,
+      itemDTO.inventoryAccountId,
+    );
     if (itemDTO.purchaseTaxRateId) {
       await this.validators.validatePurchaseTaxRateExistance(
         itemDTO.purchaseTaxRateId,
@@ -73,6 +81,11 @@ export class CreateItemService {
     if (itemDTO.sellTaxRateId) {
       await this.validators.validateSellTaxRateExistance(itemDTO.sellTaxRateId);
     }
+    await this.itemAssemblyComponents.validateAssemblyComponents(
+      undefined,
+      itemDTO.type,
+      itemDTO.assemblyComponents,
+    );
   }
 
   /**
@@ -81,10 +94,16 @@ export class CreateItemService {
    * @return {IItem}
    */
   private transformNewItemDTOToModel(itemDTO: CreateItemDto) {
+    const { assemblyComponents, ...itemAttributes } = itemDTO;
+
     return {
-      ...itemDTO,
+      ...itemAttributes,
       active: defaultTo(itemDTO.active, 1),
-      quantityOnHand: itemDTO.type === 'inventory' ? 0 : null,
+      purchasable:
+        itemDTO.type === 'inventory-assembly'
+          ? false
+          : defaultTo(itemDTO.purchasable, false),
+      quantityOnHand: isInventoryTrackedItemType(itemDTO.type) ? 0 : null,
     };
   }
 
@@ -110,6 +129,12 @@ export class CreateItemService {
         .insertAndFetch({
           ...itemInsert,
         });
+      await this.itemAssemblyComponents.syncAssemblyComponents(
+        item.id,
+        itemDTO.type,
+        itemDTO.assemblyComponents,
+        trx,
+      );
       // Triggers `onItemCreated` event.
       await this.eventEmitter.emitAsync(events.item.onCreated, {
         item,

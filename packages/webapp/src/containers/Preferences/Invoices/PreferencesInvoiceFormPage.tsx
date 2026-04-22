@@ -18,6 +18,8 @@ import { useSaveSettings } from '@/hooks/query';
 const defaultValues = {
   termsConditions: '',
   customerNotes: '',
+  erpSalesTypesPerCustomer: '',
+  preferredReceivableAccount: '',
 };
 
 /**

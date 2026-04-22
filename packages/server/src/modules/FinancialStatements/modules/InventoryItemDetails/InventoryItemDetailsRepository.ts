@@ -9,6 +9,7 @@ import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { transformToMapKeyValue } from '@/utils/transform-to-map-key-value';
 import { transformToMapBy } from '@/utils/transform-to-map-by';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { INVENTORY_TRACKED_ITEM_TYPES } from '@/modules/Items/Items.constants';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class InventoryItemDetailsRepository {
@@ -145,7 +146,7 @@ export class InventoryItemDetailsRepository {
     itemsIds?: number[],
   ): Promise<ModelObject<Item>[]> {
     return this.itemModel().query().onBuild((q) => {
-      q.where('type', 'inventory');
+      q.whereIn('type', INVENTORY_TRACKED_ITEM_TYPES);
 
       if (!isEmpty(itemsIds)) {
         q.whereIn('id', itemsIds);

@@ -5,6 +5,7 @@ import {
   useItem,
   useSettingsItems,
   useItemsCategories,
+  useItems,
   useCreateItem,
   useEditItem,
   useAccounts,
@@ -30,6 +31,22 @@ function ItemFormProvider({ itemId, ...props }) {
     isLoading: isItemsCategoriesLoading,
     data: { itemsCategories },
   } = useItemsCategories();
+
+  const {
+    data: { items: inventoryItems },
+    isLoading: isInventoryItemsLoading,
+  } = useItems({
+    page_size: 10000,
+    stringified_filter_roles: JSON.stringify([
+      {
+        index: 1,
+        fieldKey: 'type',
+        value: 'inventory',
+        condition: '&&',
+        comparator: 'equals',
+      },
+    ]),
+  });
 
   const { data: taxRates, isLoading: isTaxRatesLoading } = useTaxRates();
 
@@ -63,6 +80,7 @@ function ItemFormProvider({ itemId, ...props }) {
   const isFormLoading =
     isItemsSettingsLoading ||
     isAccountsLoading ||
+    isInventoryItemsLoading ||
     isItemsCategoriesLoading ||
     isItemLoading;
 
@@ -71,6 +89,7 @@ function ItemFormProvider({ itemId, ...props }) {
     itemId,
     accounts,
     item,
+    inventoryItems,
     itemsCategories,
     taxRates,
     submitPayload,
@@ -79,6 +98,7 @@ function ItemFormProvider({ itemId, ...props }) {
     isFormLoading,
     isAccountsLoading,
     isItemsCategoriesLoading,
+    isInventoryItemsLoading,
     isItemLoading,
     isTaxRatesLoading,
 
