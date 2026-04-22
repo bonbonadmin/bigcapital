@@ -329,6 +329,16 @@ export class CustomersMatchaPopSyncService {
     }
 
     const currencyCode = await this.getBaseCurrencyCode();
+    const externalCustomers = await this.fetchCustomers();
+    const normalizedExternalCustomers = externalCustomers
+      .map((customer) => this.normalizeCustomer(customer))
+      .filter((customer) => this.isImportableCustomer(customer));
+    const normalizedExternalCustomersMap = new Map(
+      normalizedExternalCustomers.map((customer) => [
+        Number(customer.externalId),
+        customer,
+      ]),
+    );
     const existingCustomers = await this.customerModel()
       .query()
       .whereIn(
@@ -349,9 +359,29 @@ export class CustomersMatchaPopSyncService {
         continue;
       }
 
+      const externalCustomer = normalizedExternalCustomersMap.get(
+        Number(customer.externalId),
+      );
+      const importCustomer = externalCustomer
+        ? {
+            ...customer,
+            firstName: externalCustomer.firstName || customer.firstName,
+            lastName: externalCustomer.lastName || customer.lastName,
+            companyName: externalCustomer.companyName || customer.companyName,
+            displayName: externalCustomer.displayName || customer.displayName,
+            workPhone: externalCustomer.workPhone || customer.workPhone,
+            email: externalCustomer.email || customer.email,
+            billingAddressCity:
+              externalCustomer.billingAddressCity ||
+              customer.billingAddressCity,
+            billingAddressState:
+              externalCustomer.billingAddressState ||
+              customer.billingAddressState,
+          }
+        : customer;
       const availableCode = await this.getAvailableContactCode(customer.externalId);
       const createCustomerDto = this.buildCreateCustomerDto(
-        customer,
+        importCustomer,
         currencyCode,
         availableCode,
       );
