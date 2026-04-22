@@ -150,6 +150,7 @@ function CustomerFormFormikRoot({
       <Formik<CustomerFormValues>
         validationSchema={isNewMode ? CreateCustomerForm : EditCustomerForm}
         initialValues={initialValues}
+        enableReinitialize={true}
         onSubmit={handleFormSubmit}
       >
         <Form>

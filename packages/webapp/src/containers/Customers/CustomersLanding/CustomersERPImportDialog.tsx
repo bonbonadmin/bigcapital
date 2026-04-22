@@ -36,6 +36,7 @@ export function CustomersERPImportDialog({
           external_id: customer.external_id,
           first_name: customer.first_name,
           last_name: customer.last_name,
+          company_name: customer.company_name,
           display_name: customer.display_name,
           work_phone: customer.work_phone,
           email: customer.email,
