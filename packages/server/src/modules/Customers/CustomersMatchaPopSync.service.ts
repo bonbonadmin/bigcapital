@@ -75,6 +75,24 @@ export class CustomersMatchaPopSyncService {
     );
   }
 
+  private inferCompanyNameFromImportPayload(
+    companyName: string,
+    firstName: string,
+    lastName: string,
+    displayName: string,
+  ) {
+    if (companyName) {
+      return companyName;
+    }
+
+    const personName = [firstName, lastName].filter(Boolean).join(' ').trim();
+
+    if (displayName && personName && displayName !== personName) {
+      return displayName;
+    }
+    return '';
+  }
+
   private normalizeCustomer(customer: MatchaPopCustomer) {
     const companyName = this.normalizeText(customer.company_name);
     const firstName = this.normalizeText(customer.firstName);
@@ -187,7 +205,13 @@ export class CustomersMatchaPopSyncService {
     currencyCode: string,
     code?: string,
   ): CreateCustomerDto {
-    const customerType = customer.companyName ? 'business' : 'individual';
+    const companyName = this.inferCompanyNameFromImportPayload(
+      this.normalizeText(customer.companyName),
+      this.normalizeText(customer.firstName),
+      this.normalizeText(customer.lastName),
+      this.normalizeText(customer.displayName),
+    );
+    const customerType = companyName ? 'business' : 'individual';
 
     return {
       externalId: customer.externalId,
@@ -195,8 +219,11 @@ export class CustomersMatchaPopSyncService {
       currencyCode,
       firstName: customer.firstName,
       lastName: customer.lastName || '',
-      companyName: customer.companyName || '',
-      displayName: customer.displayName,
+      companyName,
+      displayName:
+        companyName ||
+        customer.displayName ||
+        [customer.firstName, customer.lastName].filter(Boolean).join(' ').trim(),
       code,
       email: customer.email || '',
       workPhone: customer.workPhone || '',

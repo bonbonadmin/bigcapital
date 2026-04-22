@@ -21,6 +21,22 @@ export function CustomersERPImportDialog({
   const { mutateAsync: importCustomersMutate, isLoading: isImporting } =
     useImportMatchaPopCustomers();
 
+  const getCandidateValue = React.useCallback((candidate, snakeKey, camelKey) => {
+    return candidate?.[snakeKey] ?? candidate?.[camelKey];
+  }, []);
+
+  const getCandidateFullName = React.useCallback(
+    (candidate) => {
+      const firstName =
+        getCandidateValue(candidate, 'first_name', 'firstName') || '';
+      const lastName =
+        getCandidateValue(candidate, 'last_name', 'lastName') || '';
+
+      return [firstName, lastName].filter(Boolean).join(' ').trim();
+    },
+    [getCandidateValue],
+  );
+
   const handleImport = async () => {
     if (!importCandidates?.length) {
       AppToaster.show({
@@ -33,15 +49,27 @@ export function CustomersERPImportDialog({
     try {
       const response = await importCustomersMutate({
         customers: importCandidates.map((customer) => ({
-          external_id: customer.external_id,
-          first_name: customer.first_name,
-          last_name: customer.last_name,
-          company_name: customer.company_name,
-          display_name: customer.display_name,
-          work_phone: customer.work_phone,
+          external_id: getCandidateValue(customer, 'external_id', 'externalId'),
+          first_name: getCandidateValue(customer, 'first_name', 'firstName'),
+          last_name: getCandidateValue(customer, 'last_name', 'lastName'),
+          company_name:
+            getCandidateValue(customer, 'company_name', 'companyName') ||
+            '',
+          display_name:
+            getCandidateValue(customer, 'display_name', 'displayName') ||
+            getCandidateFullName(customer),
+          work_phone: getCandidateValue(customer, 'work_phone', 'workPhone'),
           email: customer.email,
-          billing_address_city: customer.billing_address_city,
-          billing_address_state: customer.billing_address_state,
+          billing_address_city: getCandidateValue(
+            customer,
+            'billing_address_city',
+            'billingAddressCity',
+          ),
+          billing_address_state: getCandidateValue(
+            customer,
+            'billing_address_state',
+            'billingAddressState',
+          ),
         })),
       });
       const result = response?.data || {};
@@ -95,13 +123,29 @@ export function CustomersERPImportDialog({
             </thead>
             <tbody>
               {(importCandidates || []).map((customer) => (
-                <tr key={customer.external_id}>
-                  <td>{customer.external_id}</td>
-                  <td>{customer.display_name || '-'}</td>
-                  <td>{customer.work_phone || '-'}</td>
+                <tr
+                  key={
+                    getCandidateValue(customer, 'external_id', 'externalId')
+                  }
+                >
+                  <td>
+                    {getCandidateValue(customer, 'external_id', 'externalId')}
+                  </td>
+                  <td>
+                    {getCandidateValue(customer, 'display_name', 'displayName') ||
+                      '-'}
+                  </td>
+                  <td>
+                    {getCandidateValue(customer, 'work_phone', 'workPhone') ||
+                      '-'}
+                  </td>
                   <td>{customer.email || '-'}</td>
                   <td>
-                    {customer.billing_address_city || (
+                    {getCandidateValue(
+                      customer,
+                      'billing_address_city',
+                      'billingAddressCity',
+                    ) || (
                       <span className={Classes.TEXT_MUTED}>-</span>
                     )}
                   </td>
