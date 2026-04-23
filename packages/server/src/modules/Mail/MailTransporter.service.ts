@@ -1,10 +1,11 @@
 import axios from 'axios';
-import MailComposer from 'nodemailer/lib/mail-composer';
 import { Transporter } from 'nodemailer';
 import { Mail } from './Mail';
 import { Inject, Injectable } from '@nestjs/common';
 import { MAIL_TRANSPORTER_PROVIDER } from './Mail.constants';
 import { ConfigService } from '@nestjs/config';
+
+const MailComposer = require('nodemailer/lib/mail-composer');
 
 @Injectable()
 export class MailTransporter {
