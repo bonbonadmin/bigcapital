@@ -127,6 +127,11 @@ export const getPreferenceRoutes = () => [
     exact: true,
   },
   {
+    path: `${BASE_URL}/ai`,
+    component: lazy(() => import('@/containers/Preferences/AI/AI')),
+    exact: true,
+  },
+  {
     path: `${BASE_URL}/`,
     component: lazy(() => import('../containers/Preferences/DefaultRoute')),
     exact: true,

@@ -45,6 +45,7 @@ export const defaultExpense = {
   payable_account_id: '',
   sales_tax_rate_id: '',
   withholding_tax_id: '',
+  internal_notes: '',
   payee_id: '',
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
   description: '',
@@ -55,6 +56,44 @@ export const defaultExpense = {
   exchange_rate: 1,
   categories: [...repeatValue(defaultExpenseEntry, MIN_LINES_NUMBER)],
   attachments: [],
+};
+
+export const transformBillReviewToInitialValues = (
+  billImageReview,
+  defaultExpense,
+  expenseMode,
+  baseCurrency,
+) => {
+  const extracted = billImageReview?.billData?.extracted || {};
+  const suggestions = billImageReview?.billData?.suggestions || {};
+  const totalAmount =
+    extracted.totalAmount ?? extracted.subtotalAmount ?? defaultExpense.categories[0].amount;
+  const expenseMemo = extracted.expenseMemo || '';
+  const referenceNo = extracted.billNumber || extracted.invoiceNumber || '';
+
+  return {
+    ...defaultExpense,
+    expense_mode: expenseMode,
+    payment_account_id:
+      expenseMode === 'paid' ? billImageReview?.bankAccountId || '' : '',
+    payable_account_id:
+      expenseMode === 'payable' ? billImageReview?.apId || '' : '',
+    payee_id: suggestions?.vendor?.contactId || '',
+    internal_notes: extracted.notes || '',
+    payment_date:
+      extracted.documentDate || moment(new Date()).format('YYYY-MM-DD'),
+    description: '',
+    reference_no: referenceNo,
+    currency_code: extracted.currencyCode || baseCurrency || '',
+    categories: [
+      {
+        ...defaultExpense.categories[0],
+        amount: totalAmount || '',
+        expense_account_id: suggestions?.expenseAccount?.accountId || '',
+        description: expenseMemo,
+      },
+    ],
+  };
 };
 
 /**
@@ -149,12 +188,12 @@ export const transformFormValuesToRequest = (values) => {
   const isPayableExpense = values.expense_mode === 'payable';
 
   return {
-    ...R.omit(['expense_mode'], values),
+    ...R.omit(['expense_mode', 'internal_notes'], values),
     payment_account_id: isPayableExpense ? null : values.payment_account_id,
     payable_account_id: isPayableExpense ? values.payable_account_id : null,
     sales_tax_rate_id: values.sales_tax_rate_id || null,
     withholding_tax_id: values.withholding_tax_id || null,
-    payee_id: isPayableExpense ? values.payee_id : null,
+    payee_id: values.payee_id || null,
     categories: R.compose(orderingLinesIndexes)(categories),
     attachments,
   };

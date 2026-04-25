@@ -7,11 +7,16 @@ import {
 } from '@/store/tableState.reducer';
 import t from '@/store/types';
 
+export const defaultTableQuery = {
+  pageSize: 20,
+  pageIndex: 0,
+  filterRoles: [],
+  viewSlug: null,
+};
+
 // Initial state.
 const initialState = {
-  tableState: {
-    filterRoles: []
-  },
+  tableState: defaultTableQuery,
 };
 
 const STORAGE_KEY = 'bigcapital:itemCategories';
@@ -23,7 +28,7 @@ const CONFIG = {
 };
 
 const reducerInstance = createReducer(initialState, {
-  ...createTableStateReducers('ITEMS_CATEGORIES'),
+  ...createTableStateReducers('ITEMS_CATEGORIES', defaultTableQuery),
 
   [t.RESET]: () => {
     purgeStoredState(CONFIG);

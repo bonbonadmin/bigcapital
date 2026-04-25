@@ -579,6 +579,24 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/expenses/upload-bill/review`,
+    component: lazy(
+      () => import('@/containers/Expenses/UploadBill/UploadBillReviewPage'),
+    ),
+    breadcrumb: 'Bill Review',
+    pageTitle: 'Bill Review',
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/expenses/upload-bill`,
+    component: lazy(
+      () => import('@/containers/Expenses/UploadBill/UploadBillPage'),
+    ),
+    breadcrumb: 'Upload Bill',
+    pageTitle: 'Upload Bill',
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/expenses/:id/edit`,
     component: lazy(
       () => import('@/containers/Expenses/ExpenseForm/ExpenseFormPage'),

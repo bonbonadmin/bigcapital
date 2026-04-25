@@ -8,8 +8,8 @@ const Schema = Yup.object().shape({
   expense_mode: Yup.string().nullable(),
   payee_id: Yup.number()
     .nullable()
-    .when('expense_mode', {
-      is: 'payable',
+    .when('publish', {
+      is: true,
       then: Yup.number().required().label(intl.get('vendor_name_')),
     }),
   payment_account_id: Yup.number().nullable().when('expense_mode', {

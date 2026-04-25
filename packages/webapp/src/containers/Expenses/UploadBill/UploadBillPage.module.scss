@@ -1,0 +1,241 @@
+.page {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  color: #5f6b7c;
+  line-height: 1.5;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.headerActionButton {
+  position: relative;
+}
+
+.headerActionBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d14343;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.cardTitle {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.cardHint {
+  margin: 0 0 16px;
+  color: #5f6b7c;
+  line-height: 1.5;
+}
+
+.fieldStack {
+  display: grid;
+  gap: 18px;
+  max-width: 420px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.helperText {
+  margin-top: 8px;
+  color: #5f6b7c;
+  font-size: 12px;
+}
+
+.helperActions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.accountSelect :global(.bp4-button) {
+  color: #182026;
+}
+
+.accountSelect :global(.bp4-button-text) {
+  color: #182026;
+}
+
+.accountSelect :global(.bp4-popover-target) {
+  display: block;
+}
+
+.dropzoneRoot {
+  min-height: 110px;
+  border: 1px dashed #cbd2d9;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fcfdff 0%, #f5f8fb 100%);
+}
+
+.dropzoneContent {
+  padding: 18px 24px;
+  text-align: center;
+}
+
+.dropzoneTitle {
+  margin: 8px 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dropzoneSubtitle {
+  margin: 0 0 16px;
+  color: #5f6b7c;
+}
+
+.dropzoneActions {
+  display: flex;
+  justify-content: center;
+}
+
+.selectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 12px;
+}
+
+.selectionMeta {
+  color: #5f6b7c;
+  font-size: 13px;
+}
+
+.fileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.fileCard {
+  overflow: hidden;
+  border: 1px solid #d8e1e8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.filePreview {
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  display: block;
+  background: #eef2f6;
+}
+
+.fileBody {
+  padding: 12px;
+}
+
+.fileName {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.fileMeta {
+  margin: 0 0 10px;
+  color: #5f6b7c;
+  font-size: 12px;
+}
+
+.fileActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.footerText {
+  color: #5f6b7c;
+  font-size: 13px;
+}
+
+.uploadedList {
+  display: grid;
+  gap: 12px;
+}
+
+.uploadedItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid #d8e1e8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.uploadedName {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.uploadedLink {
+  display: block;
+  max-width: 100%;
+  font-size: 12px;
+  color: #5f6b7c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusGroup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}

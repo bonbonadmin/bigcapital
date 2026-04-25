@@ -8,7 +8,11 @@ import { defaultExpenseEntry, accountsFieldShouldUpdate } from './utils';
 /**
  * Expense form entries field.
  */
-export default function ExpenseFormEntriesField({ linesNumber = 4 }) {
+export default function ExpenseFormEntriesField({
+  linesNumber = 4,
+  landedCost = true,
+  autoAddNewLine = true,
+}) {
   // Expense form context.
   const { accounts, projects } = useExpenseFormContext();
 
@@ -31,7 +35,9 @@ export default function ExpenseFormEntriesField({ linesNumber = 4 }) {
             setFieldValue('categories', entries);
           }}
           defaultEntry={defaultExpenseEntry}
-          linesNumber={linesNumber}
+          minLines={linesNumber}
+          landedCost={landedCost}
+          autoAddNewLine={autoAddNewLine}
           currencyCode={values.currency_code}
         />
       )}

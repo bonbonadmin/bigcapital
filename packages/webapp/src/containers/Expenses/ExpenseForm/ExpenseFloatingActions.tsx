@@ -24,45 +24,54 @@ export default function ExpenseFloatingFooter() {
   const history = useHistory();
 
   // Formik context.
-  const { isSubmitting, submitForm, resetForm } = useFormikContext();
+  const { isSubmitting, submitForm, resetForm, setFieldValue } =
+    useFormikContext();
 
   // Expense form context.
   const { setSubmitPayload, isNewMode } = useExpenseFormContext();
 
-  // Handle submit & publish button click.
-  const handleSubmitPublishBtnClick = (event) => {
-    setSubmitPayload({ redirect: true, publish: true });
+  const submitWithPayload = async (payload) => {
+    setSubmitPayload(payload);
+    await setFieldValue('publish', payload.publish, false);
     submitForm();
+  };
+
+  // Handle submit & publish button click.
+  const handleSubmitPublishBtnClick = async (event) => {
+    await submitWithPayload({ redirect: true, publish: true });
   };
 
   // Handle submit, publish & new button click.
-  const handleSubmitPublishAndNewBtnClick = (event) => {
-    setSubmitPayload({ redirect: false, publish: true, resetForm: true });
-    submitForm();
+  const handleSubmitPublishAndNewBtnClick = async (event) => {
+    await submitWithPayload({
+      redirect: false,
+      publish: true,
+      resetForm: true,
+    });
   };
 
   // Handle submit, publish & continue editing button click.
-  const handleSubmitPublishContinueEditingBtnClick = (event) => {
-    setSubmitPayload({ redirect: false, publish: true });
-    submitForm();
+  const handleSubmitPublishContinueEditingBtnClick = async (event) => {
+    await submitWithPayload({ redirect: false, publish: true });
   };
 
   // Handle submit as draft button click.
-  const handleSubmitDraftBtnClick = (event) => {
-    setSubmitPayload({ redirect: true, publish: false });
-    submitForm();
+  const handleSubmitDraftBtnClick = async (event) => {
+    await submitWithPayload({ redirect: true, publish: false });
   };
 
   // Handle submit as draft & new button click.
-  const handleSubmitDraftAndNewBtnClick = (event) => {
-    setSubmitPayload({ redirect: false, publish: false, resetForm: true });
-    submitForm();
+  const handleSubmitDraftAndNewBtnClick = async (event) => {
+    await submitWithPayload({
+      redirect: false,
+      publish: false,
+      resetForm: true,
+    });
   };
 
   // Handles submit as draft & continue editing button click.
-  const handleSubmitDraftContinueEditingBtnClick = (event) => {
-    setSubmitPayload({ redirect: false, publish: false });
-    submitForm();
+  const handleSubmitDraftContinueEditingBtnClick = async (event) => {
+    await submitWithPayload({ redirect: false, publish: false });
   };
 
   // Handle cancel button click.

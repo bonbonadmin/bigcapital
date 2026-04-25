@@ -10,6 +10,8 @@ import { withAlertActions } from '@/containers/Alert/withAlertActions';
 import { usePublishExpense } from '@/hooks/query';
 import { compose } from '@/utils';
 
+const EXPENSE_VENDOR_REQUIRED = 'EXPENSE_PAYABLE_VENDOR_REQUIRED';
+
 /**
  * Expense publish alert.
  */
@@ -38,6 +40,17 @@ function ExpensePublishAlert({
         closeAlert(name);
       })
       .catch((error) => {
+        const errors = error?.response?.data?.errors || [];
+        const hasVendorError = errors.some(
+          (entry) => entry.type === EXPENSE_VENDOR_REQUIRED,
+        );
+
+        if (hasVendorError) {
+          AppToaster.show({
+            message: `${intl.get('vendor_name_')} ${intl.get('required')}`,
+            intent: Intent.DANGER,
+          });
+        }
         closeAlert(name);
       });
   };

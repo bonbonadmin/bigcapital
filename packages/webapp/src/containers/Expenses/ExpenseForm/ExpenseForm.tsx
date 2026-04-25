@@ -12,6 +12,7 @@ import ExpenseFormHeader from './ExpenseFormHeader';
 import ExpenseFloatingFooter from './ExpenseFloatingActions';
 import ExpenseFormFooter from './ExpenseFormFooter';
 import ExpenseFormTopBar from './ExpenseFormTopBar';
+import ExpenseBillReviewLayout from './ExpenseBillReviewLayout';
 
 import { useExpenseFormContext } from './ExpenseFormPageProvider';
 
@@ -22,6 +23,7 @@ import { withCurrentOrganization } from '@/containers/Organization/withCurrentOr
 import { AppToaster, Box } from '@/components';
 import { PageForm } from '@/components/PageForm';
 import { ACCOUNT_TYPE } from '@/constants';
+import { useMarkBillImagePublished } from '@/hooks/query';
 import {
   CreateExpenseFormSchema,
   EditExpenseFormSchema,
@@ -29,6 +31,7 @@ import {
 import {
   transformErrors,
   defaultExpense,
+  transformBillReviewToInitialValues,
   transformToEditForm,
   transformFormValuesToRequest,
 } from './utils';
@@ -50,6 +53,9 @@ function ExpenseForm({
     createExpenseMutate,
     expense,
     expenseId,
+    billImageId,
+    billImageReview,
+    isBillImageReviewMode,
     accounts,
     expenseMode,
     submitPayloadRef,
@@ -59,6 +65,7 @@ function ExpenseForm({
 
   // History context.
   const history = useHistory();
+  const { mutateAsync: markBillImagePublished } = useMarkBillImagePublished();
 
   // Form initial values.
   const preferredPayableAccount = useMemo(
@@ -80,21 +87,32 @@ function ExpenseForm({
                 : EXPENSE_FORM_MODE.PAID,
           }
         : {
-            ...defaultExpense,
-            expense_mode: expenseMode,
-            currency_code: base_currency,
-            payment_account_id:
-              expenseMode === EXPENSE_FORM_MODE.PAID
-                ? defaultTo(preferredPaymentAccount, '')
-                : '',
-            payable_account_id:
-              expenseMode === EXPENSE_FORM_MODE.PAYABLE
-                ? defaultTo(preferredPayableAccount, '')
-                : '',
+            ...(isBillImageReviewMode && billImageReview
+              ? transformBillReviewToInitialValues(
+                  billImageReview,
+                  defaultExpense,
+                  expenseMode,
+                  base_currency,
+                )
+              : {
+                  ...defaultExpense,
+                  expense_mode: expenseMode,
+                  currency_code: base_currency,
+                  payment_account_id:
+                    expenseMode === EXPENSE_FORM_MODE.PAID
+                      ? defaultTo(preferredPaymentAccount, '')
+                      : '',
+                  payable_account_id:
+                    expenseMode === EXPENSE_FORM_MODE.PAYABLE
+                      ? defaultTo(preferredPayableAccount, '')
+                      : '',
+                }),
           }),
     }),
     [
       expense,
+      billImageReview,
+      isBillImageReviewMode,
       expenseMode,
       base_currency,
       preferredPayableAccount,
@@ -124,7 +142,15 @@ function ExpenseForm({
       publish: currentSubmitPayload.publish,
     };
     // Handle request success.
-    const handleSuccess = (response) => {
+    const handleSuccess = async (response) => {
+      if (
+        isBillImageReviewMode &&
+        billImageId &&
+        currentSubmitPayload.publish
+      ) {
+        await markBillImagePublished(billImageId);
+      }
+
       AppToaster.show({
         message: intl.get(
           isNewMode
@@ -164,6 +190,7 @@ function ExpenseForm({
 
   return (
     <Formik
+      enableReinitialize
       validationSchema={
         isNewMode ? CreateExpenseFormSchema : EditExpenseFormSchema
       }
@@ -178,21 +205,25 @@ function ExpenseForm({
           flex: 1,
         })}
       >
-        <PageForm flex={1}>
-          <PageForm.Body>
-            <ExpenseFormTopBar />
-            <ExpenseFormHeader />
+        {isBillImageReviewMode && billImageReview ? (
+          <ExpenseBillReviewLayout />
+        ) : (
+          <PageForm flex={1}>
+            <PageForm.Body>
+              <ExpenseFormTopBar />
+              <ExpenseFormHeader />
 
-            <Box p="18px 32px 0">
-              <ExpenseFormBody />
-            </Box>
-            <ExpenseFormFooter />
-          </PageForm.Body>
+              <Box p="18px 32px 0">
+                <ExpenseFormBody />
+              </Box>
+              <ExpenseFormFooter />
+            </PageForm.Body>
 
-          <PageForm.Footer>
-            <ExpenseFloatingFooter />
-          </PageForm.Footer>
-        </PageForm>
+            <PageForm.Footer>
+              <ExpenseFloatingFooter />
+            </PageForm.Footer>
+          </PageForm>
+        )}
       </Form>
     </Formik>
   );

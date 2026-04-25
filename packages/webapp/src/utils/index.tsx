@@ -583,15 +583,23 @@ function transformFilterRoles(filterRoles) {
   return JSON.stringify(filterRoles);
 }
 
+function normalizeTableInteger(value, fallback, min = 0) {
+  const parsed = Number(value);
+
+  return Number.isInteger(parsed) && parsed >= min ? parsed : fallback;
+}
+
 /**
  * Transformes the table state to url query.
  */
 export function transformTableStateToQuery(tableState) {
   const { pageSize, pageIndex, viewSlug, sortBy } = tableState;
+  const normalizedPageSize = normalizeTableInteger(pageSize, 20, 1);
+  const normalizedPageIndex = normalizeTableInteger(pageIndex, 0);
 
   const query = {
-    pageSize,
-    page: pageIndex + 1,
+    pageSize: normalizedPageSize,
+    page: normalizedPageIndex + 1,
     ...(tableState.filterRoles
       ? {
           stringified_filter_roles: transformFilterRoles(

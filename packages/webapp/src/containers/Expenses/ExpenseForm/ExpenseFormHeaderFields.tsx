@@ -167,7 +167,7 @@ export default function ExpenseFormHeader() {
       </FFormGroup>
 
       {/* ----------- Vendor ----------- */}
-      {expenseMode === EXPENSE_FORM_MODE.PAYABLE && <ExpenseFormVendorSelect />}
+      <ExpenseFormVendorSelect />
     </Stack>
   );
 }

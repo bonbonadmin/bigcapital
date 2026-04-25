@@ -43,6 +43,7 @@ export class PublishExpense {
 
     // Validate the expense whether is published before.
     this.validator.validateExpenseIsNotPublished(oldExpense);
+    this.validator.validatePublishedExpenseVendor(true, oldExpense.payeeId);
 
     // Publishes expense transactions with associated transactions
     // under unit-of-work envirement.

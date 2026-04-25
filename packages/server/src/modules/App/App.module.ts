@@ -27,6 +27,7 @@ import { SystemDatabaseModule } from '../System/SystemDB/SystemDB.module';
 import { SystemModelsModule } from '../System/SystemModels/SystemModels.module';
 import { TenancyDatabaseModule } from '../Tenancy/TenancyDB/TenancyDB.module';
 import { TenancyModelsModule } from '../Tenancy/TenancyModels/Tenancy.module';
+import { EmbeddingsModule } from '../Embeddings/Embeddings.module';
 import { LoggerMiddleware } from '@/middleware/logger.middleware';
 import { ExcludeNullInterceptor } from '@/interceptors/ExcludeNull.interceptor';
 import { UserIpInterceptor } from '@/interceptors/user-ip.interceptor';
@@ -108,6 +109,7 @@ import { SocketModule } from '../Socket/Socket.module';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { AppThrottleModule } from './AppThrottle.module';
 import { InventoryAssembliesModule } from '../InventoryAssemblies/InventoryAssemblies.module';
+import { BillImagesModule } from '../BillImages/BillImages.module';
 
 @Module({
   imports: [
@@ -122,6 +124,7 @@ import { InventoryAssembliesModule } from '../InventoryAssemblies/InventoryAssem
     }),
     SystemDatabaseModule,
     SystemModelsModule,
+    EmbeddingsModule,
     EventEmitterModule.forRoot(),
     I18nModule.forRootAsync({
       useFactory: () => ({
@@ -239,6 +242,7 @@ import { InventoryAssembliesModule } from '../InventoryAssemblies/InventoryAssem
     FeaturesModule,
     InventoryAdjustmentsModule,
     InventoryAssembliesModule,
+    BillImagesModule,
     InventoryCostModule,
     PostHogModule,
     EventTrackerModule,

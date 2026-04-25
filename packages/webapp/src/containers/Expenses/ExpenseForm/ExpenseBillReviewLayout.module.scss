@@ -1,0 +1,265 @@
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  padding: 16px;
+}
+
+.previewPane,
+.formPane {
+  min-height: 0;
+}
+
+.viewerCard,
+.formPane {
+  height: 100%;
+}
+
+.viewerCard {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.viewerToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.viewerActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.viewerStage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(247, 249, 252, 0.95), rgba(237, 241, 246, 0.95)),
+    repeating-linear-gradient(
+      45deg,
+      rgba(17, 20, 24, 0.03) 0,
+      rgba(17, 20, 24, 0.03) 12px,
+      rgba(255, 255, 255, 0.05) 12px,
+      rgba(255, 255, 255, 0.05) 24px
+    );
+  touch-action: none;
+  cursor: grab;
+}
+
+.viewerImage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 100%;
+  max-height: 100%;
+  transform-origin: center center;
+  user-select: none;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.viewerPdf {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.viewerEmpty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6b7c;
+}
+
+.formPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.formScroll {
+  flex: 1;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.actionsBar {
+  padding-top: 16px;
+}
+
+.sectionCard {
+  margin-bottom: 16px;
+}
+
+.sectionHeader,
+.sectionHeaderCompact {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sectionSubtitle {
+  margin: 0;
+  color: #5f6b7c;
+  line-height: 1.5;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.suggestionCard {
+  min-width: 0;
+  background: linear-gradient(180deg, #5c7080, #394b59);
+
+  .sectionTitle {
+    color: #fff;
+  }
+}
+
+.keyValueList {
+  display: grid;
+  gap: 10px;
+}
+
+.keyValueRow {
+  display: grid;
+  gap: 4px;
+}
+
+.keyLabel {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.keyValue {
+  color: #fff;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.emptyText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+}
+
+.reviewWorkspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.4fr);
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.notesColumn {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.compactField {
+  margin-bottom: 0;
+
+  :global(.bp4-label) {
+    display: none;
+  }
+
+  :global(.bp4-form-content) {
+    margin-left: 0;
+  }
+}
+
+.workspaceSection,
+.totalsPanel {
+  border: 1px solid rgba(216, 225, 232, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 18px;
+}
+
+.workspaceSectionMuted {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.workspaceHeading {
+  margin-bottom: 12px;
+}
+
+.workspaceSubtitle {
+  margin: 0;
+  color: #738694;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.descriptionInput,
+.notesInput {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.notesInput {
+  min-height: 84px;
+}
+
+.totalsPanel {
+  min-height: 100%;
+}
+
+.totalsPanel :global(.bp4-form-group) {
+  margin-bottom: 0;
+}
+
+.totalsPanel :global(.bp4-input),
+.totalsPanel :global(.bp4-button.bp4-minimal.bp4-small),
+.totalsPanel :global(.bp4-popover-target .bp4-button) {
+  border-radius: 10px;
+}
+
+.totalsPanel :global(.bp4-html-table),
+.totalsPanel :global(.bp4-card) {
+  background: transparent;
+}
+
+@media (max-width: 1200px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .previewPane {
+    min-height: 50vh;
+  }
+
+  .cardsGrid,
+  .reviewWorkspace {
+    grid-template-columns: 1fr;
+  }
+}

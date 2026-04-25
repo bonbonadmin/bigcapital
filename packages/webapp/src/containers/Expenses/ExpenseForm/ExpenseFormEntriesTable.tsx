@@ -25,6 +25,7 @@ export default function ExpenseFormEntriesTable({
   currencyCode,
   landedCost = true,
   minLines,
+  autoAddNewLine = true,
 }) {
   // Expense form context.
   const { accounts, projects } = useExpenseFormContext();
@@ -35,12 +36,15 @@ export default function ExpenseFormEntriesTable({
   // Handles update datatable data.
   const handleUpdateData = useCallback(
     (rowIndex, columnId, value) => {
-      const newRows = compose(
-        // Update auto-adding new line.
-        updateAutoAddNewLine(defaultEntry, ['expense_account_id']),
-        // Update the row value of the given row index and column id.
+      const transforms = [
         updateTableCell(rowIndex, columnId, value),
-      )(entries);
+      ];
+
+      if (autoAddNewLine) {
+        transforms.unshift(updateAutoAddNewLine(defaultEntry, ['expense_account_id']));
+      }
+
+      const newRows = compose(...transforms)(entries);
 
       saveInvoke(onChange, newRows);
     },

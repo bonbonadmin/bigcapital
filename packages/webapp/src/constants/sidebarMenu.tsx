@@ -365,6 +365,15 @@ export const SidebarMenu = [
                   ability: PaymentMadeAction.View,
                 },
               },
+              {
+                text: 'Upload Bill',
+                href: '/expenses/upload-bill',
+                type: ISidebarMenuItemType.Link,
+                permission: {
+                  subject: AbilitySubject.Expense,
+                  ability: ExpenseAction.Create,
+                },
+              },
             ],
           },
           {

@@ -6,6 +6,7 @@ import { Features } from '@/constants';
 import { useFeatureCan } from '@/hooks/state';
 import {
   useCurrencies,
+  useBillImageReview,
   useExpense,
   useAccounts,
   useBranches,
@@ -22,7 +23,13 @@ const ExpenseFormPageContext = createContext();
 /**
  * Accounts chart data provider.
  */
-function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
+function ExpenseFormPageProvider({
+  query,
+  expenseId,
+  expenseMode,
+  billImageId,
+  ...props
+}) {
   // Features guard.
   const { featureCan } = useFeatureCan();
   const isBranchFeatureCan = featureCan(Features.Branches);
@@ -39,6 +46,12 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
   // Fetch the expense details.
   const { data: expense, isLoading: isExpenseLoading } = useExpense(expenseId, {
     enabled: !!expenseId,
+  });
+  const {
+    data: billImageReview,
+    isLoading: isBillImageReviewLoading,
+  } = useBillImageReview(billImageId, {
+    enabled: !!billImageId && !expenseId,
   });
 
   // Fetches the branches list.
@@ -86,15 +99,18 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
   const provider = {
     isNewMode,
     expenseId,
+    billImageId,
     expenseMode:
       expense?.payable_account_id || expense?.payableAccountId
         ? 'payable'
         : expenseMode,
+    isBillImageReviewMode: !!billImageId && !expenseId,
     submitPayloadRef, // Expose ref for synchronous access
 
     currencies,
     vendors,
     expense,
+    billImageReview,
     accounts,
     branches,
     projects,
@@ -103,6 +119,7 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
 
     isCurrenciesLoading,
     isExpenseLoading,
+    isBillImageReviewLoading,
     isVendorsLoading,
     isAccountsLoading,
     isBranchesSuccess,
@@ -119,6 +136,7 @@ function ExpenseFormPageProvider({ query, expenseId, expenseMode, ...props }) {
       loading={
         isCurrenciesLoading ||
         isExpenseLoading ||
+        isBillImageReviewLoading ||
         isVendorsLoading ||
         isAccountsLoading ||
         isProjectsLoading ||

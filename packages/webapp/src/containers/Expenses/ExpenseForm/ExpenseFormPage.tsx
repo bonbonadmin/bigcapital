@@ -13,13 +13,18 @@ export default function ExpenseFormPage() {
   const location = useLocation();
   const expenseId = parseInt(id, 10);
   const searchParams = new URLSearchParams(location.search);
+  const billImageId = parseInt(searchParams.get('bill_image_id'), 10);
   const expenseMode =
     searchParams.get('mode') === EXPENSE_FORM_MODE.PAYABLE
       ? EXPENSE_FORM_MODE.PAYABLE
       : EXPENSE_FORM_MODE.PAID;
 
   return (
-    <ExpenseFormPageProvider expenseId={expenseId} expenseMode={expenseMode}>
+    <ExpenseFormPageProvider
+      expenseId={expenseId}
+      expenseMode={expenseMode}
+      billImageId={billImageId}
+    >
       <ExpenseForm />
     </ExpenseFormPageProvider>
   );

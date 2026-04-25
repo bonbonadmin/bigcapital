@@ -119,13 +119,10 @@ export class CommandExpenseValidator {
   }
 
   /**
-   * Validates payable expenses always have a vendor selected.
+   * Validates published expenses always have a vendor selected.
    */
-  public validatePayableExpenseVendor(
-    payableAccountId?: number,
-    payeeId?: number,
-  ) {
-    if (payableAccountId && !payeeId) {
+  public validatePublishedExpenseVendor(publish?: boolean, payeeId?: number) {
+    if (publish && !payeeId) {
       throw new ServiceError(ERRORS.EXPENSE_PAYABLE_VENDOR_REQUIRED);
     }
   }

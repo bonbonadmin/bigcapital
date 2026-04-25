@@ -48,7 +48,7 @@ export function ExpenseFormFooterRight() {
   );
 
   return (
-    <ExpensesTotalLines>
+    <ExpensesTotalLines amountColWidth={'140px'}>
       <TotalLine
         title={'Subtotal'}
         value={subtotalFormatted}
@@ -107,14 +107,23 @@ const ExpensesTotalLines = styled(TotalLines)`
   }
   width: 100%;
   color: var(--x-color-text);
+
+  .amount {
+    text-align: left;
+    padding-left: 20px;
+    white-space: nowrap;
+  }
 `;
 
 const WithholdingTaxLineTitle = styled.div`
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
 `;
 
 const WithholdingTaxSelect = styled(FSelect)`
-  min-width: 220px;
+  min-width: 176px;
+  max-width: 176px;
 `;

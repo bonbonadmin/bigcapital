@@ -73,6 +73,11 @@ export const PreferencesMenu = [
     disabled: false,
     href: '/preferences/api-keys',
   },
+  {
+    text: 'AI',
+    disabled: false,
+    href: '/preferences/ai',
+  },
   // {
   //   text: <T id={'sms_integration.label'} />,
   //   disabled: false,

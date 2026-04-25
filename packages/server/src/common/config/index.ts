@@ -1,4 +1,7 @@
 import app from './app';
+import aiEmbeddings from './ai-embeddings';
+import billImageAi from './bill-image-ai';
+import embeddingsDatabase from './embeddings-database';
 import systemDatabase from './system-database';
 import tenantDatabase from './tenant-database';
 import signup from './signup';
@@ -23,6 +26,9 @@ import bullBoard from './bull-board';
 
 export const config = [
   app,
+  aiEmbeddings,
+  billImageAi,
+  embeddingsDatabase,
   systemDatabase,
   cloud,
   tenantDatabase,

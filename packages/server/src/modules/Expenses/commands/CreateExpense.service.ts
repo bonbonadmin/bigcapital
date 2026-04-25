@@ -67,8 +67,8 @@ export class CreateExpense {
         .throwIfNotFound();
     }
 
-    this.validator.validatePayableExpenseVendor(
-      expenseDTO.payableAccountId,
+    this.validator.validatePublishedExpenseVendor(
+      expenseDTO.publish,
       expenseDTO.payeeId,
     );
     this.validator.validateWithholdingTaxExpense(

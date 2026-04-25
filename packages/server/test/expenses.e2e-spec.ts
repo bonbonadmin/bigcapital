@@ -48,7 +48,7 @@ describe('Expenses (e2e)', () => {
       .post('/expenses')
       .set('organization-id', orgainzationId)
       .set('Authorization', AuthorizationHeader)
-      .send(makeExpenseRequest())
+      .send(makeExpenseRequest({ payeeId: vendorId }))
       .expect(201);
   });
 
@@ -67,12 +67,62 @@ describe('Expenses (e2e)', () => {
       .expect(201);
   });
 
+  it('/expenses (POST) rejects publishing without vendor', () => {
+    return request(app.getHttpServer())
+      .post('/expenses')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .send(makeExpenseRequest({ payeeId: null }))
+      .expect(400);
+  });
+
+  it('/expenses (POST) allows paid drafts without vendor', () => {
+    return request(app.getHttpServer())
+      .post('/expenses')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .send(makeExpenseRequest({ publish: false, payeeId: null }))
+      .expect(201);
+  });
+
+  it('/expenses (POST) allows payable drafts without vendor', () => {
+    return request(app.getHttpServer())
+      .post('/expenses')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .send(
+        makeExpenseRequest({
+          publish: false,
+          paymentAccountId: null,
+          payableAccountId,
+          payeeId: null,
+        }),
+      )
+      .expect(201);
+  });
+
+  it('/expenses/:id/publish (POST) rejects drafts without vendor', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/expenses')
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .send(makeExpenseRequest({ publish: false, payeeId: null }));
+
+    const expenseId = response.body.id;
+
+    return request(app.getHttpServer())
+      .post(`/expenses/${expenseId}/publish`)
+      .set('organization-id', orgainzationId)
+      .set('Authorization', AuthorizationHeader)
+      .expect(400);
+  });
+
   it('/expenses/:id (PUT)', async () => {
     const response = await request(app.getHttpServer())
       .post('/expenses')
       .set('organization-id', orgainzationId)
       .set('Authorization', AuthorizationHeader)
-      .send(makeExpenseRequest());
+      .send(makeExpenseRequest({ payeeId: vendorId }));
 
     const expenseId = response.body.id;
 
@@ -80,7 +130,7 @@ describe('Expenses (e2e)', () => {
       .put(`/expenses/${expenseId}`)
       .set('organization-id', orgainzationId)
       .set('Authorization', AuthorizationHeader)
-      .send(makeExpenseRequest())
+      .send(makeExpenseRequest({ payeeId: vendorId }))
       .expect(200);
   });
 
@@ -89,7 +139,7 @@ describe('Expenses (e2e)', () => {
       .post('/expenses')
       .set('organization-id', orgainzationId)
       .set('Authorization', AuthorizationHeader)
-      .send(makeExpenseRequest());
+      .send(makeExpenseRequest({ payeeId: vendorId }));
 
     const expenseId = response.body.id;
 
@@ -105,7 +155,7 @@ describe('Expenses (e2e)', () => {
       .post('/expenses')
       .set('organization-id', orgainzationId)
       .set('Authorization', AuthorizationHeader)
-      .send(makeExpenseRequest());
+      .send(makeExpenseRequest({ payeeId: vendorId }));
 
     const expenseId = response.body.id;
 
